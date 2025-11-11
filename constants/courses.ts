@@ -33,7 +33,7 @@ export const courses: Course[] = [
     category: "Artificial Intelligence",
     instructor: {
       name: "Dr. Sarah Johnson",
-      avatar: "/images/instructors/sarah.jpg",
+      avatar: "/images/instructors/sarah.png",
     },
   },
   {
@@ -50,7 +50,7 @@ export const courses: Course[] = [
     category: "Web Development",
     instructor: {
       name: "Michael Chen",
-      avatar: "/images/instructors/michael.jpg",
+      avatar: "/images/instructors/sarah.png",
     },
   },
   {
@@ -64,11 +64,11 @@ export const courses: Course[] = [
     rating: 4.7,
     price: 99.99,
     originalPrice: 149.99,
-    thumbnail: "/images/courses/python-data.jpg",
+    thumbnail: "/images/courses/python-data.png",
     category: "Data Science",
     instructor: {
       name: "Dr. Emily Rodriguez",
-      avatar: "/images/instructors/emily.jpg",
+      avatar: "/images/instructors/sarah.png",
     },
   },
   {
@@ -81,11 +81,11 @@ export const courses: Course[] = [
     students: 1560,
     rating: 4.6,
     price: 79.99,
-    thumbnail: "/images/courses/ui-ux-design.jpg",
+    thumbnail: "/images/courses/ui-ux-design.png",
     category: "Design",
     instructor: {
       name: "Alex Thompson",
-      avatar: "/images/instructors/alex.jpg",
+      avatar: "/images/instructors/sarah.png",
     },
   },
   {
@@ -99,11 +99,11 @@ export const courses: Course[] = [
     rating: 4.8,
     price: 149.99,
     originalPrice: 199.99,
-    thumbnail: "/images/courses/aws-cloud.jpg",
+    thumbnail: "/images/courses/aws-cloud.png",
     category: "Cloud Computing",
     instructor: {
       name: "James Wilson",
-      avatar: "/images/instructors/james.jpg",
+      avatar: "/images/instructors/sarah.png",
     },
   },
   {
@@ -116,11 +116,11 @@ export const courses: Course[] = [
     students: 1750,
     rating: 4.5,
     price: 89.99,
-    thumbnail: "/images/courses/cybersecurity.jpg",
+    thumbnail: "/images/courses/cybersecurity.png",
     category: "Security",
     instructor: {
       name: "Robert Davis",
-      avatar: "/images/instructors/robert.jpg",
+      avatar: "/images/instructors/sarah.png",
     },
   },
 ];

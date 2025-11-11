@@ -52,7 +52,7 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
           } ${
             pathname === item.href
               ? "text-[#FF6B35] font-semibold"
-              : "text-gray-700 hover:text-[#FF6B35]"
+              : "text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
           }`}
         >
           {item.icon}

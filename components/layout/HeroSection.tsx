@@ -3,14 +3,25 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export function HeroSection() {
   return (
     <section className="container mx-auto px-4 py-16 md:py-24">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
         {/* Left side - Text content */}
-        <div className="flex-1 text-center lg:text-left">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+        <motion.div 
+          className="flex-1 text-center lg:text-left"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
               Master AI & Technology
             </span>
@@ -18,13 +29,23 @@ export function HeroSection() {
             <span className="text-gray-800 dark:text-white">
               with Interactive Hands-On Learning
             </span>
-          </h1>
+          </motion.h1>
           
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
+          <motion.p 
+            className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             Join thousands of learners in our cutting-edge platform designed to help you master the latest technologies through practical, real-world projects and expert guidance.
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             <Button asChild size="lg" className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white shadow-lg">
               <Link href="/courses">
                 Explore Courses
@@ -36,11 +57,16 @@ export function HeroSection() {
                 Sign In
               </Link>
             </Button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
         
         {/* Right side - Image */}
-        <div className="flex-1 w-full">
+        <motion.div 
+          className="flex-1 w-full"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <Image
               src="/images/hero.png"
@@ -51,7 +77,7 @@ export function HeroSection() {
               priority
             />
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
