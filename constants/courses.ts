@@ -46,7 +46,7 @@ export const courses: Course[] = [
     students: 890,
     rating: 4.9,
     price: 129.99,
-    thumbnail: "/images/courses/react-advanced.jpg",
+    thumbnail: "/images/courses/react-advanced.png",
     category: "Web Development",
     instructor: {
       name: "Michael Chen",

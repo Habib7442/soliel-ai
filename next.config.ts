@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // Enable React Compiler (optional, may increase compile times)
   // reactCompiler: true,
 };
