@@ -1,0 +1,13 @@
+/* Markdown styles */
+.markdown-content {
+  font-family: sans-serif;
+}
+
+.markdown-content h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.markdown-content p {
+  margin-bottom: 1rem;
+}

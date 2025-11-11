@@ -19,6 +19,7 @@
 
 # production
 /build
+/reference-code
 
 # misc
 .DS_Store
