@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  images: {
+    remotePatterns: [
+      { hostname: "img.clerk.com" },
+      // { hostname: "ebzjisaqomoombvmbyyb.supabase.co" } // Add Supabase storage domain
+    ],
+  },
   // Enable React Compiler (optional, may increase compile times)
   // reactCompiler: true,
 };
