@@ -105,7 +105,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
           <Label htmlFor="title" className="mb-2 block">Course Title *</Label>
           <Input
             id="title"
@@ -121,7 +121,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           </p>
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
           <Label htmlFor="subtitle" className="mb-2 block">Short Description *</Label>
           <Textarea
             id="subtitle"
@@ -138,7 +138,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           </p>
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
           <Label htmlFor="description" className="mb-2 block">Full Description *</Label>
           <Textarea
             id="description"
@@ -154,7 +154,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           </p>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <Label htmlFor="category" className="mb-2 block">Category *</Label>
           <Input
             id="category"
@@ -169,7 +169,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           </p>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <Label htmlFor="level" className="mb-2 block">Difficulty Level</Label>
           <Select 
             name="level" 
@@ -187,7 +187,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           </Select>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <Label htmlFor="language" className="mb-2 block">Language</Label>
           <Select 
             name="language" 
@@ -207,7 +207,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           </Select>
         </div>
 
-        <div>
+        <div className="col-span-1">
           <Label htmlFor="price" className="mb-2 block">Price (INR)</Label>
           <Input
             id="price"
