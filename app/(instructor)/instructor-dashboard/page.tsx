@@ -86,35 +86,23 @@ export default async function InstructorDashboardPage() {
               <CardTitle className="text-2xl mb-4">Your Courses</CardTitle>
               {courses && courses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {courses.map((course, index) => {
-                    // Generate a unique color for each course card
-                    const colors = [
-                      'bg-blue-100/30 border-blue-200',
-                      'bg-purple-100/30 border-purple-200',
-                      'bg-green-100/30 border-green-200',
-                      'bg-yellow-100/30 border-yellow-200',
-                      'bg-pink-100/30 border-pink-200',
-                      'bg-indigo-100/30 border-indigo-200'
-                    ];
-                    const colorClass = colors[index % colors.length];
-                    
+                  {courses.map((course) => {
                     return (
                       <Card 
                         key={course.id} 
-                        className={`p-4 hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-opacity-30 border ${colorClass}`}
+                        className="p-4 hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-background/30 border border-border/50 dark:bg-background/20 dark:border-border/30"
                       >
                         <CardTitle className="font-semibold text-lg mb-2">{course.title}</CardTitle>
                         <CardDescription className="text-sm mb-4 line-clamp-2">{course.subtitle}</CardDescription>
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-primary">₹{(course.price_cents / 100).toFixed(2)}</span>
-                          <span className="text-sm text-muted-foreground capitalize">{course.status}</span>
                         </div>
                         <div className="flex justify-between items-center mt-4">
                           <span className="text-sm text-muted-foreground">{course.level}</span>
                           {course.is_published ? (
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Published</span>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded dark:bg-green-900/30 dark:text-green-300">Published</span>
                           ) : (
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded capitalize">
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded capitalize dark:bg-yellow-900/30 dark:text-yellow-300">
                               {course.status}
                             </span>
                           )}

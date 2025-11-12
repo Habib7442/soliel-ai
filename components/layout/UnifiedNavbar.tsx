@@ -7,10 +7,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Menu } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useSupabase } from "@/providers/supabase-provider";
-import { createClient } from "@/lib/supabase-client";
 import { publicNavItems, additionalPublicNavItems, studentNavItems, instructorNavItems, companyNavItems, adminNavItems, NavItem } from "./NavItems";
 import { UserRole } from "@/types/enums";
 import { useEffect, useState } from "react";
+import { SignOut } from "@/components/auth/SignOut";
 
 interface UnifiedNavbarProps {
   userRole?: UserRole | null;
@@ -19,12 +19,6 @@ interface UnifiedNavbarProps {
 
 export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }: UnifiedNavbarProps) {
   const { user, loading } = useSupabase();
-  const supabase = createClient();
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  };
 
   // Get navigation items based on user role
   const getNavItems = () => {
@@ -121,7 +115,7 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
             {loading ? (
               <Button variant="ghost" disabled>Loading...</Button>
             ) : user ? (
-              <Button onClick={handleSignOut} variant="outline">Sign Out</Button>
+              <SignOut>Sign Out</SignOut>
             ) : (
               <Button asChild>
                 <Link href="/sign-in">Sign In</Link>
@@ -166,7 +160,9 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
                     {loading ? (
                       <Button variant="ghost" disabled className="w-full">Loading...</Button>
                     ) : user ? (
-                      <Button onClick={handleSignOut} variant="outline" className="w-full">Sign Out</Button>
+                      <div className="w-full">
+                        <SignOut variant="outline" size="default">Sign Out</SignOut>
+                      </div>
                     ) : (
                       <Button asChild className="w-full">
                         <Link href="/sign-in">Sign In</Link>
