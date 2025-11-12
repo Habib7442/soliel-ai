@@ -63,7 +63,7 @@ Staging uses:
 
 **Expected Results**
 
-* Successful redirect to `/student/dashboard`
+* Successful redirect to `/student/student-dashboard`
 * `profiles` row created
 * Role = `student`
 

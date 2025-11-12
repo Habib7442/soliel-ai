@@ -1,55 +1,92 @@
 # Soliel AI - Learning Management System
 
-A modern Learning Management System (LMS) built with Next.js 16, React 19, and TypeScript.
+## Authentication System
 
-## Project Overview
+This project implements a comprehensive authentication system with role-based access control for different user types:
 
-Soliel AI is a comprehensive LMS platform that enables:
-- Students to purchase and learn courses with progress tracking and certificates
-- Instructors to create and manage courses
-- Companies to enroll employees and track their learning
-- Admins to control the entire system
+1. **Students** - Can enroll in courses, track progress, and earn certificates
+2. **Instructors** - Can create and manage courses, view earnings
+3. **Company Admins** - Can manage employee enrollments and track team progress
+4. **Super Admins** - Can manage the entire platform
 
-## Tech Stack
+## Key Features Implemented
 
-- **Frontend**: Next.js 16 (App Router), React 19.2, TypeScript, Tailwind CSS
-- **Authentication**: Clerk
-- **Database**: Supabase (PostgreSQL + Storage)
-- **Payments**: Stripe
-- **UI Components**: shadcn/ui
-- **Deployment**: Vercel + Supabase
+### Authentication Flow
+- Unified signup/login form with role selection
+- Automatic profile creation with role assignment
+- Session management using Supabase Auth
+- Role-based route protection
 
-## Getting Started
+### Role-Based Navigation
+- Dynamic navigation menu based on user role
+- Protected routes that redirect users to appropriate dashboards
+- Middleware for server-side role validation
 
-First, run the development server:
+### Dashboards
+- Instructor dashboard with course management
+- Student dashboard with learning progress
+- Company admin dashboard with team management
+- Super admin dashboard with platform controls
 
-```bash
-npm run dev
+### Profile Management
+- User profile viewing and editing
+- Role-specific profile fields
+
+## Technical Implementation
+
+### Technologies Used
+- Next.js 16 with App Router
+- Supabase for authentication and database
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Zustand for state management
+
+### Key Components
+- `AuthForm` - Unified signup/login form component
+- `Navbar` - Role-based navigation component
+- `NavItems` - Dynamic navigation items based on user role
+- Role-specific dashboard pages
+- Profile management pages
+
+### Security Features
+- Session validation on both client and server
+- Role-based access control
+- Protected API routes
+- Secure profile updates
+
+## Testing
+
+To test the authentication system:
+1. Visit `/test` to see current auth state
+2. Use `/sign-up` to create accounts with different roles
+3. Use `/sign-in` to log into existing accounts
+4. Navigate to role-specific dashboards
+
+## API Routes
+
+- `/api/test-auth` - Test current authentication state
+- Protected routes automatically redirect based on user role
+
+## Folder Structure
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Project Structure
-
-The application is organized into route groups for different user roles:
-
-- `(marketing)` - Public marketing pages (home, courses, blog, etc.)
-- `(auth)` - Authentication pages (sign-in, sign-up)
-- `(student)` - Student dashboard and learning pages
-- `(instructor)` - Instructor course management
-- `(company)` - Company admin pages
-- `(admin)` - Super admin pages
-
-## Learn More
-
-To learn more about the technologies used in this project:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
-- [Clerk Documentation](https://clerk.com/docs) - authentication setup and management
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+app/
+├── (auth)/          # Authentication pages
+├── (marketing)/      # Public marketing pages
+├── (student)/        # Student dashboard and learning pages
+├── (instructor)/     # Instructor course management pages
+├── (company)/        # Company admin pages
+├── (admin)/          # Super admin pages
+├── profile/          # User profile pages
+├── test/             # Authentication testing page
+├── api/              # API routes
+components/
+├── auth/             # Authentication components
+├── layout/           # Layout components
+hooks/
+├── useAuthStore.ts   # Zustand store for auth state
+lib/
+├── auth.ts           # Authentication utilities
+providers/
+├── supabase-provider.tsx  # Supabase context provider
+```

@@ -12,9 +12,9 @@ const features = [
   },
   {
     title: "Secure Authentication",
-    description: "Enterprise-grade security with JWT tokens and OAuth2 integration using Clerk for safe learning.",
+    description: "Enterprise-grade security with JWT tokens and OAuth2 integration using Supabase Auth for safe learning.",
     icon: "🔒",
-    tech: "Clerk Auth"
+    tech: "Supabase Auth"
   },
   {
     title: "Interactive Learning",
@@ -61,7 +61,7 @@ const techStack = [
   "Tailwind CSS",
   "shadcn/ui",
   "Supabase (Postgres)",
-  "Clerk (Auth)",
+  "Supabase Auth",
   "Stripe (Payments)"
 ];
 
@@ -88,40 +88,32 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
             viewport={{ once: true }}
-            whileHover={{ y: -5 }}
           >
-            <div className="text-3xl mb-4">{feature.icon}</div>
-            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{feature.title}</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{feature.description}</p>
-            <Badge variant="secondary" className="bg-[#FF6B35]/10 text-[#FF6B35] dark:bg-[#FF914D]/20 dark:text-[#FF914D]">
-              {feature.tech}
-            </Badge>
+            <div className="text-5xl mb-4">{feature.icon}</div>
+            <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{feature.description}</p>
+            <Badge variant="secondary">{feature.tech}</Badge>
           </motion.div>
         ))}
       </div>
 
-      <motion.div 
-        className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] rounded-2xl p-8 text-center"
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
-      >
-        <h3 className="text-2xl font-bold mb-4 text-white">Enterprise-Ready Infrastructure</h3>
-        <div className="flex flex-wrap justify-center gap-2 mb-6">
+      <div className="text-center">
+        <h3 className="text-2xl font-bold mb-8">Technology Stack</h3>
+        <div className="flex flex-wrap justify-center gap-3">
           {techStack.map((tech, index) => (
-            <Badge 
-              key={index} 
-              className="bg-white/20 text-white hover:bg-white/30"
+            <motion.div
+              key={index}
+              className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              viewport={{ once: true }}
             >
-              {tech}
-            </Badge>
+              <span className="text-sm font-medium">{tech}</span>
+            </motion.div>
           ))}
         </div>
-        <p className="text-white/90 max-w-2xl mx-auto">
-          Our robust infrastructure ensures 99.9% uptime, scalable performance, and enterprise-grade security for all your learning needs.
-        </p>
-      </motion.div>
+      </div>
     </section>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -5,8 +7,18 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Menu } from "lucide-react";
 import { NavItems } from "./NavItems";
 import { ModeToggle } from "@/components/mode-toggle";
+import { useSupabase } from "@/providers/supabase-provider";
+import { createClient } from "@/lib/supabase-client";
 
 export function Navbar() {
+  const { user, loading } = useSupabase();
+  const supabase = createClient();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-0">
@@ -38,11 +50,17 @@ export function Navbar() {
             <ModeToggle />
           </div>
 
-          {/* CTA button - hidden on mobile */}
+          {/* Auth buttons - hidden on mobile */}
           <div className="hidden md:flex items-center">
-            <Button asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
+            {loading ? (
+              <Button variant="ghost" disabled>Loading...</Button>
+            ) : user ? (
+              <Button onClick={handleSignOut} variant="outline">Sign Out</Button>
+            ) : (
+              <Button asChild>
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu trigger */}
@@ -62,9 +80,15 @@ export function Navbar() {
                 <div className="flex flex-col space-y-4 mt-8 px-4">
                   <NavItems mobile />
                   <div className="pt-4">
-                    <Button asChild className="w-full">
-                      <Link href="/sign-in">Sign In</Link>
-                    </Button>
+                    {loading ? (
+                      <Button variant="ghost" disabled className="w-full">Loading...</Button>
+                    ) : user ? (
+                      <Button onClick={handleSignOut} variant="outline" className="w-full">Sign Out</Button>
+                    ) : (
+                      <Button asChild className="w-full">
+                        <Link href="/sign-in">Sign In</Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </SheetContent>

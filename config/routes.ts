@@ -9,7 +9,10 @@ export const publicRoutes = [
 ];
 
 export const protectedRoutes = [
-  "/dashboard",
+  "/admin/*",
+  "/company/*",
+  "/instructor/*",
+  "/student/*",
   "/courses/*",
   "/certificates",
 ];

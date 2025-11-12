@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      { hostname: "img.clerk.com" },
-      // { hostname: "ebzjisaqomoombvmbyyb.supabase.co" } // Add Supabase storage domain
+      // Add Supabase storage domain
+      { hostname: "ykxeyistnxwdopmrcqht.supabase.co" }
     ],
   },
   // Enable React Compiler (optional, may increase compile times)

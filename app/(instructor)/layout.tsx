@@ -7,8 +7,8 @@ export default function InstructorLayout({
 }) {
   return (
     <>
-      <Navbar />
-      <main className="w-full">
+      {/* <Navbar /> */}
+      <main className="w-full pt-16">
         {children}
       </main>
     </>

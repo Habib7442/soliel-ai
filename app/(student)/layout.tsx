@@ -8,7 +8,7 @@ export default function StudentLayout({
   return (
     <>
       <Navbar />
-      <main className="w-full">
+      <main className="w-full pt-16">
         {children}
       </main>
     </>

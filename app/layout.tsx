@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
-import {
-  ClerkProvider,
-} from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SupabaseProvider } from "@/providers/supabase-provider";
+import { Navbar } from "@/components/layout/Navbar";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,23 +30,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${inter.variable} ${spaceMono.variable} antialiased`}
-        >
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${spaceMono.variable} antialiased`}
+      >
+        <SupabaseProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
+            <Navbar />
             <div className="min-h-screen w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
               {children}
             </div>
+            <Toaster />
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </SupabaseProvider>
+      </body>
+    </html>
   );
 }
