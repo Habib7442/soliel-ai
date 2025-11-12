@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,16 +26,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showResendLink, setShowResendLink] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
 
   // Check if we have an error from email verification
+  // Only run this on the client side after mounting
   useEffect(() => {
-    const error_code = searchParams.get("error_code");
-    if (error_code === "otp_expired") {
-      setShowResendLink(true);
+    // This will only run on the client side
+    if (typeof window !== 'undefined') {
+      // Get search params from window.location
+      const urlParams = new URLSearchParams(window.location.search);
+      const error_code = urlParams.get("error_code");
+      if (error_code === "otp_expired") {
+        setShowResendLink(true);
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

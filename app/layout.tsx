@@ -3,7 +3,7 @@ import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SupabaseProvider } from "@/providers/supabase-provider";
-import { Navbar } from "@/components/layout/Navbar";
+import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
 import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
@@ -41,7 +41,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
+            {/* <UnifiedNavbar /> */}
             <div className="min-h-screen w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
               {children}
             </div>

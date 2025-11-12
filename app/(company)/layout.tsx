@@ -1,4 +1,5 @@
-import { Navbar } from "@/components/layout/Navbar";
+import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
+import { UserRole } from "@/types/enums";
 
 export default function CompanyLayout({
   children,
@@ -7,8 +8,8 @@ export default function CompanyLayout({
 }) {
   return (
     <>
-      <Navbar />
-      <main className="w-full">
+      <UnifiedNavbar userRole={UserRole.COMPANY_ADMIN} />
+      <main className="w-full pt-16">
         {children}
       </main>
     </>

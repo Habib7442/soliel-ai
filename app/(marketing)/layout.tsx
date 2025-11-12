@@ -1,11 +1,16 @@
+import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
+
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <main className="w-full">
-      {children}
-    </main>
+    <>
+      <UnifiedNavbar />
+      <main className="w-full pt-16">
+        {children}
+      </main>
+    </>
   );
 }

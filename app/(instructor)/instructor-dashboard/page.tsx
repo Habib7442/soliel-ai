@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { getInstructorCourses, getCourseEarnings, getStudentEnrollments } from "@/server/actions/instructor.actions";
@@ -45,11 +46,16 @@ export default async function InstructorDashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card className="p-6">
           <CardHeader>
-            <div>
-              <CardTitle className="text-3xl mb-2">Instructor Dashboard</CardTitle>
-              <CardDescription>
-                Welcome to your instructor dashboard. Here you can manage your courses, view analytics, and interact with students.
-              </CardDescription>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <CardTitle className="text-3xl mb-2">Instructor Dashboard</CardTitle>
+                <CardDescription>
+                  Welcome to your instructor dashboard. Here you can manage your courses, view analytics, and interact with students.
+                </CardDescription>
+              </div>
+              <Button asChild className="mt-4 md:mt-0">
+                <Link href="/instructor/courses/create">Create New Course</Link>
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -80,31 +86,54 @@ export default async function InstructorDashboardPage() {
               <CardTitle className="text-2xl mb-4">Your Courses</CardTitle>
               {courses && courses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {courses.map((course) => (
-                    <Card key={course.id} className="p-4 hover:shadow-md transition-shadow">
-                      <CardTitle className="font-semibold text-lg mb-2">{course.title}</CardTitle>
-                      <CardDescription className="text-sm mb-4 line-clamp-2">{course.subtitle}</CardDescription>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary">₹{(course.price_cents / 100).toFixed(2)}</span>
-                        <span className="text-sm text-muted-foreground capitalize">{course.status}</span>
-                      </div>
-                      <div className="flex justify-between items-center mt-4">
-                        <span className="text-sm text-muted-foreground">{course.level}</span>
-                        {course.is_published ? (
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Published</span>
-                        ) : (
-                          <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded capitalize">
-                            {course.status}
-                          </span>
-                        )}
-                      </div>
-                    </Card>
-                  ))}
+                  {courses.map((course, index) => {
+                    // Generate a unique color for each course card
+                    const colors = [
+                      'bg-blue-100/30 border-blue-200',
+                      'bg-purple-100/30 border-purple-200',
+                      'bg-green-100/30 border-green-200',
+                      'bg-yellow-100/30 border-yellow-200',
+                      'bg-pink-100/30 border-pink-200',
+                      'bg-indigo-100/30 border-indigo-200'
+                    ];
+                    const colorClass = colors[index % colors.length];
+                    
+                    return (
+                      <Card 
+                        key={course.id} 
+                        className={`p-4 hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-opacity-30 border ${colorClass}`}
+                      >
+                        <CardTitle className="font-semibold text-lg mb-2">{course.title}</CardTitle>
+                        <CardDescription className="text-sm mb-4 line-clamp-2">{course.subtitle}</CardDescription>
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-primary">₹{(course.price_cents / 100).toFixed(2)}</span>
+                          <span className="text-sm text-muted-foreground capitalize">{course.status}</span>
+                        </div>
+                        <div className="flex justify-between items-center mt-4">
+                          <span className="text-sm text-muted-foreground">{course.level}</span>
+                          {course.is_published ? (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Published</span>
+                          ) : (
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded capitalize">
+                              {course.status}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-4">
+                          <Button asChild size="sm" className="w-full">
+                            <Link href={`/instructor/courses/${course.id}`}>Manage Course</Link>
+                          </Button>
+                        </div>
+                      </Card>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground mb-4">You haven&apos;t created any courses yet.</p>
-                  <p className="text-muted-foreground">Course creation functionality will be added soon.</p>
+                  <Button asChild>
+                    <Link href="/instructor/courses/create">Create Your First Course</Link>
+                  </Button>
                 </div>
               )}
             </div>

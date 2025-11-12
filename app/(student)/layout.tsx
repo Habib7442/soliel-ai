@@ -1,4 +1,5 @@
-import { Navbar } from "@/components/layout/Navbar";
+import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
+import { UserRole } from "@/types/enums";
 
 export default function StudentLayout({
   children,
@@ -7,7 +8,7 @@ export default function StudentLayout({
 }) {
   return (
     <>
-      <Navbar />
+      <UnifiedNavbar userRole={UserRole.STUDENT} />
       <main className="w-full pt-16">
         {children}
       </main>

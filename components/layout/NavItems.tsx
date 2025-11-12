@@ -8,7 +8,7 @@ import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase-client";
 import { UserRole } from "@/types/enums";
 
-interface NavItem {
+export interface NavItem {
   name: string;
   href: string;
   icon: React.ReactNode;

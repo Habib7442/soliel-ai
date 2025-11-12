@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,18 +19,21 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
 
   useEffect(() => {
     // Check if we have the required parameters for password reset
-    const token_hash = searchParams.get("token_hash");
-    const type = searchParams.get("type");
-    
-    if (!token_hash || !type || type !== "recovery") {
-      router.push("/sign-in");
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token_hash = urlParams.get("token_hash");
+      const type = urlParams.get("type");
+      
+      if (!token_hash || !type || type !== "recovery") {
+        router.push("/sign-in");
+      }
     }
-  }, [router, searchParams]);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

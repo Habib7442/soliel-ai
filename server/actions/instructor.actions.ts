@@ -13,7 +13,8 @@ export const createCourse = async (courseData: {
   price_cents?: number;
   currency?: string;
   instructor_id: string;
-}) => {
+  category_name?: string;
+}, categoryId?: number) => {
   try {
     const supabase = await createServerClient();
     
@@ -30,10 +31,47 @@ export const createCourse = async (courseData: {
       return { success: false, error: "Full description is required" };
     }
     
+    // Handle category creation
+    let categoryIdToUse = categoryId;
+    if (courseData.category_name) {
+      // Check if category already exists
+      const { data: existingCategory, error: categoryCheckError } = await supabase
+        .from('course_categories')
+        .select('id')
+        .eq('name', courseData.category_name)
+        .single();
+      
+      if (categoryCheckError && categoryCheckError.code !== 'PGRST116') {
+        // Some other error occurred
+        console.error('Error checking category:', categoryCheckError);
+      }
+      
+      if (existingCategory) {
+        // Category exists, use its ID
+        categoryIdToUse = existingCategory.id;
+      } else {
+        // Category doesn't exist, create it
+        const { data: newCategory, error: categoryCreateError } = await supabase
+          .from('course_categories')
+          .insert({ name: courseData.category_name })
+          .select('id')
+          .single();
+        
+        if (categoryCreateError) {
+          console.error('Error creating category:', categoryCreateError);
+        } else {
+          categoryIdToUse = newCategory.id;
+        }
+      }
+    }
+    
+    // Remove category_name from courseData since it's not a course field
+    const { category_name, ...courseInsertData } = courseData;
+    
     const { data, error } = await supabase
       .from('courses')
       .insert({
-        ...courseData,
+        ...courseInsertData,
         status: 'draft', // Default to draft status
         is_published: false
       })
@@ -43,6 +81,21 @@ export const createCourse = async (courseData: {
     if (error) {
       console.error('Error creating course:', error);
       return { success: false, error: `Failed to create course: ${error.message}` };
+    }
+
+    // If category is provided, create the category mapping
+    if (categoryIdToUse && data?.id) {
+      const { error: categoryError } = await supabase
+        .from('course_category_map')
+        .insert({
+          course_id: data.id,
+          category_id: categoryIdToUse
+        });
+      
+      if (categoryError) {
+        console.error('Error creating category mapping:', categoryError);
+        // Don't fail the course creation if category mapping fails
+      }
     }
 
     revalidatePath('/instructor-dashboard');
@@ -228,5 +281,258 @@ export const getStudentEnrollments = async (instructorId: string) => {
   } catch (error) {
     console.error('Error in getStudentEnrollments:', error);
     return { success: false, error: 'Failed to fetch enrollments. Please try again.' };
+  }
+};
+
+export const addLesson = async (lessonData: {
+  course_id: string;
+  title: string;
+  content_md?: string;
+  video_url?: string;
+  downloadable?: boolean;
+  order_index?: number;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Validate required fields
+    if (!lessonData.course_id) {
+      return { success: false, error: "Course ID is required" };
+    }
+    
+    if (!lessonData.title?.trim()) {
+      return { success: false, error: "Lesson title is required" };
+    }
+    
+    const { data, error } = await supabase
+      .from('lessons')
+      .insert(lessonData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding lesson:', error);
+      return { success: false, error: `Failed to add lesson: ${error.message}` };
+    }
+
+    revalidatePath(`/instructor/courses/${lessonData.course_id}/curriculum`);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in addLesson:', error);
+    return { success: false, error: 'Failed to add lesson. Please try again.' };
+  }
+};
+
+export const createQuiz = async (quizData: {
+  lesson_id: string;
+  title: string;
+  passing_score?: number;
+  max_attempts?: number;
+  time_limit_minutes?: number;
+  randomize_questions?: boolean;
+  show_correct_answers?: boolean;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Validate required fields
+    if (!quizData.lesson_id) {
+      return { success: false, error: "Lesson ID is required" };
+    }
+    
+    if (!quizData.title?.trim()) {
+      return { success: false, error: "Quiz title is required" };
+    }
+    
+    const { data, error } = await supabase
+      .from('quizzes')
+      .insert(quizData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating quiz:', error);
+      return { success: false, error: `Failed to create quiz: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in createQuiz:', error);
+    return { success: false, error: 'Failed to create quiz. Please try again.' };
+  }
+};
+
+export const addQuizQuestions = async (quizId: string, questions: {
+  question_text: string;
+  question_type: string;
+  options: string[];
+  correct_answers: number[];
+  explanation?: string;
+  order_index?: number;
+}[]) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Validate required fields
+    if (!quizId) {
+      return { success: false, error: "Quiz ID is required" };
+    }
+    
+    if (!questions || questions.length === 0) {
+      return { success: false, error: "At least one question is required" };
+    }
+    
+    // Validate each question
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      if (!q.question_text?.trim()) {
+        return { success: false, error: `Question ${i + 1} text is required` };
+      }
+      
+      if (!q.options || q.options.length === 0) {
+        return { success: false, error: `Question ${i + 1} must have at least one option` };
+      }
+      
+      if (!q.correct_answers || q.correct_answers.length === 0) {
+        return { success: false, error: `Question ${i + 1} must have at least one correct answer` };
+      }
+    }
+    
+    const { data, error } = await supabase
+      .from('quiz_questions')
+      .insert(questions.map(q => ({
+        ...q,
+        quiz_id: quizId
+      })))
+      .select();
+
+    if (error) {
+      console.error('Error adding quiz questions:', error);
+      return { success: false, error: `Failed to add quiz questions: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in addQuizQuestions:', error);
+    return { success: false, error: 'Failed to add quiz questions. Please try again.' };
+  }
+};
+
+export const createAssignment = async (assignmentData: {
+  lesson_id: string;
+  title: string;
+  instructions: string;
+  file_types_allowed?: string;
+  max_file_size_mb?: number;
+  allow_multiple_files?: boolean;
+  grading_scale?: string;
+  max_points?: number;
+  rubric?: string;
+  due_date?: string;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Validate required fields
+    if (!assignmentData.lesson_id) {
+      return { success: false, error: "Lesson ID is required" };
+    }
+    
+    if (!assignmentData.title?.trim()) {
+      return { success: false, error: "Assignment title is required" };
+    }
+    
+    if (!assignmentData.instructions?.trim()) {
+      return { success: false, error: "Assignment instructions are required" };
+    }
+    
+    const { data, error } = await supabase
+      .from('assignments')
+      .insert(assignmentData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating assignment:', error);
+      return { success: false, error: `Failed to create assignment: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in createAssignment:', error);
+    return { success: false, error: 'Failed to create assignment. Please try again.' };
+  }
+};
+
+export const submitAssignment = async (submissionData: {
+  assignment_id: string;
+  student_id: string;
+  submission_files: { 
+    file_name: string;
+    file_url: string;
+    file_size: number;
+  }[];
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Validate required fields
+    if (!submissionData.assignment_id) {
+      return { success: false, error: "Assignment ID is required" };
+    }
+    
+    if (!submissionData.student_id) {
+      return { success: false, error: "Student ID is required" };
+    }
+    
+    const { data, error } = await supabase
+      .from('assignment_submissions')
+      .insert(submissionData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error submitting assignment:', error);
+      return { success: false, error: `Failed to submit assignment: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in submitAssignment:', error);
+    return { success: false, error: 'Failed to submit assignment. Please try again.' };
+  }
+};
+
+export const gradeAssignment = async (submissionId: string, gradeData: {
+  grade?: number;
+  feedback?: string;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Validate required fields
+    if (!submissionId) {
+      return { success: false, error: "Submission ID is required" };
+    }
+    
+    const { data, error } = await supabase
+      .from('assignment_submissions')
+      .update({
+        ...gradeData,
+        graded_at: new Date().toISOString()
+      })
+      .eq('id', submissionId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error grading assignment:', error);
+      return { success: false, error: `Failed to grade assignment: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in gradeAssignment:', error);
+    return { success: false, error: 'Failed to grade assignment. Please try again.' };
   }
 };
