@@ -45,6 +45,8 @@ This project implements a comprehensive authentication system with role-based ac
 - `AuthForm` - Unified signup/login form component
 - `Navbar` - Role-based navigation component
 - `NavItems` - Dynamic navigation items based on user role
+- `Loading` - Reusable loading component with customizable size and text
+- `GlobalLoading` - Full-page loading overlay for route transitions
 - Role-specific dashboard pages
 - Profile management pages
 

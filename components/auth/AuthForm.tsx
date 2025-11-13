@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserRole } from "@/types/enums";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff, RotateCcw } from "lucide-react";
+import { Loading } from "@/components/ui/loading";
 
 interface AuthFormProps {
   mode: "signup" | "login";
@@ -302,10 +303,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
             
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
-                <div className="flex items-center">
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                <>
+                  <Loading size="sm" className="mr-2" />
                   Processing...
-                </div>
+                </>
               ) : mode === "signup" ? "Sign Up" : "Sign In"}
             </Button>
           </form>

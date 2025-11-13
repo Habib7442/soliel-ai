@@ -6,8 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { createCourse } from "@/server/actions/instructor.actions";
+import { createCourse, uploadThumbnail } from "@/server/actions/instructor.actions";
+import { createClient } from "@/lib/supabase-client";
+import { Upload, X } from "lucide-react";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+
+const MDEditor = dynamic(
+  () => import("@uiw/react-md-editor"),
+  { ssr: false }
+);
 
 interface CourseCreateFormProps {
   instructorId: string;
@@ -19,11 +29,16 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
     subtitle: "",
     description: "",
     level: "beginner",
-    language: "en",
+    language: "english",
     price: "0",
     category: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadedThumbnailUrl, setUploadedThumbnailUrl] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -32,6 +47,140 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check if it's an image
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    setThumbnailFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setThumbnailPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeThumbnail = () => {
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+    setUploadedThumbnailUrl(null);
+    setUploadProgress(0);
+  };
+
+  const handleUploadThumbnail = async () => {
+    if (!thumbnailFile) {
+      toast.error('Please select a thumbnail file first');
+      return;
+    }
+
+    try {
+      setUploadingThumbnail(true);
+      setUploadProgress(10);
+      
+      const supabase = createClient();
+      
+      // Check authentication first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      setUploadProgress(20);
+      
+      if (authError || !user) {
+        console.error('Auth error:', authError);
+        toast.error('You must be logged in to upload files');
+        setUploadingThumbnail(false);
+        setUploadProgress(0);
+        return;
+      }
+      
+      const fileExt = thumbnailFile.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      
+      setUploadProgress(30);
+      
+      // Add timeout wrapper
+      const uploadPromise = supabase.storage
+        .from('course-thumbnails')
+        .upload(fileName, thumbnailFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Upload timeout after 30 seconds')), 30000)
+      );
+      
+      const { data, error: uploadError } = await Promise.race([
+        uploadPromise,
+        timeoutPromise
+      ]);
+
+      setUploadProgress(70);
+
+      if (uploadError) {
+        console.error('Upload error details:', {
+          message: uploadError.message,
+          name: uploadError.name,
+          statusCode: 'statusCode' in uploadError ? uploadError.statusCode : undefined,
+          error: 'error' in uploadError ? uploadError.error : undefined,
+          cause: uploadError.cause,
+          stack: uploadError.stack
+        });
+        toast.error(`Failed to upload: ${uploadError.message}`);
+        setUploadingThumbnail(false);
+        setUploadProgress(0);
+        return;
+      }
+
+      if (!data) {
+        console.error('No data returned from upload');
+        toast.error('Upload failed: No data returned');
+        setUploadingThumbnail(false);
+        setUploadProgress(0);
+        return;
+      }
+
+      setUploadProgress(85);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-thumbnails')
+        .getPublicUrl(fileName);
+      
+      setUploadProgress(100);
+      
+      setUploadedThumbnailUrl(publicUrl);
+      toast.success('Thumbnail uploaded successfully!');
+      
+      // Small delay to show 100% completion
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (err) {
+      console.error('Thumbnail upload error:', err);
+      if (err instanceof Error) {
+        console.error('Error details:', {
+          message: err.message,
+          stack: err.stack
+        });
+        toast.error(`Upload error: ${err.message}`);
+      } else {
+        toast.error('Failed to upload thumbnail');
+      }
+      setUploadProgress(0);
+    } finally {
+      setUploadingThumbnail(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,6 +213,14 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
         return;
       }
 
+      // Upload thumbnail if provided
+      const thumbnailUrl = uploadedThumbnailUrl;
+      if (thumbnailFile && !uploadedThumbnailUrl) {
+        toast.error('Please upload the thumbnail before creating the course');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create course
       const result = await createCourse({
         title: formData.title.trim(),
@@ -72,9 +229,10 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
         level: formData.level,
         language: formData.language,
         price_cents: Math.round(parseFloat(formData.price) * 100) || 0,
-        currency: 'INR',
+        currency: 'USD',
         instructor_id: instructorId,
-        category_name: formData.category.trim()
+        category_name: formData.category.trim(),
+        thumbnail_url: thumbnailUrl || undefined
       });
 
       if (result.success) {
@@ -85,10 +243,14 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
           subtitle: "",
           description: "",
           level: "beginner",
-          language: "en",
+          language: "english",
           price: "0",
           category: "",
         });
+        setThumbnailFile(null);
+        setThumbnailPreview(null);
+        setUploadProgress(0);
+        setUploadedThumbnailUrl(null);
       } else {
         toast.error("Failed to create course", {
           description: result.error
@@ -99,6 +261,7 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
       toast.error("Failed to create course. Please try again.");
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -140,17 +303,20 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
 
         <div className="col-span-1 md:col-span-2">
           <Label htmlFor="description" className="mb-2 block">Full Description *</Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Enter detailed course description"
-            required
-            rows={6}
-          />
+          <div data-color-mode="dark">
+            <MDEditor
+              value={formData.description}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value || "" }))}
+              preview="edit"
+              height={400}
+              visibleDragbar={false}
+              textareaProps={{
+                placeholder: "Enter detailed course description using Markdown...\n\nExample:\n# Course Overview\n\n## What you'll learn\n- Point 1\n- Point 2\n\n**Important:** Use formatting for better structure"
+              }}
+            />
+          </div>
           <p className="text-sm text-muted-foreground mt-1">
-            A comprehensive overview of what students will learn
+            Use Markdown to format your description with headings, lists, bold, italic, etc.
           </p>
         </div>
 
@@ -198,17 +364,17 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="es">Spanish</SelectItem>
-              <SelectItem value="fr">French</SelectItem>
-              <SelectItem value="de">German</SelectItem>
-              <SelectItem value="hi">Hindi</SelectItem>
+              <SelectItem value="english">English</SelectItem>
+              <SelectItem value="spanish">Spanish</SelectItem>
+              <SelectItem value="french">French</SelectItem>
+              <SelectItem value="german">German</SelectItem>
+              <SelectItem value="hindi">Hindi</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="col-span-1">
-          <Label htmlFor="price" className="mb-2 block">Price (INR)</Label>
+          <Label htmlFor="price" className="mb-2 block">Price (USD)</Label>
           <Input
             id="price"
             name="price"
@@ -223,11 +389,98 @@ export function CourseCreateForm({ instructorId }: CourseCreateFormProps) {
             Set to 0 for a free course
           </p>
         </div>
+
+        {/* Thumbnail Upload */}
+        <div className="col-span-1 md:col-span-2">
+          <Label htmlFor="thumbnail" className="mb-2 block">Course Thumbnail (16:9 ratio recommended)</Label>
+          {thumbnailPreview ? (
+            <div className="space-y-4">
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                <Image
+                  src={thumbnailPreview}
+                  alt="Thumbnail preview"
+                  fill
+                  className="object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={removeThumbnail}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                  disabled={uploadingThumbnail}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                {uploadedThumbnailUrl && (
+                  <div className="absolute bottom-2 left-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Uploaded
+                  </div>
+                )}
+              </div>
+              
+              {!uploadedThumbnailUrl && (
+                <Button
+                  type="button"
+                  onClick={handleUploadThumbnail}
+                  disabled={uploadingThumbnail}
+                  className="w-full"
+                >
+                  {uploadingThumbnail ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      Uploading... {uploadProgress}%
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Thumbnail
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="w-full aspect-video rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition cursor-pointer">
+              <label htmlFor="thumbnail" className="flex flex-col items-center justify-center h-full cursor-pointer">
+                <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-600">Click to select thumbnail</span>
+                <span className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</span>
+              </label>
+              <input
+                id="thumbnail"
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                className="hidden"
+              />
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground mt-1">
+            Recommended size: 1920x1080 pixels (16:9 ratio)
+          </p>
+          
+          {/* Upload Progress */}
+          {uploadingThumbnail && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Uploading thumbnail...</span>
+                <span className="font-medium">{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Course"}
+      <div className="flex flex-col sm:flex-row justify-end gap-3">
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || uploadingThumbnail || (!!thumbnailFile && !uploadedThumbnailUrl)} 
+          className="w-full sm:w-auto"
+        >
+          {isSubmitting ? "Creating Course..." : "Create Course"}
         </Button>
       </div>
     </form>

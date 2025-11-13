@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
-import { getInstructorCourses, getCourseEarnings, getStudentEnrollments } from "@/server/actions/instructor.actions";
+import { getInstructorCourses, getCourseEarnings, getStudentEnrollments, deleteCourse } from "@/server/actions/instructor.actions";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { DeleteCourseButton } from "@/components/instructor/DeleteCourseButton";
 
 export default async function InstructorDashboardPage() {
   const supabase = await createServerClient();
@@ -76,7 +77,7 @@ export default async function InstructorDashboardPage() {
               <Card className="p-6">
                 <CardTitle className="text-lg font-semibold mb-2">Total Revenue</CardTitle>
                 <p className="text-3xl font-bold text-primary">
-                  ₹{earnings?.reduce((acc, earning) => acc + (earning.amount || 0), 0).toFixed(2) || '0.00'}
+                  ${earnings?.reduce((acc, earning) => acc + (earning.amount || 0), 0).toFixed(2) || '0.00'}
                 </p>
               </Card>
             </div>
@@ -95,7 +96,7 @@ export default async function InstructorDashboardPage() {
                         <CardTitle className="font-semibold text-lg mb-2">{course.title}</CardTitle>
                         <CardDescription className="text-sm mb-4 line-clamp-2">{course.subtitle}</CardDescription>
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-primary">₹{(course.price_cents / 100).toFixed(2)}</span>
+                          <span className="font-bold text-primary">${(course.price_cents / 100).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center mt-4">
                           <span className="text-sm text-muted-foreground">{course.level}</span>
@@ -107,10 +108,11 @@ export default async function InstructorDashboardPage() {
                             </span>
                           )}
                         </div>
-                        <div className="mt-4">
-                          <Button asChild size="sm" className="w-full">
+                        <div className="mt-4 flex gap-2">
+                          <Button asChild size="sm" className="flex-1">
                             <Link href={`/instructor/courses/${course.id}`}>Manage Course</Link>
                           </Button>
+                          <DeleteCourseButton courseId={course.id} />
                         </div>
                       </Card>
                     );
@@ -148,7 +150,7 @@ export default async function InstructorDashboardPage() {
                               : 'Unknown Course'}
                           </TableCell>
                           <TableCell className="font-medium text-primary">
-                            ₹{earning.amount?.toFixed(2)}
+                            ${earning.amount?.toFixed(2)}
                           </TableCell>
                           <TableCell>
                             {earning.purchase_date ? new Date(earning.purchase_date).toLocaleDateString() : 'N/A'}
@@ -185,7 +187,7 @@ export default async function InstructorDashboardPage() {
                               : 'Unknown Student'}
                           </TableCell>
                           <TableCell className="font-medium text-primary">
-                            ₹{enrollment.amount?.toFixed(2)}
+                            ${enrollment.amount?.toFixed(2)}
                           </TableCell>
                           <TableCell>
                             {enrollment.purchase_date ? new Date(enrollment.purchase_date).toLocaleDateString() : 'N/A'}

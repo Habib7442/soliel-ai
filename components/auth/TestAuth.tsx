@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase-client";
 import { User } from '@supabase/auth-js';
+import { Loading } from "@/components/ui/loading";
 
 interface Profile {
   id: string;
@@ -64,7 +65,11 @@ export default function TestAuth() {
   }, []);
 
   if (loading) {
-    return <div className="p-4 bg-yellow-100 text-yellow-800 rounded">Loading authentication state...</div>;
+    return (
+      <div className="p-4 bg-yellow-100 text-yellow-800 rounded flex items-center justify-center">
+        <Loading text="Loading authentication state..." size="sm" />
+      </div>
+    );
   }
 
   return (

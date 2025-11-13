@@ -14,6 +14,7 @@ export const createCourse = async (courseData: {
   currency?: string;
   instructor_id: string;
   category_name?: string;
+  thumbnail_url?: string;
 }, categoryId?: number) => {
   try {
     const supabase = await createServerClient();
@@ -234,6 +235,18 @@ export const getCourseEarnings = async (instructorId: string) => {
   try {
     const supabase = await createServerClient();
     
+    // First get all courses by this instructor
+    const { data: instructorCourses } = await supabase
+      .from('courses')
+      .select('id')
+      .eq('instructor_id', instructorId);
+    
+    if (!instructorCourses || instructorCourses.length === 0) {
+      return { success: true, data: [] };
+    }
+    
+    const courseIds = instructorCourses.map(c => c.id);
+    
     const { data, error } = await supabase
       .from('course_purchases')
       .select(`
@@ -242,7 +255,7 @@ export const getCourseEarnings = async (instructorId: string) => {
         purchase_date,
         courses (title)
       `)
-      .eq('course.instructor_id', instructorId)
+      .in('course_id', courseIds)
       .order('purchase_date', { ascending: false });
 
     if (error) {
@@ -261,6 +274,18 @@ export const getStudentEnrollments = async (instructorId: string) => {
   try {
     const supabase = await createServerClient();
     
+    // First get all courses by this instructor
+    const { data: instructorCourses } = await supabase
+      .from('courses')
+      .select('id')
+      .eq('instructor_id', instructorId);
+    
+    if (!instructorCourses || instructorCourses.length === 0) {
+      return { success: true, data: [] };
+    }
+    
+    const courseIds = instructorCourses.map(c => c.id);
+    
     const { data, error } = await supabase
       .from('course_purchases')
       .select(`
@@ -269,7 +294,7 @@ export const getStudentEnrollments = async (instructorId: string) => {
         amount,
         profiles (full_name, email)
       `)
-      .eq('course.instructor_id', instructorId)
+      .in('course_id', courseIds)
       .order('purchase_date', { ascending: false });
 
     if (error) {
@@ -534,5 +559,675 @@ export const gradeAssignment = async (submissionId: string, gradeData: {
   } catch (error) {
     console.error('Error in gradeAssignment:', error);
     return { success: false, error: 'Failed to grade assignment. Please try again.' };
+  }
+};
+
+// Get assignment submissions for grading
+export const getAssignmentSubmissions = async (assignmentId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('assignment_submissions')
+      .select(`
+        id,
+        submission_files,
+        submitted_at,
+        grade,
+        feedback,
+        graded_at,
+        profiles!assignment_submissions_student_id_fkey (
+          id,
+          full_name,
+          email
+        )
+      `)
+      .eq('assignment_id', assignmentId)
+      .order('submitted_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching assignment submissions:', error);
+      return { success: false, error: `Failed to fetch submissions: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getAssignmentSubmissions:', error);
+    return { success: false, error: 'Failed to fetch submissions. Please try again.' };
+  }
+};
+
+// Get course reviews
+export const getCourseReviews = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('reviews')
+      .select(`
+        id,
+        rating,
+        comment,
+        status,
+        created_at,
+        profiles (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching course reviews:', error);
+      return { success: false, error: `Failed to fetch reviews: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourseReviews:', error);
+    return { success: false, error: 'Failed to fetch reviews. Please try again.' };
+  }
+};
+
+// Update review status (hide/show)
+export const updateReviewStatus = async (reviewId: string, status: 'visible' | 'hidden' | 'flagged') => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('reviews')
+      .update({ status })
+      .eq('id', reviewId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating review status:', error);
+      return { success: false, error: `Failed to update review status: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateReviewStatus:', error);
+    return { success: false, error: 'Failed to update review status. Please try again.' };
+  }
+};
+
+// Get course FAQs
+export const getCourseFaqs = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('course_faqs')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching course FAQs:', error);
+      return { success: false, error: `Failed to fetch FAQs: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourseFaqs:', error);
+    return { success: false, error: 'Failed to fetch FAQs. Please try again.' };
+  }
+};
+
+// Create course FAQ
+export const createCourseFaq = async (faqData: {
+  course_id: string;
+  question: string;
+  answer_md: string;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    if (!faqData.course_id || !faqData.question?.trim() || !faqData.answer_md?.trim()) {
+      return { success: false, error: "All fields are required" };
+    }
+    
+    const { data, error } = await supabase
+      .from('course_faqs')
+      .insert(faqData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating course FAQ:', error);
+      return { success: false, error: `Failed to create FAQ: ${error.message}` };
+    }
+
+    revalidatePath(`/instructor/courses/${faqData.course_id}/faq`);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in createCourseFaq:', error);
+    return { success: false, error: 'Failed to create FAQ. Please try again.' };
+  }
+};
+
+// Update course FAQ
+export const updateCourseFaq = async (faqId: string, updates: {
+  question?: string;
+  answer_md?: string;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('course_faqs')
+      .update(updates)
+      .eq('id', faqId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating course FAQ:', error);
+      return { success: false, error: `Failed to update FAQ: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateCourseFaq:', error);
+    return { success: false, error: 'Failed to update FAQ. Please try again.' };
+  }
+};
+
+// Delete course FAQ
+export const deleteCourseFaq = async (faqId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { error } = await supabase
+      .from('course_faqs')
+      .delete()
+      .eq('id', faqId);
+
+    if (error) {
+      console.error('Error deleting course FAQ:', error);
+      return { success: false, error: `Failed to delete FAQ: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteCourseFaq:', error);
+    return { success: false, error: 'Failed to delete FAQ. Please try again.' };
+  }
+};
+
+// Delete course
+export const deleteCourse = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // First get the course to check for thumbnail
+    const { data: course } = await supabase
+      .from('courses')
+      .select('thumbnail_url')
+      .eq('id', courseId)
+      .single();
+    
+    // Delete thumbnail from storage if exists
+    if (course?.thumbnail_url) {
+      const fileName = course.thumbnail_url.split('/').pop();
+      if (fileName) {
+        await supabase.storage
+          .from('course-thumbnails')
+          .remove([fileName]);
+      }
+    }
+    
+    const { error } = await supabase
+      .from('courses')
+      .delete()
+      .eq('id', courseId);
+
+    if (error) {
+      console.error('Error deleting course:', error);
+      return { success: false, error: `Failed to delete course: ${error.message}` };
+    }
+
+    revalidatePath('/instructor-dashboard');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteCourse:', error);
+    return { success: false, error: 'Failed to delete course. Please try again.' };
+  }
+};
+
+// Get Q&A threads for a course
+export const getQnaThreads = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('qna_threads')
+      .select(`
+        id,
+        title,
+        created_at,
+        profiles (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching Q&A threads:', error);
+      return { success: false, error: `Failed to fetch threads: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getQnaThreads:', error);
+    return { success: false, error: 'Failed to fetch threads. Please try again.' };
+  }
+};
+
+// Get messages in a Q&A thread
+export const getQnaMessages = async (threadId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('qna_messages')
+      .select(`
+        id,
+        body_md,
+        created_at,
+        profiles (
+          id,
+          full_name,
+          avatar_url,
+          role
+        )
+      `)
+      .eq('thread_id', threadId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching Q&A messages:', error);
+      return { success: false, error: `Failed to fetch messages: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getQnaMessages:', error);
+    return { success: false, error: 'Failed to fetch messages. Please try again.' };
+  }
+};
+
+// Reply to Q&A thread
+export const replyToQnaThread = async (threadId: string, userId: string, message: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    if (!message?.trim()) {
+      return { success: false, error: "Message cannot be empty" };
+    }
+    
+    const { data, error } = await supabase
+      .from('qna_messages')
+      .insert({
+        thread_id: threadId,
+        user_id: userId,
+        body_md: message
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error replying to Q&A thread:', error);
+      return { success: false, error: `Failed to reply: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in replyToQnaThread:', error);
+    return { success: false, error: 'Failed to reply. Please try again.' };
+  }
+};
+
+// Get course lessons
+export const getCourseLessons = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('order_index', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching course lessons:', error);
+      return { success: false, error: `Failed to fetch lessons: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourseLessons:', error);
+    return { success: false, error: 'Failed to fetch lessons. Please try again.' };
+  }
+};
+
+// Update lesson
+export const updateLesson = async (lessonId: string, updates: Partial<{
+  title: string;
+  content_md: string;
+  video_url: string;
+  downloadable: boolean;
+  order_index: number;
+}>) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('lessons')
+      .update(updates)
+      .eq('id', lessonId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating lesson:', error);
+      return { success: false, error: `Failed to update lesson: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateLesson:', error);
+    return { success: false, error: 'Failed to update lesson. Please try again.' };
+  }
+};
+
+// Delete lesson
+export const deleteLesson = async (lessonId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { error } = await supabase
+      .from('lessons')
+      .delete()
+      .eq('id', lessonId);
+
+    if (error) {
+      console.error('Error deleting lesson:', error);
+      return { success: false, error: `Failed to delete lesson: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteLesson:', error);
+    return { success: false, error: 'Failed to delete lesson. Please try again.' };
+  }
+};
+
+// Get course quizzes
+export const getCourseQuizzes = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('quizzes')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching course quizzes:', error);
+      return { success: false, error: `Failed to fetch quizzes: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourseQuizzes:', error);
+    return { success: false, error: 'Failed to fetch quizzes. Please try again.' };
+  }
+};
+
+// Get quiz with questions
+export const getQuizWithQuestions = async (quizId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data: quiz, error: quizError } = await supabase
+      .from('quizzes')
+      .select('*')
+      .eq('id', quizId)
+      .single();
+
+    if (quizError) {
+      console.error('Error fetching quiz:', quizError);
+      return { success: false, error: `Failed to fetch quiz: ${quizError.message}` };
+    }
+
+    const { data: questions, error: questionsError } = await supabase
+      .from('quiz_questions')
+      .select(`
+        *,
+        quiz_options (*)
+      `)
+      .eq('quiz_id', quizId)
+      .order('order_index', { ascending: true });
+
+    if (questionsError) {
+      console.error('Error fetching quiz questions:', questionsError);
+      return { success: false, error: `Failed to fetch questions: ${questionsError.message}` };
+    }
+
+    return { success: true, data: { ...quiz, questions } };
+  } catch (error) {
+    console.error('Error in getQuizWithQuestions:', error);
+    return { success: false, error: 'Failed to fetch quiz. Please try again.' };
+  }
+};
+
+// Update quiz
+export const updateQuiz = async (quizId: string, updates: Partial<{
+  title: string;
+  is_final: boolean;
+}>) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('quizzes')
+      .update(updates)
+      .eq('id', quizId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating quiz:', error);
+      return { success: false, error: `Failed to update quiz: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateQuiz:', error);
+    return { success: false, error: 'Failed to update quiz. Please try again.' };
+  }
+};
+
+// Delete quiz
+export const deleteQuiz = async (quizId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { error } = await supabase
+      .from('quizzes')
+      .delete()
+      .eq('id', quizId);
+
+    if (error) {
+      console.error('Error deleting quiz:', error);
+      return { success: false, error: `Failed to delete quiz: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteQuiz:', error);
+    return { success: false, error: 'Failed to delete quiz. Please try again.' };
+  }
+};
+
+// Get course assignments
+export const getCourseAssignments = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('assignments')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching course assignments:', error);
+      return { success: false, error: `Failed to fetch assignments: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourseAssignments:', error);
+    return { success: false, error: 'Failed to fetch assignments. Please try again.' };
+  }
+};
+
+// Update assignment
+export const updateAssignment = async (assignmentId: string, updates: Partial<{
+  title: string;
+  description: string;
+  type: string;
+  due_at: string;
+}>) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('assignments')
+      .update(updates)
+      .eq('id', assignmentId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating assignment:', error);
+      return { success: false, error: `Failed to update assignment: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateAssignment:', error);
+    return { success: false, error: 'Failed to update assignment. Please try again.' };
+  }
+};
+
+// Delete assignment
+export const deleteAssignment = async (assignmentId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { error } = await supabase
+      .from('assignments')
+      .delete()
+      .eq('id', assignmentId);
+
+    if (error) {
+      console.error('Error deleting assignment:', error);
+      return { success: false, error: `Failed to delete assignment: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteAssignment:', error);
+    return { success: false, error: 'Failed to delete assignment. Please try again.' };
+  }
+};
+
+// Get instructor analytics
+// Upload thumbnail to storage
+export const uploadThumbnail = async (file: File) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('course-thumbnails')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Error uploading thumbnail:', error);
+      return { success: false, error: `Failed to upload thumbnail: ${error.message}` };
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('course-thumbnails')
+      .getPublicUrl(fileName);
+
+    return { success: true, data: { url: publicUrl, path: fileName } };
+  } catch (error) {
+    console.error('Error in uploadThumbnail:', error);
+    return { success: false, error: 'Failed to upload thumbnail. Please try again.' };
+  }
+};
+
+export const getInstructorAnalytics = async (instructorId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Get total students across all courses
+    const { data: enrollments, error: enrollmentsError } = await supabase
+      .from('enrollments')
+      .select('id, courses!inner(instructor_id)')
+      .eq('courses.instructor_id', instructorId);
+
+    // Get total revenue
+    const { data: payments, error: paymentsError } = await supabase
+      .from('payments')
+      .select('amount_cents, orders!inner(order_items!inner(courses!inner(instructor_id)))')
+      .eq('status', 'paid')
+      .eq('orders.order_items.courses.instructor_id', instructorId);
+
+    // Get average rating across all courses
+    const { data: reviews, error: reviewsError } = await supabase
+      .from('reviews')
+      .select('rating, courses!inner(instructor_id)')
+      .eq('courses.instructor_id', instructorId)
+      .eq('status', 'visible');
+
+    const totalStudents = enrollments?.length || 0;
+    const totalRevenue = (payments?.reduce((sum, p) => sum + (p.amount_cents || 0), 0) || 0) / 100;
+    const averageRating = reviews && reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
+    return {
+      success: true,
+      data: {
+        totalStudents,
+        totalRevenue,
+        averageRating: Math.round(averageRating * 10) / 10,
+        totalReviews: reviews?.length || 0
+      }
+    };
+  } catch (error) {
+    console.error('Error in getInstructorAnalytics:', error);
+    return { success: false, error: 'Failed to fetch analytics. Please try again.' };
   }
 };
