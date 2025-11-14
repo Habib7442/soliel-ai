@@ -416,10 +416,10 @@ export const createQuiz = async (quizData: {
 export const addQuizQuestions = async (quizId: string, questions: {
   question_text: string;
   question_type: string;
+  order_index: number;
   options: string[];
   correct_answers: number[];
   explanation?: string;
-  order_index?: number;
 }[]) => {
   try {
     const supabase = await createServerClient();
@@ -449,20 +449,28 @@ export const addQuizQuestions = async (quizId: string, questions: {
       }
     }
     
-    const { data, error } = await supabase
+    // Insert questions
+    const questionsData = questions.map(q => ({
+      quiz_id: quizId,
+      question_text: q.question_text,
+      question_type: q.question_type,
+      options: q.options,
+      correct_answers: q.correct_answers,
+      explanation: q.explanation,
+      order_index: q.order_index
+    }));
+    
+    const { data: insertedQuestions, error: questionsError } = await supabase
       .from('quiz_questions')
-      .insert(questions.map(q => ({
-        ...q,
-        quiz_id: quizId
-      })))
+      .insert(questionsData)
       .select();
 
-    if (error) {
-      console.error('Error adding quiz questions:', error);
-      return { success: false, error: `Failed to add quiz questions: ${error.message}` };
+    if (questionsError) {
+      console.error('Error adding quiz questions:', questionsError);
+      return { success: false, error: `Failed to add quiz questions: ${questionsError.message}` };
     }
 
-    return { success: true, data };
+    return { success: true, data: insertedQuestions };
   } catch (error) {
     console.error('Error in addQuizQuestions:', error);
     return { success: false, error: 'Failed to add quiz questions. Please try again.' };
@@ -1003,8 +1011,11 @@ export const getCourseQuizzes = async (courseId: string) => {
     
     const { data, error } = await supabase
       .from('quizzes')
-      .select('*')
-      .eq('course_id', courseId)
+      .select(`
+        *,
+        lessons (course_id)
+      `)
+      .eq('lessons.course_id', courseId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1012,7 +1023,13 @@ export const getCourseQuizzes = async (courseId: string) => {
       return { success: false, error: `Failed to fetch quizzes: ${error.message}` };
     }
 
-    return { success: true, data };
+    // Flatten the data structure for the UI
+    const flattenedData = data.map(quiz => ({
+      ...quiz,
+      course_id: quiz.lessons?.course_id
+    }));
+
+    return { success: true, data: flattenedData };
   } catch (error) {
     console.error('Error in getCourseQuizzes:', error);
     return { success: false, error: 'Failed to fetch quizzes. Please try again.' };
@@ -1037,10 +1054,7 @@ export const getQuizWithQuestions = async (quizId: string) => {
 
     const { data: questions, error: questionsError } = await supabase
       .from('quiz_questions')
-      .select(`
-        *,
-        quiz_options (*)
-      `)
+      .select('*')
       .eq('quiz_id', quizId)
       .order('order_index', { ascending: true });
 
@@ -1060,6 +1074,11 @@ export const getQuizWithQuestions = async (quizId: string) => {
 export const updateQuiz = async (quizId: string, updates: Partial<{
   title: string;
   is_final: boolean;
+  passing_score?: number;
+  max_attempts?: number;
+  time_limit_minutes?: number;
+  randomize_questions?: boolean;
+  show_correct_answers?: boolean;
 }>) => {
   try {
     const supabase = await createServerClient();
@@ -1080,6 +1099,75 @@ export const updateQuiz = async (quizId: string, updates: Partial<{
   } catch (error) {
     console.error('Error in updateQuiz:', error);
     return { success: false, error: 'Failed to update quiz. Please try again.' };
+  }
+};
+
+// Update a single quiz question
+export const updateQuizQuestion = async (questionId: string, updates: Partial<{
+  question_text: string;
+  question_type: string;
+  options: string[];
+  correct_answers: number[];
+  explanation?: string;
+  order_index: number;
+}>) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('quiz_questions')
+      .update(updates)
+      .eq('id', questionId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating quiz question:', error);
+      return { success: false, error: `Failed to update question: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateQuizQuestion:', error);
+    return { success: false, error: 'Failed to update question. Please try again.' };
+  }
+};
+
+// Add a single quiz question
+export const addQuizQuestion = async (quizId: string, question: {
+  question_text: string;
+  question_type: string;
+  options: string[];
+  correct_answers: number[];
+  explanation?: string;
+  order_index: number;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('quiz_questions')
+      .insert({
+        quiz_id: quizId,
+        question_text: question.question_text,
+        question_type: question.question_type,
+        options: question.options,
+        correct_answers: question.correct_answers,
+        explanation: question.explanation,
+        order_index: question.order_index,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding quiz question:', error);
+      return { success: false, error: `Failed to add question: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in addQuizQuestion:', error);
+    return { success: false, error: 'Failed to add question. Please try again.' };
   }
 };
 

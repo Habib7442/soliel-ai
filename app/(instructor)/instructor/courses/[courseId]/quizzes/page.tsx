@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { Button } from "@/components/ui/button";
-import { QuizManager } from "@/components/instructor/QuizManager";
+import { EnhancedQuizManager } from "@/components/instructor/EnhancedQuizManager";
 import { ChevronLeft } from "lucide-react";
 
 interface QuizzesPageProps {
@@ -55,7 +55,7 @@ export default async function QuizzesPage({ params }: QuizzesPageProps) {
           </Button>
         </div>
 
-        <QuizManager courseId={courseId} />
+        <EnhancedQuizManager courseId={courseId} />
       </div>
     </div>
   );

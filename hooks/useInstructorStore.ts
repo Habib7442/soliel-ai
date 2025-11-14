@@ -32,10 +32,18 @@ export interface Lesson {
 
 export interface Quiz {
   id: string;
-  course_id: string;
+  lesson_id: string;
   title: string;
-  is_final: boolean;
+  passing_score?: number;
+  max_attempts?: number;
+  time_limit_minutes?: number;
+  randomize_questions?: boolean;
+  show_correct_answers?: boolean;
   created_at: string;
+  updated_at: string;
+  lessons?: {
+    course_id: string;
+  };
 }
 
 export interface QuizQuestion {
