@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { CourseCreateForm } from "@/components/forms/course-create-form";
+import { CourseWizard } from "@/components/forms/course-wizard/CourseWizard";
 
 export default async function CreateCoursePage() {
   const supabase = await createServerClient();
@@ -28,20 +27,8 @@ export default async function CreateCoursePage() {
   }
   
   return (
-    <div className="min-h-screen py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card className="p-6">
-          <CardHeader>
-            <CardTitle className="text-3xl mb-2">Create New Course</CardTitle>
-            <CardDescription>
-              Fill in the basic information for your new course. You can edit these details later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CourseCreateForm instructorId={user.id} />
-          </CardContent>
-        </Card>
-      </div>
+    <div className="min-h-screen py-4 md:py-8">
+      <CourseWizard instructorId={user.id} />
     </div>
   );
 }

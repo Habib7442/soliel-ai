@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import ReactMarkdown from "react-markdown";
 
 interface CourseManagePageProps {
   params: Promise<{
@@ -45,6 +46,27 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
     console.error('Error fetching course:', error);
     redirect("/instructor-dashboard");
   }
+  
+  // Fetch lesson count
+  const { count: lessonCount } = await supabase
+    .from('lessons')
+    .select('*', { count: 'exact', head: true })
+    .eq('course_id', courseId);
+  
+  // Fetch student count
+  const { count: studentCount } = await supabase
+    .from('course_purchases')
+    .select('*', { count: 'exact', head: true })
+    .eq('course_id', courseId);
+  
+  // Fetch average rating
+  const { data: courseStats } = await supabase
+    .from('course_stats')
+    .select('average_rating, total_reviews')
+    .eq('course_id', courseId)
+    .single();
+  
+  const averageRating = courseStats?.average_rating || 0;
   
   return (
     <div className="min-h-screen md:py-12">
@@ -90,7 +112,9 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                 <CardContent className="space-y-4">
                   <div>
                     <h3 className="font-semibold mb-1">Description</h3>
-                    <p className="text-muted-foreground">{course.description}</p>
+                    <div className="text-muted-foreground prose prose-sm max-w-none">
+                      <ReactMarkdown>{course.description || ""}</ReactMarkdown>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
@@ -114,11 +138,6 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                     <Button asChild className="w-full sm:w-auto">
                       <Link href={`/instructor/courses/${courseId}/edit`}>Edit Course</Link>
                     </Button>
-                    {!course.is_published && (
-                      <Button variant="outline" className="w-full sm:w-auto">
-                        Submit for Review
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -129,7 +148,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                     <CardTitle className="text-lg">Total Lessons</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">0</p>
+                    <p className="text-3xl font-bold">{lessonCount || 0}</p>
                   </CardContent>
                 </Card>
                 <Card>
@@ -137,7 +156,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                     <CardTitle className="text-lg">Total Students</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">0</p>
+                    <p className="text-3xl font-bold">{studentCount || 0}</p>
                   </CardContent>
                 </Card>
                 <Card>
@@ -145,7 +164,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                     <CardTitle className="text-lg">Average Rating</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">0.0</p>
+                    <p className="text-3xl font-bold">{averageRating.toFixed(1)}</p>
                   </CardContent>
                 </Card>
               </div>

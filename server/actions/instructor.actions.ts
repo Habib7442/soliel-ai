@@ -15,6 +15,17 @@ export const createCourse = async (courseData: {
   instructor_id: string;
   category_name?: string;
   thumbnail_url?: string;
+  prerequisites?: string;
+  estimated_duration_hours?: number;
+  intro_video_url?: string;
+  learning_outcomes?: string[];
+  target_audience?: string;
+  requirements?: string;
+  allow_in_bundles?: boolean;
+  bundle_discount_percent?: number;
+  enable_qna?: boolean;
+  enable_reviews?: boolean;
+  enable_certificates?: boolean;
 }, categoryId?: number) => {
   try {
     const supabase = await createServerClient();
@@ -117,6 +128,18 @@ export const updateCourse = async (courseId: string, courseData: Partial<{
   currency: string;
   status: string;
   is_published: boolean;
+  prerequisites: string;
+  estimated_duration_hours: number;
+  intro_video_url: string;
+  learning_outcomes: string[];
+  target_audience: string;
+  requirements: string;
+  allow_in_bundles: boolean;
+  bundle_discount_percent: number;
+  enable_qna: boolean;
+  enable_reviews: boolean;
+  enable_certificates: boolean;
+  thumbnail_url: string;
 }>) => {
   try {
     const supabase = await createServerClient();
@@ -311,11 +334,14 @@ export const getStudentEnrollments = async (instructorId: string) => {
 
 export const addLesson = async (lessonData: {
   course_id: string;
+  section_id?: string;
   title: string;
   content_md?: string;
   video_url?: string;
   downloadable?: boolean;
   order_index?: number;
+  lesson_type?: string;
+  is_preview?: boolean;
 }) => {
   try {
     const supabase = await createServerClient();
@@ -1229,5 +1255,118 @@ export const getInstructorAnalytics = async (instructorId: string) => {
   } catch (error) {
     console.error('Error in getInstructorAnalytics:', error);
     return { success: false, error: 'Failed to fetch analytics. Please try again.' };
+  }
+};
+
+// =========================================================
+// SECTION MANAGEMENT
+// =========================================================
+
+export const createSection = async (sectionData: {
+  course_id: string;
+  title: string;
+  description?: string;
+  order_index?: number;
+}) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('course_sections')
+      .insert(sectionData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating section:', error);
+      return { success: false, error: `Failed to create section: ${error.message}` };
+    }
+
+    revalidatePath(`/instructor/courses/${sectionData.course_id}/curriculum`);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in createSection:', error);
+    return { success: false, error: 'Failed to create section. Please try again.' };
+  }
+};
+
+export const getCourseSections = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('course_sections')
+      .select(`
+        *,
+        lessons (
+          id,
+          title,
+          lesson_type,
+          is_preview,
+          order_index,
+          video_url,
+          content_md
+        )
+      `)
+      .eq('course_id', courseId)
+      .order('order_index', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching sections:', error);
+      return { success: false, error: `Failed to fetch sections: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourseSections:', error);
+    return { success: false, error: 'Failed to fetch sections. Please try again.' };
+  }
+};
+
+export const updateSection = async (sectionId: string, updates: Partial<{
+  title: string;
+  description: string;
+  order_index: number;
+}>) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('course_sections')
+      .update(updates)
+      .eq('id', sectionId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating section:', error);
+      return { success: false, error: `Failed to update section: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in updateSection:', error);
+    return { success: false, error: 'Failed to update section. Please try again.' };
+  }
+};
+
+export const deleteSection = async (sectionId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { error } = await supabase
+      .from('course_sections')
+      .delete()
+      .eq('id', sectionId);
+
+    if (error) {
+      console.error('Error deleting section:', error);
+      return { success: false, error: `Failed to delete section: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteSection:', error);
+    return { success: false, error: 'Failed to delete section. Please try again.' };
   }
 };
