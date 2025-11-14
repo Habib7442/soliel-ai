@@ -4,7 +4,7 @@ import { UserRole } from "@/types/enums";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CourseEditForm } from "@/components/forms/course-edit-form";
+import { CourseEditWizard } from "@/components/forms/course-edit-wizard/CourseEditWizard";
 
 interface CourseEditPageProps {
   params: Promise<{
@@ -47,7 +47,7 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
   
   return (
     <div className="min-h-screen py-6 md:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 md:mb-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex-1 min-w-0">
@@ -62,15 +62,7 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
           </div>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Course Information</CardTitle>
-            <CardDescription>Update the basic details of your course</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CourseEditForm course={course} />
-          </CardContent>
-        </Card>
+        <CourseEditWizard course={course} instructorId={user.id} />
       </div>
     </div>
   );

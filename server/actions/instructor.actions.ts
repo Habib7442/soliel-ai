@@ -1305,7 +1305,8 @@ export const getCourseSections = async (courseId: string) => {
           is_preview,
           order_index,
           video_url,
-          content_md
+          content_md,
+          downloadable
         )
       `)
       .eq('course_id', courseId)

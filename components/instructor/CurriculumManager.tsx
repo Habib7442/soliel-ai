@@ -22,131 +22,247 @@ import { toast } from "sonner";
 import { 
   addLesson, 
   updateLesson, 
-  deleteLesson, 
-  getCourseLessons 
+  deleteLesson,
+  createSection,
+  getCourseSections,
+  updateSection,
+  deleteSection
 } from "@/server/actions/instructor.actions";
-import { useInstructorStore } from "@/hooks/useInstructorStore";
-import { PlusCircle, Edit, Trash2, GripVertical, Video, FileText, Download } from "lucide-react";
+import { PlusCircle, Edit, Trash2, GripVertical, Video, FileText, Download, ChevronDown, ChevronRight, FileQuestion, Clipboard, Code } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 interface CurriculumManagerProps {
   courseId: string;
 }
 
+interface Lesson {
+  id: string;
+  title: string;
+  content_md?: string;
+  video_url?: string;
+  downloadable: boolean;
+  order_index: number;
+  lesson_type?: "video" | "text" | "pdf" | "quiz" | "assignment" | "lab";
+  is_preview?: boolean;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  description?: string;
+  order_index: number;
+  lessons: Lesson[];
+}
+
 export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
   const router = useRouter();
-  const { lessons, setLessons, setLessonsLoading, lessonsLoading } = useInstructorStore();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingLesson, setEditingLesson] = useState<{
-    id: string;
-    title: string;
-    content_md?: string;
-    video_url?: string;
-    downloadable: boolean;
-    order_index: number;
-  } | null>(null);
-  const [formData, setFormData] = useState({
+  const [sections, setSections] = useState<Section[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  
+  // Section Dialog State
+  const [isSectionDialogOpen, setIsSectionDialogOpen] = useState(false);
+  const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const [sectionFormData, setSectionFormData] = useState({
+    title: "",
+    description: "",
+  });
+
+  // Lesson Dialog State
+  const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
+  const [lessonFormData, setLessonFormData] = useState({
     title: "",
     content_md: "",
     video_url: "",
     downloadable: false,
-    order_index: 0,
+    lesson_type: "video" as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab",
+    is_preview: false,
   });
 
-  // Fetch lessons on mount
+  // Fetch sections with lessons on mount
   useEffect(() => {
-    const fetchLessons = async () => {
-      setLessonsLoading(true);
-      const result = await getCourseLessons(courseId);
-      if (result.success && result.data) {
-        setLessons(result.data);
-      }
-      setLessonsLoading(false);
-    };
-
-    fetchLessons();
+    fetchSections();
   }, [courseId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+  const fetchSections = async () => {
+    setLoading(true);
+    try {
+      const result = await getCourseSections(courseId);
+      if (result.success && result.data) {
+        setSections(result.data);
+        // Auto-expand all sections
+        setExpandedSections(new Set(result.data.map((s: Section) => s.id)));
+      }
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+      toast.error("Failed to load curriculum");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
+  };
+
+  // Section Handlers
+  const handleSectionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
+    if (!sectionFormData.title.trim()) {
+      toast.error("Section title is required");
+      return;
+    }
+
+    try {
+      if (editingSection) {
+        const result = await updateSection(editingSection.id, {
+          title: sectionFormData.title,
+          description: sectionFormData.description || undefined,
+        });
+        if (result.success) {
+          toast.success("Section updated successfully!");
+          fetchSections();
+        } else {
+          toast.error(result.error || "Failed to update section");
+        }
+      } else {
+        const result = await createSection({
+          course_id: courseId,
+          title: sectionFormData.title,
+          description: sectionFormData.description || undefined,
+          order_index: sections.length,
+        });
+
+        if (result.success) {
+          toast.success("Section created successfully!");
+          fetchSections();
+        } else {
+          toast.error(result.error || "Failed to create section");
+        }
+      }
+
+      resetSectionForm();
+      setIsSectionDialogOpen(false);
+    } catch (error) {
+      console.error("Error submitting section:", error);
+      toast.error("An error occurred. Please try again.");
+    }
+  };
+
+  const handleSectionEdit = (section: Section) => {
+    setEditingSection(section);
+    setSectionFormData({
+      title: section.title,
+      description: section.description || "",
+    });
+    setIsSectionDialogOpen(true);
+  };
+
+  const handleSectionDelete = async (sectionId: string) => {
+    if (!confirm("Are you sure you want to delete this section? All lessons in this section will also be deleted.")) {
+      return;
+    }
+
+    const result = await deleteSection(sectionId);
+    if (result.success) {
+      toast.success("Section deleted successfully!");
+      fetchSections();
+    } else {
+      toast.error(result.error || "Failed to delete section");
+    }
+  };
+
+  const resetSectionForm = () => {
+    setEditingSection(null);
+    setSectionFormData({
+      title: "",
+      description: "",
+    });
+  };
+
+  // Lesson Handlers
+  const openLessonDialog = (sectionId: string, lesson?: Lesson) => {
+    setCurrentSectionId(sectionId);
+    if (lesson) {
+      setEditingLesson(lesson);
+      setLessonFormData({
+        title: lesson.title,
+        content_md: lesson.content_md || "",
+        video_url: lesson.video_url || "",
+        downloadable: lesson.downloadable || false,
+        lesson_type: (lesson.lesson_type as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab") || "video",
+        is_preview: lesson.is_preview || false,
+      });
+    }
+    setIsLessonDialogOpen(true);
+  };
+
+  const handleLessonSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!lessonFormData.title.trim()) {
       toast.error("Lesson title is required");
+      return;
+    }
+
+    if (!currentSectionId) {
+      toast.error("Section ID is missing");
       return;
     }
 
     try {
       if (editingLesson) {
-        // Update existing lesson
-        const result = await updateLesson(editingLesson.id, formData);
+        const result = await updateLesson(editingLesson.id, lessonFormData);
         if (result.success) {
           toast.success("Lesson updated successfully!");
-          const updatedLessons = await getCourseLessons(courseId);
-          if (updatedLessons.success && updatedLessons.data) {
-            setLessons(updatedLessons.data);
-          }
+          fetchSections();
         } else {
           toast.error(result.error || "Failed to update lesson");
         }
       } else {
-        // Create new lesson
+        const section = sections.find(s => s.id === currentSectionId);
         const result = await addLesson({
           course_id: courseId,
-          title: formData.title,
-          content_md: formData.content_md,
-          video_url: formData.video_url,
-          downloadable: formData.downloadable,
-          order_index: lessons.length,
+          section_id: currentSectionId,
+          title: lessonFormData.title,
+          content_md: lessonFormData.content_md,
+          video_url: lessonFormData.video_url,
+          downloadable: lessonFormData.downloadable,
+          lesson_type: lessonFormData.lesson_type,
+          is_preview: lessonFormData.is_preview,
+          order_index: section?.lessons.length || 0,
         });
 
         if (result.success) {
           toast.success("Lesson created successfully!");
-          const updatedLessons = await getCourseLessons(courseId);
-          if (updatedLessons.success && updatedLessons.data) {
-            setLessons(updatedLessons.data);
-          }
+          fetchSections();
         } else {
           toast.error(result.error || "Failed to create lesson");
         }
       }
 
-      resetForm();
-      setIsDialogOpen(false);
+      resetLessonForm();
+      setIsLessonDialogOpen(false);
     } catch (error) {
       console.error("Error submitting lesson:", error);
       toast.error("An error occurred. Please try again.");
     }
   };
 
-  const handleEdit = (lesson: {
-    id: string;
-    title: string;
-    content_md?: string;
-    video_url?: string;
-    downloadable: boolean;
-    order_index: number;
-  }) => {
-    setEditingLesson(lesson);
-    setFormData({
-      title: lesson.title,
-      content_md: lesson.content_md || "",
-      video_url: lesson.video_url || "",
-      downloadable: lesson.downloadable || false,
-      order_index: lesson.order_index,
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = async (lessonId: string) => {
+  const handleLessonDelete = async (lessonId: string) => {
     if (!confirm("Are you sure you want to delete this lesson?")) {
       return;
     }
@@ -154,23 +270,22 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
     const result = await deleteLesson(lessonId);
     if (result.success) {
       toast.success("Lesson deleted successfully!");
-      const updatedLessons = await getCourseLessons(courseId);
-      if (updatedLessons.success && updatedLessons.data) {
-        setLessons(updatedLessons.data);
-      }
+      fetchSections();
     } else {
       toast.error(result.error || "Failed to delete lesson");
     }
   };
 
-  const resetForm = () => {
+  const resetLessonForm = () => {
     setEditingLesson(null);
-    setFormData({
+    setCurrentSectionId(null);
+    setLessonFormData({
       title: "",
       content_md: "",
       video_url: "",
       downloadable: false,
-      order_index: 0,
+      lesson_type: "video" as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab",
+      is_preview: false,
     });
   };
 
@@ -182,79 +297,45 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
           <h2 className="text-2xl font-bold">Course Curriculum</h2>
           <p className="text-muted-foreground">Manage your course lessons and content</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) resetForm();
+        <Dialog open={isSectionDialogOpen} onOpenChange={(open) => {
+          setIsSectionDialogOpen(open);
+          if (!open) resetSectionForm();
         }}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Lesson
+              Add Section
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editingLesson ? "Edit Lesson" : "Add New Lesson"}</DialogTitle>
+              <DialogTitle>{editingSection ? "Edit Section" : "Add New Section"}</DialogTitle>
               <DialogDescription>
-                {editingLesson ? "Update lesson details" : "Create a new lesson for your course"}
+                {editingSection ? "Update section details" : "Create a new section for your course"}
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="title">Lesson Title *</Label>
+            <form onSubmit={handleSectionSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="section-title">Section Title *</Label>
                 <Input
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder="Enter lesson title"
+                  id="section-title"
+                  value={sectionFormData.title}
+                  onChange={(e) => setSectionFormData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g., Introduction to React"
                   required
                 />
               </div>
 
-              <div>
-                <Label htmlFor="video_url">Video URL</Label>
-                <Input
-                  id="video_url"
-                  name="video_url"
-                  value={formData.video_url}
-                  onChange={handleChange}
-                  placeholder="https://youtube.com/watch?v=..."
-                  type="url"
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Paste a YouTube, Vimeo, or other video URL
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="content_md">Lesson Content (Markdown)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="section-description">Description</Label>
                 <Textarea
-                  id="content_md"
-                  name="content_md"
-                  value={formData.content_md}
-                  onChange={handleChange}
-                  placeholder="Enter lesson content in markdown format..."
-                  rows={8}
+                  id="section-description"
+                  value={sectionFormData.description}
+                  onChange={(e) => setSectionFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Brief description of what this section covers"
+                  rows={3}
                 />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Use markdown formatting for rich text content
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="downloadable"
-                  name="downloadable"
-                  checked={formData.downloadable}
-                  onChange={handleChange}
-                  className="rounded"
-                />
-                <Label htmlFor="downloadable" className="cursor-pointer">
-                  Allow students to download this lesson
-                </Label>
               </div>
 
               <DialogFooter>
@@ -262,14 +343,14 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    setIsDialogOpen(false);
-                    resetForm();
+                    setIsSectionDialogOpen(false);
+                    resetSectionForm();
                   }}
                 >
                   Cancel
                 </Button>
                 <Button type="submit">
-                  {editingLesson ? "Update Lesson" : "Create Lesson"}
+                  {editingSection ? "Update Section" : "Create Section"}
                 </Button>
               </DialogFooter>
             </form>
@@ -277,83 +358,325 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
         </Dialog>
       </div>
 
-      {/* Lessons List */}
-      {lessonsLoading ? (
+      {/* Lesson Dialog */}
+      <Dialog open={isLessonDialogOpen} onOpenChange={(open) => {
+        setIsLessonDialogOpen(open);
+        if (!open) resetLessonForm();
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingLesson ? "Edit Lesson" : "Add New Lesson"}</DialogTitle>
+            <DialogDescription>
+              {editingLesson ? "Update lesson details" : "Create a new lesson for this section"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleLessonSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="lesson-title">Lesson Title *</Label>
+              <Input
+                id="lesson-title"
+                value={lessonFormData.title}
+                onChange={(e) => setLessonFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter lesson title"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="lesson-type">Lesson Type *</Label>
+              <select
+                id="lesson-type"
+                value={lessonFormData.lesson_type}
+                onChange={(e) => setLessonFormData(prev => ({ 
+                  ...prev, 
+                  lesson_type: e.target.value as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab"
+                }))}
+                className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="video">Video Lesson</option>
+                <option value="text">Text/Article</option>
+                <option value="pdf">PDF Document</option>
+                <option value="quiz">Quiz</option>
+                <option value="assignment">Assignment</option>
+                <option value="lab">Coding Lab</option>
+              </select>
+            </div>
+
+            {(lessonFormData.lesson_type === "video") && (
+              <div className="space-y-2">
+                <Label htmlFor="video_url">Video URL</Label>
+                <Input
+                  id="video_url"
+                  value={lessonFormData.video_url}
+                  onChange={(e) => setLessonFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                  placeholder="https://youtube.com/watch?v=..."
+                  type="url"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Paste a YouTube, Vimeo, or other video URL
+                </p>
+              </div>
+            )}
+
+            {(lessonFormData.lesson_type === "pdf") && (
+              <div className="space-y-2">
+                <Label htmlFor="pdf_url">PDF URL</Label>
+                <Input
+                  id="pdf_url"
+                  value={lessonFormData.video_url}
+                  onChange={(e) => setLessonFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                  placeholder="https://... or upload PDF"
+                  type="url"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Upload or link to a PDF document
+                </p>
+              </div>
+            )}
+
+            {(lessonFormData.lesson_type === "text" || lessonFormData.lesson_type === "assignment" || lessonFormData.lesson_type === "lab") && (
+              <div className="space-y-2">
+                <Label htmlFor="content_md">
+                  {lessonFormData.lesson_type === "assignment" ? "Assignment Instructions" : 
+                   lessonFormData.lesson_type === "lab" ? "Lab Instructions" : 
+                   "Lesson Content"}
+                </Label>
+                <MDEditor
+                  value={lessonFormData.content_md}
+                  onChange={(value) => setLessonFormData(prev => ({ ...prev, content_md: value || "" }))}
+                  preview="edit"
+                  height={300}
+                />
+                <p className="text-sm text-muted-foreground">
+                  {lessonFormData.lesson_type === "assignment" ? "Describe what students need to do" :
+                   lessonFormData.lesson_type === "lab" ? "Provide lab setup and instructions" :
+                   "Use markdown formatting for rich text content"}
+                </p>
+              </div>
+            )}
+
+            {lessonFormData.lesson_type === "quiz" && (
+              <Alert>
+                <FileQuestion className="h-4 w-4" />
+                <AlertDescription>
+                  Quiz questions can be added after creating the lesson. Use the Quiz Manager in the course details page.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="is_preview"
+                checked={lessonFormData.is_preview}
+                onChange={(e) => setLessonFormData(prev => ({ ...prev, is_preview: e.target.checked }))}
+                className="rounded"
+              />
+              <Label htmlFor="is_preview" className="cursor-pointer">
+                Free preview lesson
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="downloadable"
+                checked={lessonFormData.downloadable}
+                onChange={(e) => setLessonFormData(prev => ({ ...prev, downloadable: e.target.checked }))}
+                className="rounded"
+              />
+              <Label htmlFor="downloadable" className="cursor-pointer">
+                Allow students to download this lesson
+              </Label>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsLessonDialogOpen(false);
+                  resetLessonForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingLesson ? "Update Lesson" : "Create Lesson"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sections List */}
+      {loading ? (
         <Card>
           <CardContent className="py-12">
-            <p className="text-center text-muted-foreground">Loading lessons...</p>
+            <p className="text-center text-muted-foreground">Loading curriculum...</p>
           </CardContent>
         </Card>
-      ) : lessons.length === 0 ? (
+      ) : sections.length === 0 ? (
         <Alert>
           <AlertDescription>
-            No lessons yet. Click &quot;Add Lesson&quot; to create your first lesson.
+            No sections yet. Click &quot;Add Section&quot; to create your first section.
           </AlertDescription>
         </Alert>
       ) : (
         <div className="space-y-4">
-          {lessons.map((lesson, index) => (
-            <Card key={lesson.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <GripVertical className="h-5 w-5" />
-                      <span className="font-semibold">{index + 1}</span>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2">{lesson.title}</h3>
-                      
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {lesson.video_url && (
-                          <Badge variant="secondary">
-                            <Video className="mr-1 h-3 w-3" />
-                            Video
-                          </Badge>
+          {sections.map((section, sectionIndex) => {
+            const isExpanded = expandedSections.has(section.id);
+            
+            return (
+              <Card key={section.id} className="overflow-hidden">
+                <div className="p-4 bg-muted/50 border-b">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <button
+                        onClick={() => toggleSection(section.id)}
+                        className="mt-1 hover:bg-background rounded p-1"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="h-5 w-5" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5" />
                         )}
-                        {lesson.content_md && (
-                          <Badge variant="secondary">
-                            <FileText className="mr-1 h-3 w-3" />
-                            Content
-                          </Badge>
+                      </button>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-1">
+                          {String(sectionIndex + 1).padStart(2, '0')} — {section.title}
+                        </h3>
+                        {section.description && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {section.description}
+                          </p>
                         )}
-                        {lesson.downloadable && (
-                          <Badge variant="secondary">
-                            <Download className="mr-1 h-3 w-3" />
-                            Downloadable
-                          </Badge>
-                        )}
-                      </div>
-
-                      {lesson.content_md && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {lesson.content_md.substring(0, 150)}...
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Lessons ({section.lessons?.length || 0})
                         </p>
-                      )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(lesson)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(lesson.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openLessonDialog(section.id)}
+                      >
+                        Manage Section
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSectionEdit(section)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleSectionDelete(section.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                {isExpanded && (
+                  <CardContent className="p-4">
+                    {section.lessons && section.lessons.length > 0 ? (
+                      <div className="space-y-3">
+                        {section.lessons.map((lesson, lessonIndex) => {
+                          const getLessonIcon = () => {
+                            switch (lesson.lesson_type) {
+                              case "video": return <Video className="mr-1 h-3 w-3" />;
+                              case "text": return <FileText className="mr-1 h-3 w-3" />;
+                              case "pdf": return <FileText className="mr-1 h-3 w-3" />;
+                              case "quiz": return <FileQuestion className="mr-1 h-3 w-3" />;
+                              case "assignment": return <Clipboard className="mr-1 h-3 w-3" />;
+                              case "lab": return <Code className="mr-1 h-3 w-3" />;
+                              default: return <FileText className="mr-1 h-3 w-3" />;
+                            }
+                          };
+
+                          const getLessonTypeLabel = () => {
+                            switch (lesson.lesson_type) {
+                              case "video": return "Video";
+                              case "text": return "Text";
+                              case "pdf": return "Pdf";
+                              case "quiz": return "Quiz";
+                              case "assignment": return "Assignment";
+                              case "lab": return "Lab";
+                              default: return "Lesson";
+                            }
+                          };
+
+                          return (
+                            <div key={lesson.id} className="flex items-start gap-4 p-3 bg-muted/30 rounded-lg">
+                              <div className="text-muted-foreground font-semibold min-w-[30px]">
+                                {lessonIndex + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium mb-1">{lesson.title}</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  <Badge variant="secondary">
+                                    {getLessonIcon()}
+                                    {getLessonTypeLabel()}
+                                  </Badge>
+                                  {lesson.is_preview && (
+                                    <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300">
+                                      Preview
+                                    </Badge>
+                                  )}
+                                  {lesson.downloadable && (
+                                    <Badge variant="secondary">
+                                      <Download className="mr-1 h-3 w-3" />
+                                      Downloadable
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openLessonDialog(section.id, lesson)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleLessonDelete(lesson.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <p className="text-muted-foreground text-sm mb-3">
+                          No lessons in this section yet.
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openLessonDialog(section.id)}
+                        >
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Add First Lesson
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                )}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
