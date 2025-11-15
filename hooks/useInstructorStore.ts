@@ -113,7 +113,10 @@ export interface CourseFaq {
   course_id: string;
   question: string;
   answer_md: string;
+  category?: string;
+  order_index?: number;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Earnings {

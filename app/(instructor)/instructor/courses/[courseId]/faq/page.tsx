@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { FaqManager } from "@/components/instructor/FaqManager";
 import { ChevronLeft } from "lucide-react";
 
@@ -55,7 +56,29 @@ export default async function FaqPage({ params }: FaqPageProps) {
           </Button>
         </div>
 
-        <FaqManager courseId={courseId} />
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>FAQ Management Tips</CardTitle>
+              <CardDescription>Best practices for organizing your course FAQs</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-sm">
+                • Use categories to group related questions (e.g., &quot;Enrollment&quot;, &quot;Technical&quot;, &quot;Content&quot;)
+              </p>
+              <p className="text-sm">
+                • Write clear, concise questions that students commonly ask
+              </p>
+              <p className="text-sm">
+                • Use Markdown formatting in answers for better readability
+              </p>
+              <p className="text-sm">
+                • Regularly review and update FAQs based on new student questions
+              </p>
+            </CardContent>
+          </Card>
+          <FaqManager courseId={courseId} />
+        </div>
       </div>
     </div>
   );

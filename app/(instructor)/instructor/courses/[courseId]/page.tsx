@@ -336,7 +336,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg md:text-xl">Course FAQs</CardTitle>
-                    <CardDescription className="text-sm">Frequently asked questions for this course</CardDescription>
+                    <CardDescription className="text-sm">Frequently asked questions for this course. Organize by category for better student experience.</CardDescription>
                   </div>
                   <Button asChild size="sm" className="w-full md:w-auto text-xs md:text-sm">
                     <Link href={`/instructor/courses/${courseId}/faq`}>Manage FAQs</Link>

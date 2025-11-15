@@ -698,7 +698,8 @@ export const getCourseFaqs = async (courseId: string) => {
       .from('course_faqs')
       .select('*')
       .eq('course_id', courseId)
-      .order('created_at', { ascending: false });
+      .order('category', { ascending: true })
+      .order('order_index', { ascending: true });
 
     if (error) {
       console.error('Error fetching course FAQs:', error);
@@ -717,17 +718,26 @@ export const createCourseFaq = async (faqData: {
   course_id: string;
   question: string;
   answer_md: string;
+  category?: string;
+  order_index?: number;
 }) => {
   try {
     const supabase = await createServerClient();
     
     if (!faqData.course_id || !faqData.question?.trim() || !faqData.answer_md?.trim()) {
-      return { success: false, error: "All fields are required" };
+      return { success: false, error: "Question and answer are required" };
     }
+    
+    // Set default order_index if not provided
+    const faqDataWithOrder = {
+      ...faqData,
+      order_index: faqData.order_index ?? 0,
+      updated_at: new Date().toISOString()
+    };
     
     const { data, error } = await supabase
       .from('course_faqs')
-      .insert(faqData)
+      .insert(faqDataWithOrder)
       .select()
       .single();
 
@@ -748,13 +758,20 @@ export const createCourseFaq = async (faqData: {
 export const updateCourseFaq = async (faqId: string, updates: {
   question?: string;
   answer_md?: string;
+  category?: string;
+  order_index?: number;
 }) => {
   try {
     const supabase = await createServerClient();
     
+    const updatesWithTimestamp = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+    
     const { data, error } = await supabase
       .from('course_faqs')
-      .update(updates)
+      .update(updatesWithTimestamp)
       .eq('id', faqId)
       .select()
       .single();
