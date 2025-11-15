@@ -1200,8 +1200,11 @@ export const getCourseAssignments = async (courseId: string) => {
     
     const { data, error } = await supabase
       .from('assignments')
-      .select('*')
-      .eq('course_id', courseId)
+      .select(`
+        *,
+        lessons (course_id, title)
+      `)
+      .eq('lessons.course_id', courseId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1209,7 +1212,14 @@ export const getCourseAssignments = async (courseId: string) => {
       return { success: false, error: `Failed to fetch assignments: ${error.message}` };
     }
 
-    return { success: true, data };
+    // Flatten the data structure for the UI
+    const flattenedData = data.map(assignment => ({
+      ...assignment,
+      course_id: assignment.lessons?.course_id,
+      lesson_title: assignment.lessons?.title
+    }));
+
+    return { success: true, data: flattenedData };
   } catch (error) {
     console.error('Error in getCourseAssignments:', error);
     return { success: false, error: 'Failed to fetch assignments. Please try again.' };
@@ -1219,16 +1229,25 @@ export const getCourseAssignments = async (courseId: string) => {
 // Update assignment
 export const updateAssignment = async (assignmentId: string, updates: Partial<{
   title: string;
-  description: string;
-  type: string;
-  due_at: string;
+  instructions: string;
+  due_date: string;
 }>) => {
   try {
     const supabase = await createServerClient();
     
+    // Map the field names to match the database schema
+    const dbUpdates: Partial<{
+      title: string;
+      instructions: string;
+      due_date: string;
+    }> = {};
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.instructions !== undefined) dbUpdates.instructions = updates.instructions;
+    if (updates.due_date !== undefined) dbUpdates.due_date = updates.due_date;
+
     const { data, error } = await supabase
       .from('assignments')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', assignmentId)
       .select()
       .single();

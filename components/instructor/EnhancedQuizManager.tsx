@@ -48,7 +48,8 @@ interface QuizQuestion {
   order_index: number;
 }
 
-interface Quiz {
+// Define types that match what's actually returned from the server
+interface QuizFromServer {
   id: string;
   lesson_id: string;
   title: string;
@@ -62,7 +63,10 @@ interface Quiz {
   lessons?: {
     course_id: string;
   };
+  questions?: QuizQuestion[];
 }
+
+type Quiz = QuizFromServer;
 
 export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
   const { quizzes, setQuizzes, setQuizzesLoading, quizzesLoading } = useInstructorStore();
@@ -72,16 +76,16 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [quizFormData, setQuizFormData] = useState<{
     title: string;
-    passing_score: number;
-    max_attempts: number;
-    time_limit_minutes: number;
+    passing_score: string;
+    max_attempts: string;
+    time_limit_minutes: string;
     randomize_questions: boolean;
     show_correct_answers: boolean;
   }>({
     title: "",
-    passing_score: 70,
-    max_attempts: 0, // 0 means unlimited
-    time_limit_minutes: 0, // 0 means no time limit
+    passing_score: "70",
+    max_attempts: "0", // 0 means unlimited
+    time_limit_minutes: "0", // 0 means no time limit
     randomize_questions: false,
     show_correct_answers: true,
   });
@@ -129,7 +133,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
     };
 
     fetchQuizzes();
-  }, [courseId]);
+  }, [courseId, setQuizzes, setQuizzesLoading]);
 
   const handleQuizSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,9 +165,9 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
       const quizResult = await createQuiz({
         lesson_id: lessonResult.data.id,
         title: quizFormData.title,
-        passing_score: quizFormData.passing_score,
-        max_attempts: quizFormData.max_attempts,
-        time_limit_minutes: quizFormData.time_limit_minutes,
+        passing_score: quizFormData.passing_score ? parseInt(quizFormData.passing_score) : undefined,
+        max_attempts: quizFormData.max_attempts ? parseInt(quizFormData.max_attempts) : undefined,
+        time_limit_minutes: quizFormData.time_limit_minutes ? parseInt(quizFormData.time_limit_minutes) : undefined,
         randomize_questions: quizFormData.randomize_questions,
         show_correct_answers: quizFormData.show_correct_answers,
       });
@@ -220,9 +224,9 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
       // Update quiz settings
       const quizResult = await updateQuiz(selectedQuiz.id, {
         title: quizFormData.title,
-        passing_score: quizFormData.passing_score,
-        max_attempts: quizFormData.max_attempts,
-        time_limit_minutes: quizFormData.time_limit_minutes,
+        passing_score: quizFormData.passing_score ? parseInt(quizFormData.passing_score) : undefined,
+        max_attempts: quizFormData.max_attempts ? parseInt(quizFormData.max_attempts) : undefined,
+        time_limit_minutes: quizFormData.time_limit_minutes ? parseInt(quizFormData.time_limit_minutes) : undefined,
         randomize_questions: quizFormData.randomize_questions,
         show_correct_answers: quizFormData.show_correct_answers,
       });
@@ -332,11 +336,11 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
     setSelectedQuiz(quiz);
     setQuizFormData({
       title: quiz.title,
-      passing_score: quiz.passing_score || 70,
-      max_attempts: quiz.max_attempts || 0,
-      time_limit_minutes: quiz.time_limit_minutes || 0,
+      passing_score: quiz.passing_score !== undefined ? quiz.passing_score.toString() : "70",
+      max_attempts: quiz.max_attempts !== undefined ? quiz.max_attempts.toString() : "0",
+      time_limit_minutes: quiz.time_limit_minutes !== undefined ? quiz.time_limit_minutes.toString() : "0",
       randomize_questions: quiz.randomize_questions || false,
-      show_correct_answers: quiz.show_correct_answers || true,
+      show_correct_answers: quiz.show_correct_answers !== undefined ? quiz.show_correct_answers : true,
     });
     setIsSettingsDialogOpen(true);
   };
@@ -345,15 +349,6 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
     setEditingQuizId(quizId);
     resetCurrentQuestion(); // Reset to empty question for adding new
     setEditingSingleQuestion(false); // Not editing a single question, but adding a new one
-    setIsQuestionDialogOpen(true);
-  };
-
-  const openEditQuestions = async (quizId: string) => {
-    setEditingQuizId(quizId);
-    const quizResult = await getQuizWithQuestions(quizId);
-    if (quizResult.success && quizResult.data) {
-      setQuestions(quizResult.data.questions || []);
-    }
     setIsQuestionDialogOpen(true);
   };
 
@@ -442,9 +437,9 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
   const resetQuizForm = () => {
     setQuizFormData({ 
       title: "",
-      passing_score: 70,
-      max_attempts: 0,
-      time_limit_minutes: 0,
+      passing_score: "70",
+      max_attempts: "0",
+      time_limit_minutes: "0",
       randomize_questions: false,
       show_correct_answers: true,
     });
@@ -514,12 +509,12 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={formTouched && quizFormData.passing_score === 0 ? "" : quizFormData.passing_score}
+                      value={quizFormData.passing_score}
                       onChange={(e) => {
                         setFormTouched(true);
                         setQuizFormData({ 
                           ...quizFormData, 
-                          passing_score: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 
+                          passing_score: e.target.value
                         });
                       }}
                       placeholder="70"
@@ -532,12 +527,12 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                       id="max_attempts"
                       type="number"
                       min="0"
-                      value={formTouched && quizFormData.max_attempts === 0 ? "" : quizFormData.max_attempts}
+                      value={quizFormData.max_attempts}
                       onChange={(e) => {
                         setFormTouched(true);
                         setQuizFormData({ 
                           ...quizFormData, 
-                          max_attempts: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 
+                          max_attempts: e.target.value
                         });
                       }}
                       placeholder="Unlimited"
@@ -550,12 +545,12 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                       id="time_limit_minutes"
                       type="number"
                       min="0"
-                      value={formTouched && quizFormData.time_limit_minutes === 0 ? "" : quizFormData.time_limit_minutes}
+                      value={quizFormData.time_limit_minutes}
                       onChange={(e) => {
                         setFormTouched(true);
                         setQuizFormData({ 
                           ...quizFormData, 
-                          time_limit_minutes: e.target.value === "" ? 0 : parseInt(e.target.value) || 0 
+                          time_limit_minutes: e.target.value
                         });
                       }}
                       placeholder="No time limit"
@@ -927,7 +922,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                     min="0"
                     max="100"
                     value={quizFormData.passing_score}
-                    onChange={(e) => setQuizFormData({ ...quizFormData, passing_score: parseInt(e.target.value) || 70 })}
+                    onChange={(e) => setQuizFormData({ ...quizFormData, passing_score: e.target.value })}
                   />
                 </div>
                 
@@ -938,7 +933,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                     type="number"
                     min="0"
                     value={quizFormData.max_attempts}
-                    onChange={(e) => setQuizFormData({ ...quizFormData, max_attempts: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => setQuizFormData({ ...quizFormData, max_attempts: e.target.value })}
                     placeholder="0 for unlimited"
                   />
                 </div>
@@ -950,7 +945,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                     type="number"
                     min="0"
                     value={quizFormData.time_limit_minutes}
-                    onChange={(e) => setQuizFormData({ ...quizFormData, time_limit_minutes: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => setQuizFormData({ ...quizFormData, time_limit_minutes: e.target.value })}
                     placeholder="0 for no limit"
                   />
                 </div>

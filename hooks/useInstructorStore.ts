@@ -64,12 +64,13 @@ export interface QuizOption {
 
 export interface Assignment {
   id: string;
-  course_id: string;
+  lesson_id: string;
   title: string;
-  description?: string;
-  type: 'file_upload' | 'link_submission' | 'text_entry';
-  due_at?: string;
+  instructions: string;
+  due_date?: string;
   created_at: string;
+  course_id?: string;
+  lesson_title?: string;
 }
 
 export interface AssignmentSubmission {
