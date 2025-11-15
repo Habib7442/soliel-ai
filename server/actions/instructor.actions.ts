@@ -894,6 +894,8 @@ export const getQnaThreads = async (courseId: string) => {
         id,
         title,
         created_at,
+        is_resolved,
+        is_pinned,
         profiles (
           id,
           full_name,
@@ -901,6 +903,7 @@ export const getQnaThreads = async (courseId: string) => {
         )
       `)
       .eq('course_id', courseId)
+      .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -926,6 +929,8 @@ export const getQnaMessages = async (threadId: string) => {
         id,
         body_md,
         created_at,
+        upvotes,
+        is_official_answer,
         profiles (
           id,
           full_name,
@@ -976,6 +981,129 @@ export const replyToQnaThread = async (threadId: string, userId: string, message
   } catch (error) {
     console.error('Error in replyToQnaThread:', error);
     return { success: false, error: 'Failed to reply. Please try again.' };
+  }
+};
+
+// Mark Q&A thread as resolved
+export const markQnaThreadAsResolved = async (threadId: string, isResolved: boolean) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('qna_threads')
+      .update({ 
+        is_resolved: isResolved,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', threadId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error marking Q&A thread as resolved:', error);
+      return { success: false, error: `Failed to update thread: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in markQnaThreadAsResolved:', error);
+    return { success: false, error: 'Failed to update thread. Please try again.' };
+  }
+};
+
+// Pin/Unpin Q&A thread
+export const pinQnaThread = async (threadId: string, isPinned: boolean) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('qna_threads')
+      .update({ 
+        is_pinned: isPinned,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', threadId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error pinning Q&A thread:', error);
+      return { success: false, error: `Failed to update thread: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in pinQnaThread:', error);
+    return { success: false, error: 'Failed to update thread. Please try again.' };
+  }
+};
+
+// Upvote Q&A message
+export const upvoteQnaMessage = async (messageId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // First, get the current upvotes count
+    const { data: message, error: fetchError } = await supabase
+      .from('qna_messages')
+      .select('upvotes')
+      .eq('id', messageId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching Q&A message:', fetchError);
+      return { success: false, error: `Failed to fetch message: ${fetchError.message}` };
+    }
+
+    // Update with incremented upvotes
+    const newUpvotes = (message.upvotes || 0) + 1;
+    
+    const { data, error } = await supabase
+      .from('qna_messages')
+      .update({ 
+        upvotes: newUpvotes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', messageId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error upvoting Q&A message:', error);
+      return { success: false, error: `Failed to upvote message: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in upvoteQnaMessage:', error);
+    return { success: false, error: 'Failed to upvote message. Please try again.' };
+  }
+};
+
+// Mark message as official answer
+export const markAsOfficialAnswer = async (messageId: string, isOfficial: boolean) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('qna_messages')
+      .update({ 
+        is_official_answer: isOfficial,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', messageId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error marking message as official answer:', error);
+      return { success: false, error: `Failed to update message: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in markAsOfficialAnswer:', error);
+    return { success: false, error: 'Failed to update message. Please try again.' };
   }
 };
 
@@ -1478,6 +1606,55 @@ export const getCourseStudents = async (courseId: string) => {
   } catch (error) {
     console.error('Error in getCourseStudents:', error);
     return { success: false, error: 'Failed to fetch students. Please try again.' };
+  }
+};
+
+// Get a single course by ID
+export const getCourse = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('courses')
+      .select(`
+        id,
+        title,
+        subtitle,
+        description,
+        level,
+        language,
+        price_cents,
+        currency,
+        status,
+        is_published,
+        instructor_id,
+        created_at,
+        updated_at,
+        prerequisites,
+        estimated_duration_hours,
+        intro_video_url,
+        learning_outcomes,
+        target_audience,
+        requirements,
+        allow_in_bundles,
+        bundle_discount_percent,
+        enable_qna,
+        enable_reviews,
+        enable_certificates,
+        thumbnail_url
+      `)
+      .eq('id', courseId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching course:', error);
+      return { success: false, error: `Failed to fetch course: ${error.message}` };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error in getCourse:', error);
+    return { success: false, error: 'Failed to fetch course. Please try again.' };
   }
 };
 
