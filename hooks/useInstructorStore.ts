@@ -94,8 +94,24 @@ export interface Review {
   rating: number;
   comment?: string;
   status: 'visible' | 'hidden' | 'flagged';
+  instructor_response?: string;
+  responded_at?: string;
   created_at: string;
   student_name?: string;
+  profiles: {
+    id: string;
+    full_name?: string;
+    avatar_url?: string;
+  } | null;
+}
+
+// This type matches what Supabase returns with the join query
+export interface ReviewWithProfilesArray extends Omit<Review, 'profiles'> {
+  profiles: {
+    id: string;
+    full_name?: string;
+    avatar_url?: string;
+  }[] | null;
 }
 
 export interface QnaThread {

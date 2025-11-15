@@ -1,27 +1,39 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { 
   getCourseReviews,
-  updateReviewStatus
+  updateReviewStatus,
+  replyToReview
 } from "@/server/actions/instructor.actions";
 import { useInstructorStore } from "@/hooks/useInstructorStore";
-import { Star, Eye, EyeOff, Flag } from "lucide-react";
+import { Star, Eye, EyeOff, Flag, Send, Filter } from "lucide-react";
 
 interface ReviewsManagerProps {
   courseId: string;
 }
 
+interface ReviewFormData {
+  instructor_response: string;
+}
+
 export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
   const { reviews, setReviews, reviewsLoading, setReviewsLoading } = useInstructorStore();
   const [filterStatus, setFilterStatus] = useState<'all' | 'visible' | 'hidden' | 'flagged'>('all');
+  const [filterRating, setFilterRating] = useState<number | 'all'>('all');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyForm, setReplyForm] = useState<ReviewFormData>({
+    instructor_response: ""
+  });
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -34,7 +46,7 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
     };
 
     fetchReviews();
-  }, [courseId]);
+  }, [courseId, setReviews, setReviewsLoading]);
 
   const handleStatusChange = async (reviewId: string, status: 'visible' | 'hidden' | 'flagged') => {
     const result = await updateReviewStatus(reviewId, status);
@@ -46,6 +58,26 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
       }
     } else {
       toast.error(result.error || "Failed to update review status");
+    }
+  };
+
+  const handleReplySubmit = async (reviewId: string) => {
+    if (!replyForm.instructor_response.trim()) {
+      toast.error("Response cannot be empty");
+      return;
+    }
+
+    const result = await replyToReview(reviewId, replyForm.instructor_response);
+    if (result.success) {
+      toast.success("Response sent successfully!");
+      setReplyingTo(null);
+      setReplyForm({ instructor_response: "" });
+      const updatedReviews = await getCourseReviews(courseId);
+      if (updatedReviews.success && updatedReviews.data) {
+        setReviews(updatedReviews.data);
+      }
+    } else {
+      toast.error(result.error || "Failed to send response");
     }
   };
 
@@ -64,9 +96,9 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
     );
   };
 
-  const filteredReviews = filterStatus === 'all' 
-    ? reviews 
-    : reviews.filter(review => review.status === filterStatus);
+  const filteredReviews = reviews
+    .filter(review => filterStatus === 'all' || review.status === filterStatus)
+    .filter(review => filterRating === 'all' || review.rating === filterRating);
 
   const averageRating = reviews.length > 0
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
@@ -74,25 +106,47 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Student Reviews</h2>
           <p className="text-muted-foreground">View and manage course feedback</p>
         </div>
-        <Select
-          value={filterStatus}
-          onValueChange={(value: typeof filterStatus) => setFilterStatus(value)}
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Reviews</SelectItem>
-            <SelectItem value="visible">Visible</SelectItem>
-            <SelectItem value="hidden">Hidden</SelectItem>
-            <SelectItem value="flagged">Flagged</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-2">
+          <Select
+            value={filterStatus}
+            onValueChange={(value: typeof filterStatus) => setFilterStatus(value)}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reviews</SelectItem>
+              <SelectItem value="visible">Visible</SelectItem>
+              <SelectItem value="hidden">Hidden</SelectItem>
+              <SelectItem value="flagged">Flagged</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select
+            value={String(filterRating)}
+            onValueChange={(value) => setFilterRating(value === 'all' ? 'all' : Number(value))}
+          >
+            <SelectTrigger className="w-32">
+              <div className="flex items-center gap-1">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Rating" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Ratings</SelectItem>
+              <SelectItem value="5">5 Stars</SelectItem>
+              <SelectItem value="4">4 Stars</SelectItem>
+              <SelectItem value="3">3 Stars</SelectItem>
+              <SelectItem value="2">2 Stars</SelectItem>
+              <SelectItem value="1">1 Star</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Stats */}
@@ -153,9 +207,9 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
       ) : filteredReviews.length === 0 ? (
         <Alert>
           <AlertDescription>
-            {filterStatus === 'all' 
+            {filterStatus === 'all' && filterRating === 'all'
               ? 'No reviews yet. Students will see a prompt to leave a review after completing the course.'
-              : `No ${filterStatus} reviews found.`}
+              : `No reviews found matching your filters.`}
           </AlertDescription>
         </Alert>
       ) : (
@@ -168,13 +222,13 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
                     <Avatar>
                       <AvatarImage src={review.profiles?.avatar_url || ''} />
                       <AvatarFallback>
-                        {review.student_name?.charAt(0).toUpperCase() || 'U'}
+                        {review.profiles?.full_name?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
 
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold">{review.student_name || 'Anonymous'}</h4>
+                        <h4 className="font-semibold">{review.profiles?.full_name || 'Anonymous'}</h4>
                         <Badge variant={
                           review.status === 'visible' ? 'default' :
                           review.status === 'flagged' ? 'destructive' : 'secondary'
@@ -191,12 +245,50 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
                       </div>
 
                       {review.comment && (
-                        <p className="text-muted-foreground">{review.comment}</p>
+                        <p className="text-muted-foreground mb-3">{review.comment}</p>
+                      )}
+
+                      {/* Instructor Response */}
+                      {review.instructor_response && (
+                        <div className="mt-3 p-3 bg-muted rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-medium">Your Response:</span>
+                          </div>
+                          <p className="text-sm">{review.instructor_response}</p>
+                          {review.responded_at && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Responded on {new Date(review.responded_at).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Reply Form */}
+                      {replyingTo === review.id && (
+                        <div className="mt-4 p-3 border rounded-lg">
+                          <Label htmlFor={`reply-${review.id}`} className="mb-2 block">Your Response</Label>
+                          <Textarea
+                            id={`reply-${review.id}`}
+                            value={replyForm.instructor_response}
+                            onChange={(e) => setReplyForm({ ...replyForm, instructor_response: e.target.value })}
+                            placeholder="Write your response to this review..."
+                            rows={3}
+                          />
+                          <div className="flex gap-2 mt-2">
+                            <Button size="sm" onClick={() => setReplyingTo(null)} variant="outline">
+                              Cancel
+                            </Button>
+                            <Button size="sm" onClick={() => handleReplySubmit(review.id)}>
+                              <Send className="mr-2 h-4 w-4" />
+                              Send Response
+                            </Button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
                     {review.status !== 'visible' && (
                       <Button
                         size="sm"
@@ -225,6 +317,19 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
                         title="Flag review"
                       >
                         <Flag className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {!review.instructor_response && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setReplyingTo(review.id);
+                          setReplyForm({ instructor_response: "" });
+                        }}
+                        title="Reply to review"
+                      >
+                        <Send className="h-4 w-4" />
                       </Button>
                     )}
                   </div>

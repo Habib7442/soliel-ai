@@ -2,6 +2,7 @@
 
 import { createServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { Review, ReviewWithProfilesArray } from "@/hooks/useInstructorStore";
 
 // Course-related actions
 export const createCourse = async (courseData: {
@@ -632,6 +633,7 @@ export const getAssignmentSubmissions = async (assignmentId: string) => {
 };
 
 // Get course reviews
+// Get course reviews
 export const getCourseReviews = async (courseId: string) => {
   try {
     const supabase = await createServerClient();
@@ -640,11 +642,15 @@ export const getCourseReviews = async (courseId: string) => {
       .from('reviews')
       .select(`
         id,
+        course_id,
+        user_id,
         rating,
         comment,
         status,
+        instructor_response,
+        responded_at,
         created_at,
-        profiles (
+        profiles!inner (
           id,
           full_name,
           avatar_url
@@ -658,7 +664,13 @@ export const getCourseReviews = async (courseId: string) => {
       return { success: false, error: `Failed to fetch reviews: ${error.message}` };
     }
 
-    return { success: true, data };
+    // Transform the data to match the expected Review interface
+    const transformedData = data?.map((review: ReviewWithProfilesArray) => ({
+      ...review,
+      profiles: review.profiles && review.profiles.length > 0 ? review.profiles[0] : null
+    })) || [];
+    
+    return { success: true, data: transformedData };
   } catch (error) {
     console.error('Error in getCourseReviews:', error);
     return { success: false, error: 'Failed to fetch reviews. Please try again.' };
@@ -674,7 +686,22 @@ export const updateReviewStatus = async (reviewId: string, status: 'visible' | '
       .from('reviews')
       .update({ status })
       .eq('id', reviewId)
-      .select()
+      .select(`
+        id,
+        course_id,
+        user_id,
+        rating,
+        comment,
+        status,
+        instructor_response,
+        responded_at,
+        created_at,
+        profiles!inner (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
       .single();
 
     if (error) {
@@ -682,7 +709,13 @@ export const updateReviewStatus = async (reviewId: string, status: 'visible' | '
       return { success: false, error: `Failed to update review status: ${error.message}` };
     }
 
-    return { success: true, data };
+    // Transform the data to match the expected Review interface
+    const transformedData = data ? {
+      ...data,
+      profiles: data.profiles && data.profiles.length > 0 ? data.profiles[0] : null
+    } : null;
+    
+    return { success: true, data: transformedData as Review };
   } catch (error) {
     console.error('Error in updateReviewStatus:', error);
     return { success: false, error: 'Failed to update review status. Please try again.' };
@@ -1561,3 +1594,52 @@ export const deleteSection = async (sectionId: string) => {
     return { success: false, error: 'Failed to delete section. Please try again.' };
   }
 };
+
+// Reply to a review
+export const replyToReview = async (reviewId: string, instructorResponse: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data, error } = await supabase
+      .from('reviews')
+      .update({ 
+        instructor_response: instructorResponse, 
+        responded_at: new Date().toISOString() 
+      })
+      .eq('id', reviewId)
+      .select(`
+        id,
+        course_id,
+        user_id,
+        rating,
+        comment,
+        status,
+        instructor_response,
+        responded_at,
+        created_at,
+        profiles!inner (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .single();
+
+    if (error) {
+      console.error('Error replying to review:', error);
+      return { success: false, error: `Failed to reply to review: ${error.message}` };
+    }
+
+    // Transform the data to match the expected Review interface
+    const transformedData = data ? {
+      ...data,
+      profiles: data.profiles && data.profiles.length > 0 ? data.profiles[0] : null
+    } : null;
+    
+    return { success: true, data: transformedData as Review };
+  } catch (error) {
+    console.error('Error in replyToReview:', error);
+    return { success: false, error: 'Failed to reply to review. Please try again.' };
+  }
+};
+
