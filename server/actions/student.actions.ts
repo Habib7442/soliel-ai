@@ -10,7 +10,7 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
     
     // Check if already enrolled
     const { data: existingEnrollment } = await supabase
-      .from('course_purchases')
+      .from('enrollments')
       .select('id')
       .eq('user_id', userId)
       .eq('course_id', courseId)
@@ -22,11 +22,11 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
 
     // Create enrollment
     const { data, error } = await supabase
-      .from('course_purchases')
+      .from('enrollments')
       .insert({
         user_id: userId,
         course_id: courseId,
-        purchase_date: new Date().toISOString(),
+        created_at: new Date().toISOString(),
         amount: 0 // Assuming free enrollment for now, adjust as needed
       })
       .select()
@@ -50,10 +50,10 @@ export const getStudentEnrolledCourses = async (userId: string) => {
     const supabase = await createServerClient();
     
     const { data, error } = await supabase
-      .from('course_purchases')
+      .from('enrollments')
       .select(`
         id,
-        purchase_date,
+        created_at,
         amount,
         courses (
           id,
@@ -65,7 +65,7 @@ export const getStudentEnrolledCourses = async (userId: string) => {
         )
       `)
       .eq('user_id', userId)
-      .order('purchase_date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching enrolled courses:', error);

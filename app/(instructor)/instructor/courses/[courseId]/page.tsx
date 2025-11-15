@@ -62,7 +62,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
   
   // Fetch student count
   const { count: studentCount } = await supabase
-    .from('course_purchases')
+    .from('enrollments')
     .select('*', { count: 'exact', head: true })
     .eq('course_id', courseId);
   
@@ -98,11 +98,12 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
 
         {/* Course Management Tabs */}
         <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 gap-1 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-1 h-auto p-1">
             <TabsTrigger value="overview" className="text-xs md:text-sm py-2 px-2 md:px-4">Overview</TabsTrigger>
             <TabsTrigger value="curriculum" className="text-xs md:text-sm py-2 px-2 md:px-4">Curriculum</TabsTrigger>
             <TabsTrigger value="quizzes" className="text-xs md:text-sm py-2 px-2 md:px-4">Quizzes</TabsTrigger>
             <TabsTrigger value="assignments" className="text-xs md:text-sm py-2 px-2 md:px-4">Assignments</TabsTrigger>
+            <TabsTrigger value="students" className="text-xs md:text-sm py-2 px-2 md:px-4">Students</TabsTrigger>
             <TabsTrigger value="faq" className="text-xs md:text-sm py-2 px-2 md:px-4 md:col-start-auto col-start-1">FAQ</TabsTrigger>
             <TabsTrigger value="reviews" className="text-xs md:text-sm py-2 px-2 md:px-4">Reviews</TabsTrigger>
             <TabsTrigger value="notes" className="text-xs md:text-sm py-2 px-2 md:px-4">Q&A</TabsTrigger>
@@ -298,6 +299,33 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                   </Button>
                 </div>
               </CardHeader>
+            </Card>
+          </TabsContent>
+
+          {/* Students Tab */}
+          <TabsContent value="students">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg md:text-xl">Student Management</CardTitle>
+                    <CardDescription className="text-sm">Monitor student progress and engagement</CardDescription>
+                  </div>
+                  <Button asChild size="sm" className="w-full md:w-auto text-xs md:text-sm">
+                    <Link href={`/instructor/courses/${courseId}/students`}>Manage Students</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 md:py-12">
+                  <p className="text-sm md:text-base text-muted-foreground mb-4">
+                    View enrolled students, track their progress, and send announcements
+                  </p>
+                  <Button asChild size="sm">
+                    <Link href={`/instructor/courses/${courseId}/students`}>View Student List</Link>
+                  </Button>
+                </div>
+              </CardContent>
             </Card>
           </TabsContent>
 

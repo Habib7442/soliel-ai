@@ -271,15 +271,15 @@ export const getCourseEarnings = async (instructorId: string) => {
     const courseIds = instructorCourses.map(c => c.id);
     
     const { data, error } = await supabase
-      .from('course_purchases')
+      .from('enrollments')
       .select(`
         id,
         amount,
-        purchase_date,
+        created_at,
         courses (title)
       `)
       .in('course_id', courseIds)
-      .order('purchase_date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching course earnings:', error);
@@ -310,15 +310,15 @@ export const getStudentEnrollments = async (instructorId: string) => {
     const courseIds = instructorCourses.map(c => c.id);
     
     const { data, error } = await supabase
-      .from('course_purchases')
+      .from('enrollments')
       .select(`
         id,
-        purchase_date,
+        created_at,
         amount,
         profiles (full_name, email)
       `)
       .in('course_id', courseIds)
-      .order('purchase_date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching student enrollments:', error);
@@ -1362,6 +1362,72 @@ export const getInstructorAnalytics = async (instructorId: string) => {
   } catch (error) {
     console.error('Error in getInstructorAnalytics:', error);
     return { success: false, error: 'Failed to fetch analytics. Please try again.' };
+  }
+};
+
+// Get enrolled students for a course with progress information
+export const getCourseStudents = async (courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    // Get all enrollments for this course with student profiles and progress
+    const { data, error } = await supabase
+      .from('enrollments')
+      .select(`
+        id,
+        created_at,
+        profiles (
+          id,
+          full_name,
+          email
+        ),
+        courses (
+          id
+        )
+      `)
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching course students:', error);
+      return { success: false, error: `Failed to fetch students: ${error.message}` };
+    }
+
+    // Get progress information for each student
+    const studentsWithProgress = await Promise.all(data.map(async (enrollment) => {
+      // Get progress percentage from the v_course_progress view
+      const { data: progressData, error: progressError } = await supabase
+        .from('v_course_progress')
+        .select('progress_percent')
+        .eq('user_id', enrollment.profiles?.[0]?.id || '')
+        .eq('course_id', courseId)
+        .single();
+
+      // Get last activity from lesson_progress table
+      const { data: activityData, error: activityError } = await supabase
+        .from('lesson_progress')
+        .select('completed_at')
+        .eq('user_id', enrollment.profiles?.[0]?.id || '')
+        .eq('lessons.course_id', courseId)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      return {
+        id: enrollment.profiles?.[0]?.id || '',
+        enrollment_id: enrollment.id,
+        full_name: enrollment.profiles?.[0]?.full_name || 'Unknown Student',
+        email: enrollment.profiles?.[0]?.email || 'No email',
+        enrollment_date: enrollment.created_at,
+        progress_percent: progressData?.progress_percent || 0,
+        last_activity: activityData?.completed_at || null
+      };
+    }));
+
+    return { success: true, data: studentsWithProgress };
+  } catch (error) {
+    console.error('Error in getCourseStudents:', error);
+    return { success: false, error: 'Failed to fetch students. Please try again.' };
   }
 };
 
