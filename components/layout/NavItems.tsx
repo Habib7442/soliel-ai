@@ -109,25 +109,19 @@ export const companyNavItems: NavItem[] = [
 export const adminNavItems: NavItem[] = [
   {
     name: "Dashboard",
-    href: "/admin/admin-dashboard",
+    href: "/admin-dashboard",
     icon: <Home className="h-5 w-5" />,
   },
   {
     name: "Users",
-    href: "/admin/users",
+    href: "/admin-users",
     icon: <Users className="h-5 w-5" />,
     role: [UserRole.SUPER_ADMIN],
   },
   {
-    name: "Reports",
-    href: "/admin/reports",
-    icon: <FileText className="h-5 w-5" />,
-    role: [UserRole.SUPER_ADMIN],
-  },
-  {
-    name: "Payments",
-    href: "/admin/payments",
-    icon: <DollarSign className="h-5 w-5" />,
+    name: "Manage Courses",
+    href: "/admin-courses",
+    icon: <GraduationCap className="h-5 w-5" />,
     role: [UserRole.SUPER_ADMIN],
   },
 ];

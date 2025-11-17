@@ -114,21 +114,57 @@ export const getAllUsers = async () => {
   try {
     const supabase = await createServerClient();
     
-    // Fetch all users
+    // First, try to get auth users list with service role
+    let authUsersMap: Record<string, string> = {};
+    
+    try {
+      const { data: authData } = await supabase.auth.admin.listUsers();
+      if (authData?.users) {
+        authUsersMap = authData.users.reduce((acc, user) => {
+          acc[user.id] = user.created_at;
+          return acc;
+        }, {} as Record<string, string>);
+      }
+    } catch (authError) {
+      console.log('Could not fetch auth users (service role may be required):', authError);
+      // Continue without auth data
+    }
+    
+    // Fetch all profiles
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select(`
+        id,
+        email,
+        full_name,
+        role,
+        updated_at
+      `)
+      .order('updated_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching users:', error);
-      return { success: false, error: `Failed to fetch users: ${error.message}` };
+      return { success: false, error: `Failed to fetch users: ${error.message}`, data: [] };
     }
 
-    return { success: true, data };
+    // Merge profile data with auth created_at
+    const usersWithCreatedAt = data?.map(user => {
+      const createdAt = authUsersMap[user.id] || user.updated_at;
+      return {
+        ...user,
+        created_at: createdAt
+      };
+    }) || [];
+
+    // Sort by created_at descending
+    usersWithCreatedAt.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    return { success: true, data: usersWithCreatedAt };
   } catch (error) {
     console.error('Error in getAllUsers:', error);
-    return { success: false, error: 'Failed to fetch users' };
+    return { success: false, error: 'Failed to fetch users', data: [] };
   }
 };
 

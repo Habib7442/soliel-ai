@@ -661,6 +661,23 @@ for all using (
   instructor_id in (select id from app.v_me)
 );
 
+-- Super admins can manage all courses
+drop policy if exists "courses super admin manage" on app.courses;
+create policy "courses super admin manage" on app.courses
+for all using (
+  exists (
+    select 1 from app.profiles p 
+    where p.id = (select id from app.v_me)
+    and p.role = 'super_admin'
+  )
+) with check (
+  exists (
+    select 1 from app.profiles p 
+    where p.id = (select id from app.v_me)
+    and p.role = 'super_admin'
+  )
+);
+
 drop policy if exists "lessons instructor manage" on app.lessons;
 create policy "lessons instructor manage" on app.lessons
 for all using (

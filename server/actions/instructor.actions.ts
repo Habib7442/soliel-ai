@@ -1718,9 +1718,22 @@ export const getCourseSections = async (courseId: string) => {
     }
 
     // Sort lessons by order_index within each section
+    type LessonType = {
+      id: string;
+      title: string;
+      lesson_type: string;
+      is_preview: boolean;
+      order_index: number | null;
+      video_url: string | null;
+      content_md: string | null;
+      downloadable: boolean;
+    };
+
     const sortedData = data?.map(section => ({
       ...section,
-      lessons: section.lessons?.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)) || []
+      lessons: (section.lessons as LessonType[])?.sort(
+        (a, b) => (a.order_index || 0) - (b.order_index || 0)
+      ) || []
     }));
 
     return { success: true, data: sortedData };

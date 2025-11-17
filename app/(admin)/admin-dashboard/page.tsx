@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { getAllUsers } from "@/server/actions/user.actions";
@@ -100,7 +101,7 @@ export default async function AdminDashboardPage() {
                             {user.role}
                           </TableCell>
                           <TableCell>
-                            {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                            {user.created_at ? new Date(user.created_at).toLocaleDateString() : new Date(user.updated_at || new Date()).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -116,14 +117,18 @@ export default async function AdminDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="p-6">
                 <CardTitle className="text-xl font-semibold mb-2">Manage Users</CardTitle>
-                <CardDescription className="mb-4">View and manage all platform users</CardDescription>
-                <Button>Manage Users</Button>
+                <CardDescription className="mb-4">View and manage all platform users, including role assignments</CardDescription>
+                <Button asChild>
+                  <Link href="/admin-users">Manage Users</Link>
+                </Button>
               </Card>
               
               <Card className="p-6">
                 <CardTitle className="text-xl font-semibold mb-2">Manage Courses</CardTitle>
                 <CardDescription className="mb-4">Review and manage all courses</CardDescription>
-                <Button variant="secondary">Manage Courses</Button>
+                <Button variant="secondary" asChild>
+                  <Link href="/admin-courses">Manage Courses</Link>
+                </Button>
               </Card>
               
               <Card className="p-6">
