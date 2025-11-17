@@ -144,7 +144,9 @@ export function CourseEditWizard({ course, instructorId }: CourseEditWizardProps
   };
 
   const progressPercentage = (currentStep / STEPS.length) * 100;
-  const CurrentStepComponent = STEPS[currentStep - 1].component;
+  // Ensure currentStep is within valid bounds
+  const stepIndex = Math.min(Math.max(currentStep - 1, 0), STEPS.length - 1);
+  const CurrentStepComponent = STEPS[stepIndex]?.component;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">

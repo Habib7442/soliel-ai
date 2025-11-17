@@ -1717,7 +1717,13 @@ export const getCourseSections = async (courseId: string) => {
       return { success: false, error: `Failed to fetch sections: ${error.message}` };
     }
 
-    return { success: true, data };
+    // Sort lessons by order_index within each section
+    const sortedData = data?.map(section => ({
+      ...section,
+      lessons: section.lessons?.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)) || []
+    }));
+
+    return { success: true, data: sortedData };
   } catch (error) {
     console.error('Error in getCourseSections:', error);
     return { success: false, error: 'Failed to fetch sections. Please try again.' };

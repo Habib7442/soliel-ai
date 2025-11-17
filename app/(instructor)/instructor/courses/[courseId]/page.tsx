@@ -47,18 +47,17 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
     redirect("/instructor-dashboard");
   }
   
-  // Fetch lesson count
-  const { count: lessonCount } = await supabase
-    .from('lessons')
-    .select('*', { count: 'exact', head: true })
-    .eq('course_id', courseId);
-  
   // Fetch sections with lessons
   const { data: sections } = await supabase
     .from('course_sections')
     .select('*, lessons(*)')
     .eq('course_id', courseId)
     .order('order_index', { ascending: true });
+  
+  // Calculate actual lesson count from sections
+  const lessonCount = sections?.reduce((total, section) => {
+    return total + (section.lessons?.length || 0);
+  }, 0) || 0;
   
   // Fetch student count
   const { count: studentCount } = await supabase
