@@ -7,7 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CourseFaqDisplay } from "@/components/course/CourseFaqDisplay";
 import { VideoPlayer } from "@/components/course/VideoPlayer";
+import { ReviewForm } from "@/components/course/ReviewForm";
+import { ReviewsList } from "@/components/course/ReviewsList";
+import { RatingSummary } from "@/components/course/RatingSummary";
 import { getPublicCourse } from "@/server/actions/public.actions";
+import { getCourseReviews, getUserReview } from "@/server/actions/review.actions";
 import { createServerClient } from "@/lib/supabase-server";
 import ReactMarkdown from "react-markdown";
 import { Star, Users, Clock, BookOpen, Play, ChevronRight, Check, Lock, Award, Video } from "lucide-react";
@@ -46,6 +50,25 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
   }
   
   const course = courseResult.data;
+  
+  // Fetch reviews
+  const reviewsResult = await getCourseReviews(courseId);
+  const reviews = reviewsResult.success ? reviewsResult.data : [];
+  
+  // Get user's review if enrolled
+  let userReview = null;
+  if (user && isEnrolled) {
+    const userReviewResult = await getUserReview(user.id, courseId);
+    userReview = userReviewResult.success ? userReviewResult.data : null;
+  }
+  
+  // Calculate rating distribution
+  const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  reviews?.forEach((review: { rating: number }) => {
+    if (review.rating >= 1 && review.rating <= 5) {
+      ratingDistribution[review.rating as keyof typeof ratingDistribution]++;
+    }
+  });
   
   // Format price
   const formattedPrice = course.price_cents > 0 
@@ -541,6 +564,49 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                   <span className="text-muted-foreground">Enrolled</span>
                   <span className="font-medium">{course.stats.total_enrollments.toLocaleString()}</span>
                 </div>
+              </CardContent>
+            </Card>
+            
+            {/* Reviews Section */}
+            <Card className="shadow-md mb-8">
+              <CardHeader>
+                <CardTitle className="text-2xl">Student Reviews</CardTitle>
+                <CardDescription>
+                  {course.stats.total_reviews > 0 
+                    ? `See what students are saying about this course`
+                    : `Be the first to review this course`
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Rating Summary */}
+                {course.stats.total_reviews > 0 && (
+                  <RatingSummary 
+                    averageRating={course.stats.average_rating} 
+                    totalReviews={course.stats.total_reviews}
+                    ratingDistribution={ratingDistribution}
+                  />
+                )}
+                
+                {/* Review Form - Only for enrolled students */}
+                {isEnrolled && user && (
+                  <div>
+                    <ReviewForm 
+                      courseId={courseId} 
+                      userId={user.id}
+                      existingReview={userReview}
+                    />
+                  </div>
+                )}
+                
+                {/* Reviews List */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">
+                    {course.stats.total_reviews > 0 ? 'All Reviews' : 'No reviews yet'}
+                  </h3>
+                  <ReviewsList reviews={(reviews || []) as never[]} />
+                </div>
+
               </CardContent>
             </Card>
             

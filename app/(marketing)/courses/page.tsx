@@ -26,11 +26,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CourseCard } from "@/components/cards/CourseCard";
 import { getPublicCourses, getCourseCategories, PublicCourse, CourseFilters } from "@/server/actions/public.actions";
+import { createClient } from "@/lib/supabase-client";
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<PublicCourse[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [loading, setLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<string>>(new Set());
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,6 +63,24 @@ export default function CoursesPage() {
       }
     };
     fetchCategories();
+    
+    // Fetch user's enrolled courses
+    const fetchEnrollments = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: enrollments } = await supabase
+          .from('enrollments')
+          .select('course_id')
+          .eq('user_id', user.id);
+        
+        if (enrollments) {
+          setEnrolledCourseIds(new Set(enrollments.map(e => e.course_id)));
+        }
+      }
+    };
+    fetchEnrollments();
   }, []);
 
   useEffect(() => {
@@ -372,6 +392,7 @@ export default function CoursesPage() {
                     avatar: course.instructor?.avatar_url || "/images/instructors/sarah.png",
                   }}
                   isBundle={course.allow_in_bundles && (course.bundle_discount_percent || 0) > 0}
+                  isEnrolled={enrolledCourseIds.has(course.id)}
                 />
               </motion.div>
             ))}

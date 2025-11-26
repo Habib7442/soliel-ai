@@ -24,6 +24,7 @@ interface CourseCardProps {
     avatar: string;
   };
   isBundle?: boolean;
+  isEnrolled?: boolean;
 }
 
 export function CourseCard({
@@ -41,6 +42,7 @@ export function CourseCard({
   category,
   instructor,
   isBundle = false,
+  isEnrolled = false,
 }: CourseCardProps) {
   return (
     <motion.div
@@ -110,9 +112,15 @@ export function CourseCard({
               <span className="ml-2 text-sm text-gray-500 line-through">${originalPrice}</span>
             )}
           </div>
-          <Button asChild size="sm" className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white rounded-lg text-xs h-9 px-4">
-            <Link href={`/courses/${id}`}>Enroll Now</Link>
-          </Button>
+          {isEnrolled ? (
+            <Button asChild size="sm" variant="secondary" className="rounded-lg text-xs h-9 px-4">
+              <Link href={`/learn/${id}/player`}>Go to Course</Link>
+            </Button>
+          ) : (
+            <Button asChild size="sm" className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white rounded-lg text-xs h-9 px-4">
+              <Link href={`/courses/${id}`}>Enroll Now</Link>
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>

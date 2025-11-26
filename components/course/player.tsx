@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { VideoPlayer } from "./VideoPlayer";
+import { ReviewForm } from "./ReviewForm";
 import { 
   CheckCircle2, 
   Circle, 
@@ -18,7 +20,9 @@ import {
   Clipboard, 
   Code,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Star,
+  ChevronDown
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
@@ -69,9 +73,15 @@ interface CoursePlayerProps {
     status: string;
   };
   userId: string;
+  userReview?: {
+    id: string;
+    rating: number;
+    comment: string;
+    created_at: string;
+  } | null;
 }
 
-export function CoursePlayer({ course, sections, progress, enrollment, userId }: CoursePlayerProps) {
+export function CoursePlayer({ course, sections, progress, enrollment, userId, userReview }: CoursePlayerProps) {
   const router = useRouter();
   const [currentLesson, setCurrentLesson] = useState(() => {
     // Find first uncompleted lesson or first lesson
@@ -82,6 +92,7 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId }:
     return sections[0]?.lessons[0] || null;
   });
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
   
   const allLessons = sections.flatMap(s => s.lessons).sort((a, b) => a.order_index - b.order_index);
   const currentIndex = allLessons.findIndex(l => l.id === currentLesson?.id);
@@ -343,6 +354,39 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId }:
                       </Button>
                     </div>
                   </CardContent>
+                </Card>
+                
+                {/* Review Section */}
+                <Card>
+                  <Collapsible open={reviewOpen} onOpenChange={setReviewOpen}>
+                    <CollapsibleTrigger asChild>
+                      <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Star className="h-5 w-5 text-yellow-500" />
+                            <CardTitle className="text-lg">
+                              {userReview ? 'Update Your Review' : 'Rate This Course'}
+                            </CardTitle>
+                          </div>
+                          <ChevronDown className={`h-5 w-5 transition-transform ${reviewOpen ? 'rotate-180' : ''}`} />
+                        </div>
+                        {userReview && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            You rated this course {userReview.rating} stars
+                          </p>
+                        )}
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent className="pt-0">
+                        <ReviewForm
+                          courseId={course.id}
+                          userId={userId}
+                          existingReview={userReview}
+                        />
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </Card>
               </>
             ) : (
