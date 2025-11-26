@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { LabsManager } from "@/components/instructor/LabsManager";
 import ReactMarkdown from "react-markdown";
 
 interface CourseManagePageProps {
@@ -97,13 +98,14 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
 
         {/* Course Management Tabs */}
         <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-1 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 gap-1 h-auto p-1">
             <TabsTrigger value="overview" className="text-xs md:text-sm py-2 px-2 md:px-4">Overview</TabsTrigger>
             <TabsTrigger value="curriculum" className="text-xs md:text-sm py-2 px-2 md:px-4">Curriculum</TabsTrigger>
+            <TabsTrigger value="labs" className="text-xs md:text-sm py-2 px-2 md:px-4">Labs</TabsTrigger>
             <TabsTrigger value="quizzes" className="text-xs md:text-sm py-2 px-2 md:px-4">Quizzes</TabsTrigger>
             <TabsTrigger value="assignments" className="text-xs md:text-sm py-2 px-2 md:px-4">Assignments</TabsTrigger>
-            <TabsTrigger value="students" className="text-xs md:text-sm py-2 px-2 md:px-4">Students</TabsTrigger>
-            <TabsTrigger value="faq" className="text-xs md:text-sm py-2 px-2 md:px-4 md:col-start-auto col-start-1">FAQ</TabsTrigger>
+            <TabsTrigger value="students" className="text-xs md:text-sm py-2 px-2 md:px-4 md:col-start-auto col-start-1">Students</TabsTrigger>
+            <TabsTrigger value="faq" className="text-xs md:text-sm py-2 px-2 md:px-4">FAQ</TabsTrigger>
             <TabsTrigger value="reviews" className="text-xs md:text-sm py-2 px-2 md:px-4">Reviews</TabsTrigger>
             <TabsTrigger value="notes" className="text-xs md:text-sm py-2 px-2 md:px-4">Q&A</TabsTrigger>
           </TabsList>
@@ -265,6 +267,11 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Labs Tab */}
+          <TabsContent value="labs">
+            <LabsManager courseId={courseId} />
           </TabsContent>
 
           {/* Quizzes Tab */}

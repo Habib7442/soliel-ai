@@ -50,18 +50,13 @@ export const additionalPublicNavItems: NavItem[] = [
 export const studentNavItems: NavItem[] = [
   {
     name: "Dashboard",
-    href: "/student/student-dashboard",
+    href: "/student-dashboard",
     icon: <Home className="h-5 w-5" />,
   },
   {
-    name: "My Courses",
-    href: "/learn",
+    name: "Browse Courses",
+    href: "/courses",
     icon: <BookOpen className="h-5 w-5" />,
-  },
-  {
-    name: "Certificates",
-    href: "/certificates",
-    icon: <FileText className="h-5 w-5" />,
   },
 ];
 

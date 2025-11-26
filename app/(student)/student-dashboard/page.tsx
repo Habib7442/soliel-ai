@@ -2,9 +2,11 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { getStudentEnrolledCourses, getStudentCertificates, getStudentProgress } from "@/server/actions/student.actions";
+import { getStudentEnrolledCourses as getEnrollmentsWithProgress } from "@/server/actions/enrollment.actions";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function StudentDashboardPage() {
   const supabase = await createServerClient();
@@ -31,7 +33,7 @@ export default async function StudentDashboardPage() {
   
   // Fetch dashboard data using server actions
   const [coursesResult, certificatesResult, progressResult] = await Promise.all([
-    getStudentEnrolledCourses(user.id),
+    getEnrollmentsWithProgress(user.id),
     getStudentCertificates(user.id),
     getStudentProgress(user.id)
   ]);
@@ -74,37 +76,57 @@ export default async function StudentDashboardPage() {
               <CardTitle className="text-2xl mb-4">Your Courses</CardTitle>
               {courses && courses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {courses.map((enrollment) => (
+                  {courses.map((enrollment) => {
+                    const courseData = (Array.isArray(enrollment.courses) && enrollment.courses.length > 0 
+                      ? enrollment.courses[0] 
+                      : enrollment.courses) as { 
+                        id?: string; 
+                        title?: string; 
+                        subtitle?: string; 
+                        description?: string;
+                        profiles?: { full_name?: string };
+                      };
+                    const progress = enrollment.progress || { progress_percent: 0, total_lessons: 0, completed_lessons: 0 };
+                    
+                    return (
                     <Card key={enrollment.id} className="p-4 hover:shadow-md transition-shadow">
                       <CardTitle className="font-semibold text-lg mb-2">
-                        {enrollment.courses && enrollment.courses.length > 0 
-                          ? enrollment.courses[0].title 
-                          : 'Untitled Course'}
+                        {courseData?.title || 'Untitled Course'}
                       </CardTitle>
                       <CardDescription className="text-sm mb-4 line-clamp-2">
-                        {enrollment.courses && enrollment.courses.length > 0 
-                          ? enrollment.courses[0].description 
-                          : 'No description available'}
+                        {courseData?.subtitle || courseData?.description || 'No description available'}
                       </CardDescription>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary">
-                          ${enrollment.courses && enrollment.courses.length > 0 
-                            ? enrollment.courses[0].price 
-                            : 0}
-                        </span>
+                      
+                      {/* Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">Progress</span>
+                          <span className="font-semibold text-primary">{progress.progress_percent}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] h-2 rounded-full transition-all"
+                            style={{ width: `${progress.progress_percent}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {progress.completed_lessons} of {progress.total_lessons} lessons completed
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                          Instructor: {
-                            enrollment.courses && 
-                            enrollment.courses.length > 0 && 
-                            enrollment.courses[0].user_profiles &&
-                            enrollment.courses[0].user_profiles.length > 0
-                              ? enrollment.courses[0].user_profiles[0].full_name 
-                              : 'Unknown Instructor'
-                          }
+                          by {courseData?.profiles?.full_name || 'Unknown'}
                         </span>
+                        <Button asChild size="sm">
+                          <Link href={`/learn/${courseData?.id}/player`}>
+                            {progress.progress_percent > 0 ? 'Continue' : 'Start'}
+                          </Link>
+                        </Button>
                       </div>
                     </Card>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <p className="text-muted-foreground">You haven&apos;t enrolled in any courses yet.</p>
@@ -125,23 +147,25 @@ export default async function StudentDashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {progress.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>
-                            {item.lessons && Array.isArray(item.lessons) && item.lessons.length > 0 && item.lessons[0].courses && Array.isArray(item.lessons[0].courses) && item.lessons[0].courses.length > 0
-                              ? item.lessons[0].courses[0].title
-                              : 'Unknown Course'}
-                          </TableCell>
-                          <TableCell>
-                            {item.lessons && Array.isArray(item.lessons) && item.lessons.length > 0
-                              ? item.lessons[0].title
-                              : 'Unknown Lesson'}
-                          </TableCell>
-                          <TableCell>
-                            {item.completed_at ? new Date(item.completed_at).toLocaleDateString() : 'N/A'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {progress.map((item) => {
+                        // Handle both object and array formats from Supabase
+                        const lesson = Array.isArray(item.lessons) ? item.lessons[0] : item.lessons;
+                        const course = lesson?.courses ? (Array.isArray(lesson.courses) ? lesson.courses[0] : lesson.courses) : null;
+                        
+                        return (
+                          <TableRow key={`${item.user_id}-${item.lesson_id}`}>
+                            <TableCell>
+                              {course?.title || 'Unknown Course'}
+                            </TableCell>
+                            <TableCell>
+                              {lesson?.title || 'Unknown Lesson'}
+                            </TableCell>
+                            <TableCell>
+                              {item.completed_at ? new Date(item.completed_at).toLocaleDateString() : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
@@ -151,23 +175,21 @@ export default async function StudentDashboardPage() {
             </div>
             
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <CardTitle className="text-xl font-semibold mb-2">Continue Learning</CardTitle>
-                <CardDescription className="mb-4">Resume your in-progress courses</CardDescription>
-                <Button>View Courses</Button>
-              </Card>
-              
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="p-6">
                 <CardTitle className="text-xl font-semibold mb-2">Browse Courses</CardTitle>
                 <CardDescription className="mb-4">Discover new courses to learn</CardDescription>
-                <Button variant="secondary">Browse Courses</Button>
+                <Button asChild>
+                  <Link href="/courses">Browse Courses</Link>
+                </Button>
               </Card>
               
               <Card className="p-6">
-                <CardTitle className="text-xl font-semibold mb-2">My Certificates</CardTitle>
-                <CardDescription className="mb-4">View and download your certificates</CardDescription>
-                <Button variant="secondary">View Certificates</Button>
+                <CardTitle className="text-xl font-semibold mb-2">My Profile</CardTitle>
+                <CardDescription className="mb-4">Manage your account settings</CardDescription>
+                <Button variant="secondary" asChild>
+                  <Link href="/profile">View Profile</Link>
+                </Button>
               </Card>
             </div>
           </CardContent>

@@ -114,7 +114,8 @@ export const getStudentProgress = async (userId: string) => {
     const { data, error } = await supabase
       .from('lesson_progress')
       .select(`
-        id,
+        user_id,
+        lesson_id,
         completed_at,
         lessons (
           title,

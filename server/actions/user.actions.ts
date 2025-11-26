@@ -22,7 +22,6 @@ export interface UpdateUserParams {
   id: string;
   fullName?: string;
   avatarUrl?: string;
-  bio?: string;
 }
 
 export const createUserProfile = async (params: CreateUserParams) => {
@@ -178,7 +177,6 @@ export const updateUserProfile = async (params: UpdateUserParams) => {
       .update({
         full_name: params.fullName,
         avatar_url: params.avatarUrl,
-        bio: params.bio,
         updated_at: new Date().toISOString()
       })
       .eq('id', params.id)
@@ -190,6 +188,7 @@ export const updateUserProfile = async (params: UpdateUserParams) => {
       return { success: false, error: `Failed to update user profile: ${error.message}` };
     }
 
+    revalidatePath('/profile');
     return { success: true, data };
   } catch (error) {
     console.error('Error in updateUserProfile:', error);

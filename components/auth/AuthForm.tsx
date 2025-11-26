@@ -90,24 +90,34 @@ export default function AuthForm({ mode }: AuthFormProps) {
         // Use getUser() instead of relying on session for security
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+          // Check if there's a redirect parameter in the URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectPath = urlParams.get('redirect');
+          
+          if (redirectPath) {
+            // If there's a redirect parameter, use it
+            router.push(redirectPath);
+          } else {
+            // Otherwise, redirect based on role
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single();
 
-          if (profile) {
-            if (profile.role === UserRole.INSTRUCTOR) {
-              router.push("/instructor-dashboard");
-            } else if (profile.role === UserRole.COMPANY_ADMIN) {
-              router.push("/company-dashboard");
-            } else if (profile.role === UserRole.SUPER_ADMIN) {
-              router.push("/admin-dashboard");
+            if (profile) {
+              if (profile.role === UserRole.INSTRUCTOR) {
+                router.push("/instructor-dashboard");
+              } else if (profile.role === UserRole.COMPANY_ADMIN) {
+                router.push("/company-dashboard");
+              } else if (profile.role === UserRole.SUPER_ADMIN) {
+                router.push("/admin-dashboard");
+              } else {
+                router.push("/student-dashboard");
+              }
             } else {
               router.push("/student-dashboard");
             }
-          } else {
-            router.push("/student-dashboard");
           }
         }
       }
@@ -163,7 +173,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
       });
 
       if (error) {
