@@ -191,9 +191,17 @@ export const getPublicCourses = async (filters?: CourseFilters, limit?: number) 
             ...(Array.isArray(course.profiles) ? course.profiles[0] : course.profiles),
             bio_md: null
           },
-          stats: Array.isArray(course.course_stats) && course.course_stats.length > 0
-            ? course.course_stats[0]
-            : { total_enrollments: 0, average_rating: 0, total_reviews: 0 },
+          stats: (() => {
+            // Handle course_stats - could be array, object, or null
+            if (Array.isArray(course.course_stats)) {
+              return course.course_stats.length > 0
+                ? course.course_stats[0]
+                : { total_enrollments: 0, average_rating: 0, total_reviews: 0 };
+            } else if (course.course_stats && typeof course.course_stats === 'object') {
+              return course.course_stats;
+            }
+            return { total_enrollments: 0, average_rating: 0, total_reviews: 0 };
+          })(),
           category: categoryName,
           lessons_count: lessonsCount || 0,
         };
@@ -339,9 +347,17 @@ export const getPublicCourse = async (courseId: string) => {
         ...(Array.isArray(course.profiles) ? course.profiles[0] : course.profiles),
         bio_md: instructorBio
       },
-      stats: Array.isArray(course.course_stats) && course.course_stats.length > 0
-        ? course.course_stats[0]
-        : { total_enrollments: 0, average_rating: 0, total_reviews: 0 },
+      stats: (() => {
+        // Handle course_stats - could be array, object, or null
+        if (Array.isArray(course.course_stats)) {
+          return course.course_stats.length > 0
+            ? course.course_stats[0]
+            : { total_enrollments: 0, average_rating: 0, total_reviews: 0 };
+        } else if (course.course_stats && typeof course.course_stats === 'object') {
+          return course.course_stats;
+        }
+        return { total_enrollments: 0, average_rating: 0, total_reviews: 0 };
+      })(),
       category: categoryName,
       lessons_count: lessonsCount || 0,
       sections: sections || [],

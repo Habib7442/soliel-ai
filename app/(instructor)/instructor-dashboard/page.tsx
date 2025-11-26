@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { getInstructorCourses, getCourseEarnings, getStudentEnrollments, deleteCourse } from "@/server/actions/instructor.actions";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DeleteCourseButton } from "@/components/instructor/DeleteCourseButton";
@@ -91,29 +91,31 @@ export default async function InstructorDashboardPage() {
                     return (
                       <Card 
                         key={course.id} 
-                        className="p-4 hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-background/30 border border-border/50 dark:bg-background/20 dark:border-border/30"
+                        className="hover:shadow-md transition-all duration-300 backdrop-blur-sm bg-background/30 border border-border/50 dark:bg-background/20 dark:border-border/30 flex flex-col"
                       >
-                        <CardTitle className="font-semibold text-lg mb-2">{course.title}</CardTitle>
-                        <CardDescription className="text-sm mb-4 line-clamp-2">{course.subtitle}</CardDescription>
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-primary">${(course.price_cents / 100).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center mt-4">
-                          <span className="text-sm text-muted-foreground">{course.level}</span>
-                          {course.is_published ? (
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded dark:bg-green-900/30 dark:text-green-300">Published</span>
-                          ) : (
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded capitalize dark:bg-yellow-900/30 dark:text-yellow-300">
-                              {course.status}
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-4 flex gap-2">
+                        <CardContent className="pt-6 flex-1">
+                          <CardTitle className="font-semibold text-lg mb-2">{course.title}</CardTitle>
+                          <CardDescription className="text-sm mb-4 line-clamp-2">{course.subtitle}</CardDescription>
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-primary">${(course.price_cents / 100).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between items-center mt-4">
+                            <span className="text-sm text-muted-foreground">{course.level}</span>
+                            {course.is_published ? (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded dark:bg-green-900/30 dark:text-green-300">Published</span>
+                            ) : (
+                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded capitalize dark:bg-yellow-900/30 dark:text-yellow-300">
+                                {course.status}
+                              </span>
+                            )}
+                          </div>
+                        </CardContent>
+                        <CardFooter className="flex gap-2 pt-4">
                           <Button asChild size="sm" className="flex-1">
                             <Link href={`/instructor/courses/${course.id}`}>Manage Course</Link>
                           </Button>
                           <DeleteCourseButton courseId={course.id} />
-                        </div>
+                        </CardFooter>
                       </Card>
                     );
                   })}
@@ -153,7 +155,7 @@ export default async function InstructorDashboardPage() {
                             ${earning.amount?.toFixed(2)}
                           </TableCell>
                           <TableCell>
-                            {earning.purchase_date ? new Date(earning.purchase_date).toLocaleDateString() : 'N/A'}
+                            {earning.created_at ? new Date(earning.created_at).toLocaleDateString() : 'N/A'}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -174,23 +176,23 @@ export default async function InstructorDashboardPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Student</TableHead>
-                        <TableHead>Amount</TableHead>
+                        <TableHead>Course</TableHead>
                         <TableHead>Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {enrollments.map((enrollment) => (
+                      {enrollments.slice(0, 5).map((enrollment, index) => (
                         <TableRow key={enrollment.id}>
                           <TableCell className="font-medium">
-                            {enrollment.profiles && Array.isArray(enrollment.profiles) && enrollment.profiles.length > 0
-                              ? enrollment.profiles[0].full_name 
-                              : 'Unknown Student'}
-                          </TableCell>
-                          <TableCell className="font-medium text-primary">
-                            ${enrollment.amount?.toFixed(2)}
+                            Student {index + 1}
                           </TableCell>
                           <TableCell>
-                            {enrollment.purchase_date ? new Date(enrollment.purchase_date).toLocaleDateString() : 'N/A'}
+                            {enrollment.courses && Array.isArray(enrollment.courses) && enrollment.courses.length > 0
+                              ? enrollment.courses[0].title
+                              : 'Course'}
+                          </TableCell>
+                          <TableCell>
+                            {enrollment.created_at ? new Date(enrollment.created_at).toLocaleDateString() : 'N/A'}
                           </TableCell>
                         </TableRow>
                       ))}

@@ -315,11 +315,15 @@ export const getStudentEnrollments = async (instructorId: string) => {
       .select(`
         id,
         created_at,
-        amount,
-        profiles (full_name, email)
+        status,
+        course_id,
+        courses:course_id (
+          title
+        )
       `)
       .in('course_id', courseIds)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10);
 
     if (error) {
       console.error('Error fetching student enrollments:', error);
@@ -1553,15 +1557,8 @@ export const getCourseStudents = async (courseId: string) => {
       .from('enrollments')
       .select(`
         id,
-        created_at,
-        profiles (
-          id,
-          full_name,
-          email
-        ),
-        courses (
-          id
-        )
+        user_id,
+        created_at
       `)
       .eq('course_id', courseId)
       .order('created_at', { ascending: false });
@@ -1572,32 +1569,34 @@ export const getCourseStudents = async (courseId: string) => {
     }
 
     // Get progress information for each student
-    const studentsWithProgress = await Promise.all(data.map(async (enrollment) => {
+    const studentsWithProgress = await Promise.all((data || []).map(async (enrollment, index) => {
       // Get progress percentage from the v_course_progress view
-      const { data: progressData, error: progressError } = await supabase
+      const { data: progressData } = await supabase
         .from('v_course_progress')
-        .select('progress_percent')
-        .eq('user_id', enrollment.profiles?.[0]?.id || '')
+        .select('progress_percent, total_lessons, completed_lessons')
+        .eq('user_id', enrollment.user_id)
         .eq('course_id', courseId)
         .single();
 
       // Get last activity from lesson_progress table
-      const { data: activityData, error: activityError } = await supabase
+      const { data: activityData } = await supabase
         .from('lesson_progress')
         .select('completed_at')
-        .eq('user_id', enrollment.profiles?.[0]?.id || '')
-        .eq('lessons.course_id', courseId)
+        .eq('user_id', enrollment.user_id)
         .order('completed_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
+      // Anonymize student identity for privacy
       return {
-        id: enrollment.profiles?.[0]?.id || '',
+        id: enrollment.user_id,
         enrollment_id: enrollment.id,
-        full_name: enrollment.profiles?.[0]?.full_name || 'Unknown Student',
-        email: enrollment.profiles?.[0]?.email || 'No email',
+        full_name: `Student ${index + 1}`, // Anonymized
+        email: '***@***.***', // Hidden for privacy
         enrollment_date: enrollment.created_at,
         progress_percent: progressData?.progress_percent || 0,
+        total_lessons: progressData?.total_lessons || 0,
+        completed_lessons: progressData?.completed_lessons || 0,
         last_activity: activityData?.completed_at || null
       };
     }));

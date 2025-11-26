@@ -174,7 +174,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
             
             {/* Right Card - 2 columns */}
             <div className="lg:col-span-2">
-              <Card className="bg-white dark:bg-gray-800 shadow-2xl sticky top-6">
+              <Card className="bg-white dark:bg-gray-800 shadow-2xl">
                 <CardContent className="p-6">
                   {course.thumbnail_url && (
                     <div className="rounded-lg overflow-hidden mb-6 shadow-md">
@@ -530,7 +530,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
           {/* Right Sidebar */}
           <div className="space-y-6">
             {/* Course Info */}
-            <Card className="shadow-md sticky top-6">
+            <Card className="shadow-md">
               <CardHeader>
                 <CardTitle>Course Details</CardTitle>
               </CardHeader>
