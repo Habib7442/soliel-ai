@@ -3,7 +3,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { getStudentEnrolledCourses, getStudentCertificates, getStudentProgress } from "@/server/actions/student.actions";
 import { getStudentEnrolledCourses as getEnrollmentsWithProgress } from "@/server/actions/enrollment.actions";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -89,7 +89,8 @@ export default async function StudentDashboardPage() {
                     const progress = enrollment.progress || { progress_percent: 0, total_lessons: 0, completed_lessons: 0 };
                     
                     return (
-                    <Card key={enrollment.id} className="p-4 hover:shadow-md transition-shadow">
+                    <Card key={enrollment.id} className="hover:shadow-md transition-shadow flex flex-col">
+                      <CardContent className="pt-6 flex-1">
                       <CardTitle className="font-semibold text-lg mb-2">
                         {courseData?.title || 'Untitled Course'}
                       </CardTitle>
@@ -106,7 +107,7 @@ export default async function StudentDashboardPage() {
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div 
                             className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] h-2 rounded-full transition-all"
-                            style={{ width: `${progress.progress_percent}%` }}
+                            style={{ width: `${Math.max(0, progress.progress_percent)}%` }}
                           />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -114,16 +115,18 @@ export default async function StudentDashboardPage() {
                         </p>
                       </div>
                       
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          by {courseData?.profiles?.full_name || 'Unknown'}
-                        </span>
-                        <Button asChild size="sm">
+                      <div className="text-sm text-muted-foreground">
+                        by {courseData?.profiles?.full_name || 'Unknown'}
+                      </div>
+                      </CardContent>
+                      
+                      <CardFooter className="pt-4">
+                        <Button asChild size="sm" className="w-full">
                           <Link href={`/learn/${courseData?.id}/player`}>
                             {progress.progress_percent > 0 ? 'Continue' : 'Start'}
                           </Link>
                         </Button>
-                      </div>
+                      </CardFooter>
                     </Card>
                   );
                   })}

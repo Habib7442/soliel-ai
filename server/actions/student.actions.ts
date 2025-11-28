@@ -111,14 +111,18 @@ export const getStudentProgress = async (userId: string) => {
   try {
     const supabase = await createServerClient();
     
+    // Only get progress for lessons that have actual content
     const { data, error } = await supabase
       .from('lesson_progress')
       .select(`
         user_id,
         lesson_id,
         completed_at,
-        lessons (
+        lessons!inner (
+          id,
           title,
+          video_url,
+          content_md,
           courses (title)
         )
       `)
@@ -129,8 +133,17 @@ export const getStudentProgress = async (userId: string) => {
       console.error('Error fetching learning progress:', error);
       return { success: false, error: `Failed to fetch progress: ${error.message}` };
     }
+    
+    // Filter to only include lessons with actual content
+    const filteredData = (data || []).filter(item => {
+      const lesson = Array.isArray(item.lessons) ? item.lessons[0] : item.lessons;
+      if (!lesson) return false;
+      const hasVideo = lesson.video_url && lesson.video_url.trim() !== '';
+      const hasContent = lesson.content_md && lesson.content_md.trim() !== '';
+      return hasVideo || hasContent;
+    });
 
-    return { success: true, data };
+    return { success: true, data: filteredData };
   } catch (error) {
     console.error('Error in getStudentProgress:', error);
     return { success: false, error: 'Failed to fetch progress' };
