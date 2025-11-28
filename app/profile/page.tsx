@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Calendar, CreditCard, ShoppingBag, Award } from "lucide-react";
+import { User, Mail, Calendar, CreditCard, ShoppingBag, Award, Download, Eye } from "lucide-react";
 
 export default async function ProfilePage() {
   const supabase = await createServerClient();
@@ -63,14 +63,20 @@ export default async function ProfilePage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // Get certificates
+  // Get certificates with complete data
   const { data: certificates } = await supabase
     .from('certificates')
     .select(`
       id,
+      certificate_number,
+      verification_code,
       issued_at,
+      completion_date,
+      certificate_data,
       courses (
-        title
+        id,
+        title,
+        thumbnail_url
       )
     `)
     .eq('user_id', user.id)
@@ -263,37 +269,62 @@ export default async function ProfilePage() {
               </CardHeader>
               <CardContent>
                 {certificates && certificates.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Issued On</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {certificates.map((cert) => {
-                        const course = Array.isArray(cert.courses) ? cert.courses[0] : cert.courses;
-                        return (
-                          <TableRow key={cert.id}>
-                            <TableCell className="font-medium">
-                              {course?.title || 'Unknown Course'}
-                            </TableCell>
-                            <TableCell>
-                              {new Date(cert.issued_at).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <Button variant="outline" size="sm" asChild>
-                                <Link href={`/certificates/${cert.id}`}>
-                                  View Certificate
-                                </Link>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                  <div className="space-y-4">
+                    {certificates.map((cert) => {
+                      const course = Array.isArray(cert.courses) ? cert.courses[0] : cert.courses;
+                      return (
+                        <div
+                          key={cert.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                        >
+                          <div className="flex items-start gap-4">
+                            {course?.thumbnail_url && (
+                              <img
+                                src={course.thumbnail_url}
+                                alt={course?.title || 'Course'}
+                                className="w-20 h-20 object-cover rounded-md"
+                              />
+                            )}
+                            <div>
+                              <h4 className="font-semibold text-lg mb-1">
+                                {course?.title || 'Unknown Course'}
+                              </h4>
+                              <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                                <p>
+                                  Certificate No:{" "}
+                                  <span className="font-mono font-semibold">
+                                    {cert.certificate_number}
+                                  </span>
+                                </p>
+                                <p>
+                                  Issued:{" "}
+                                  {new Date(cert.issued_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/certificates/${cert.id}`}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Link>
+                            </Button>
+                            <Button size="sm" asChild>
+                              <Link href={`/certificates/${cert.id}?download=true`}>
+                                <Download className="h-4 w-4 mr-2" />
+                                Download
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <div className="text-center py-8">
                     <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

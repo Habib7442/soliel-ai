@@ -2,6 +2,7 @@
 
 import { createServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import { checkAndGenerateCertificate } from "./certificate.actions";
 
 interface CreateEnrollmentParams {
   userId: string;
@@ -299,19 +300,11 @@ export const markLessonComplete = async (userId: string, lessonId: string, cours
         .eq('user_id', userId)
         .eq('course_id', courseId);
       
-      // Auto-generate certificate
-      const { error: certError } = await supabase
-        .from('certificates')
-        .upsert({
-          user_id: userId,
-          course_id: courseId,
-          issued_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,course_id'
-        });
+      // Auto-generate certificate using proper certificate generation
+      const certResult = await checkAndGenerateCertificate(userId, courseId);
       
-      if (certError) {
-        console.error('Error generating certificate:', certError);
+      if (!certResult.success) {
+        console.log('Certificate generation note:', certResult.error);
       }
     }
     
@@ -366,31 +359,63 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
       return { success: false, error: 'Course not found' };
     }
     
-    // Get sections with lessons
+    // Get sections
     const { data: sections, error: sectionsError } = await supabase
       .from('course_sections')
-      .select(`
-        id,
-        title,
-        description,
-        order_index,
-        lessons (
-          id,
-          title,
-          lesson_type,
-          video_url,
-          content_md,
-          duration_minutes,
-          order_index,
-          is_preview
-        )
-      `)
+      .select('id, title, description, order_index')
       .eq('course_id', courseId)
       .order('order_index', { ascending: true });
     
     if (sectionsError) {
-      return { success: false, error: 'Failed to load course content' };
+      return { success: false, error: 'Failed to load course sections' };
     }
+    
+    // Get all lessons for this course separately
+    const { data: allLessons, error: lessonsError } = await supabase
+      .from('lessons')
+      .select('id, title, lesson_type, video_url, content_md, duration_minutes, order_index, is_preview, section_id')
+      .eq('course_id', courseId)
+      .order('order_index', { ascending: true });
+    
+    if (lessonsError) {
+      return { success: false, error: 'Failed to load course lessons' };
+    }
+    
+    // Filter to only include lessons with actual content (video URL or content markdown)
+    const lessonsWithContent = (allLessons || []).filter(lesson => {
+      const hasVideo = lesson.video_url && lesson.video_url.trim() !== '';
+      const hasContent = lesson.content_md && lesson.content_md.trim() !== '';
+      return hasVideo || hasContent;
+    });
+    
+    // Group lessons by section_id
+    interface LessonData {
+      id: string;
+      title: string;
+      lesson_type: string;
+      video_url: string | null;
+      content_md: string | null;
+      duration_minutes: number | null;
+      order_index: number;
+      is_preview: boolean;
+      section_id: string;
+    }
+    
+    const lessonsBySection = new Map<string, LessonData[]>();
+    lessonsWithContent.forEach(lesson => {
+      if (lesson.section_id) {
+        if (!lessonsBySection.has(lesson.section_id)) {
+          lessonsBySection.set(lesson.section_id, []);
+        }
+        lessonsBySection.get(lesson.section_id)!.push(lesson);
+      }
+    });
+    
+    // Combine sections with their lessons
+    const sectionsWithLessons = (sections || []).map(section => ({
+      ...section,
+      lessons: lessonsBySection.get(section.id) || [],
+    }));
     
     // Get lesson progress
     const { data: lessonProgress } = await supabase
@@ -402,14 +427,16 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
       (lessonProgress || []).map(lp => [lp.lesson_id, lp])
     );
     
-    // Enhance sections with progress
-    const sectionsWithProgress = sections?.map(section => ({
-      ...section,
-      lessons: (section.lessons || []).map(lesson => ({
-        ...lesson,
-        progress: progressMap.get(lesson.id) || { completed: false },
-      })).sort((a, b) => a.order_index - b.order_index),
-    })) || [];
+    // Enhance sections with progress and filter out empty sections
+    const sectionsWithProgress = sectionsWithLessons
+      .map(section => ({
+        ...section,
+        lessons: section.lessons.map((lesson: LessonData) => ({
+          ...lesson,
+          progress: progressMap.get(lesson.id) || { completed: false },
+        })).sort((a: LessonData & { progress: unknown }, b: LessonData & { progress: unknown }) => a.order_index - b.order_index),
+      }))
+      .filter(section => section.lessons.length > 0); // Only include sections with lessons
     
     // Get overall progress
     const { data: overallProgress } = await supabase

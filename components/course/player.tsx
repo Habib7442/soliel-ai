@@ -22,7 +22,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Star,
-  ChevronDown
+  ChevronDown,
+  Award,
+  Download
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
@@ -94,7 +96,15 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
   const [markingComplete, setMarkingComplete] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   
-  const allLessons = sections.flatMap(s => s.lessons).sort((a, b) => a.order_index - b.order_index);
+  // Build ordered lesson list (maintain section order, then lesson order within section)
+  const allLessons = sections
+    .sort((a, b) => a.order_index - b.order_index)
+    .flatMap(section => 
+      section.lessons
+        .sort((a, b) => a.order_index - b.order_index)
+        .map(lesson => ({ ...lesson, sectionOrder: section.order_index }))
+    );
+  
   const currentIndex = allLessons.findIndex(l => l.id === currentLesson?.id);
   const hasNext = currentIndex < allLessons.length - 1;
   const hasPrevious = currentIndex > 0;
@@ -185,6 +195,35 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
           </div>
           
           <Progress value={progress.progress_percent} className="mt-4 h-3" />
+          
+          {/* Certificate Congratulations - Show when 100% complete */}
+          {progress.progress_percent === 100 && (
+            <Card className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
+                      <Award className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-green-900 dark:text-green-100 mb-1">
+                      🎉 Congratulations! Course Completed!
+                    </h3>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      You&apos;ve successfully completed this course. Your certificate is ready!
+                    </p>
+                  </div>
+                  <Button asChild className="bg-green-600 hover:bg-green-700">
+                    <Link href="/profile">
+                      <Download className="h-4 w-4 mr-2" />
+                      View Certificate
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -196,34 +235,53 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
               </CardHeader>
               <CardContent className="p-0">
                 <Accordion type="multiple" defaultValue={sections.map(s => s.id)} className="w-full">
-                  {sections.map((section) => (
+                  {sections.map((section, sectionIndex) => (
                     <AccordionItem key={section.id} value={section.id} className="border-b last:border-0">
                       <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <span className="text-sm font-semibold text-left">{section.title}</span>
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-sm font-semibold text-left">
+                            {sectionIndex + 1}. {section.title}
+                          </span>
+                          <span className="text-xs text-muted-foreground mr-2">
+                            {section.lessons.length} lessons
+                          </span>
+                        </div>
                       </AccordionTrigger>
                       <AccordionContent className="pb-0">
-                        <div className="space-y-1">
-                          {section.lessons.map((lesson) => (
+                        <div className="space-y-0">
+                          {section.lessons.map((lesson, lessonIndex) => (
                             <button
                               key={lesson.id}
                               onClick={() => setCurrentLesson(lesson)}
-                              className={`w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                              className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b last:border-0 ${
                                 currentLesson?.id === lesson.id
                                   ? 'bg-[#FF6B35]/10 border-l-4 border-[#FF6B35]'
-                                  : 'pl-4'
+                                  : ''
                               }`}
                             >
-                              {getLessonIcon(lesson)}
-                              <span className={`text-sm flex-1 ${
-                                currentLesson?.id === lesson.id ? 'font-semibold text-[#FF6B35]' : ''
-                              }`}>
-                                {lesson.title}
-                              </span>
-                              {lesson.duration_minutes && (
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {getLessonIcon(lesson)}
                                 <span className="text-xs text-muted-foreground">
-                                  {lesson.duration_minutes}m
+                                  {sectionIndex + 1}.{lessonIndex + 1}
                                 </span>
-                              )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className={`text-sm block truncate ${
+                                  currentLesson?.id === lesson.id ? 'font-semibold text-[#FF6B35]' : ''
+                                }`}>
+                                  {lesson.title}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {lesson.duration_minutes && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {lesson.duration_minutes}m
+                                  </span>
+                                )}
+                                {lesson.progress?.completed && (
+                                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                )}
+                              </div>
                             </button>
                           ))}
                         </div>
