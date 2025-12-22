@@ -42,6 +42,7 @@ export function Step2Curriculum({ courseData, updateCourseData, onNext }: StepPr
   const [currentSectionIndex, setCurrentSectionIndex] = useState<number | null>(null);
   const [editingSection, setEditingSection] = useState<{ index: number; id: string; title: string; description?: string } | null>(null);
   const [editingLesson, setEditingLesson] = useState<{ index: number; id: string; title: string; lesson_type: LessonType; is_preview: boolean } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   const [sectionForm, setSectionForm] = useState({
     title: "",
@@ -174,6 +175,7 @@ export function Step2Curriculum({ courseData, updateCourseData, onNext }: StepPr
     }
 
     // Save sections and lessons to database
+    setIsSaving(true);
     try {
       const { createSection } = await import("@/server/actions/instructor.actions");
       
@@ -212,6 +214,8 @@ export function Step2Curriculum({ courseData, updateCourseData, onNext }: StepPr
     } catch (error) {
       console.error("Error saving curriculum:", error);
       toast.error("Failed to save curriculum. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -426,10 +430,10 @@ export function Step2Curriculum({ courseData, updateCourseData, onNext }: StepPr
       <div className="flex justify-end pt-6 border-t">
         <Button
           onClick={handleContinue}
-          disabled={sections.length === 0 || totalLessons < 3}
+          disabled={sections.length === 0 || totalLessons < 3 || isSaving}
           className="min-w-[200px]"
         >
-          Save & Continue
+          {isSaving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>
     </div>

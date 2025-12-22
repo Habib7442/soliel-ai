@@ -55,7 +55,7 @@ export const approveCourse = async (courseId: string) => {
     const { data, error } = await supabase
       .from('courses')
       .update({ 
-        status: 'approved',
+        status: 'published',
         is_published: true
       })
       .eq('id', courseId)
@@ -253,7 +253,7 @@ export const getCourseStatistics = async () => {
 
     const stats = {
       total: courses?.length || 0,
-      published: courses?.filter(c => c.is_published === true).length || 0,
+      published: courses?.filter(c => c.status === 'published').length || 0,
       pending: courses?.filter(c => c.status === 'pending').length || 0,
       rejected: courses?.filter(c => c.status === 'rejected').length || 0,
       archived: courses?.filter(c => c.status === 'archived').length || 0

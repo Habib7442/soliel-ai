@@ -225,19 +225,20 @@ export default function AdminCoursesPage() {
   };
 
   const getStatusBadge = (course: Course) => {
-    if (course.is_published) {
-      return <Badge className="bg-green-500 hover:bg-green-600">Published</Badge>;
-    }
-    
+    // Show actual status from database
     switch (course.status) {
+      case 'published':
+        return <Badge className="bg-green-500 hover:bg-green-600">Published</Badge>;
+      case 'approved':
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Approved</Badge>;
       case 'pending':
         return <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending Review</Badge>;
       case 'rejected':
         return <Badge className="bg-red-500 hover:bg-red-600">Rejected</Badge>;
       case 'archived':
         return <Badge className="bg-gray-500 hover:bg-gray-600">Archived</Badge>;
-      case 'approved':
-        return <Badge className="bg-blue-500 hover:bg-blue-600">Approved</Badge>;
+      case 'draft':
+        return <Badge className="bg-gray-400 hover:bg-gray-500">Draft</Badge>;
       default:
         return <Badge variant="outline">{course.status}</Badge>;
     }
@@ -245,7 +246,7 @@ export default function AdminCoursesPage() {
 
   const filteredCourses = courses.filter(course => {
     if (filter === 'all') return true;
-    if (filter === 'published') return course.is_published === true;
+    if (filter === 'published') return course.status === 'published';
     if (filter === 'pending') return course.status === 'pending';
     if (filter === 'rejected') return course.status === 'rejected';
     if (filter === 'archived') return course.status === 'archived';
@@ -419,7 +420,7 @@ export default function AdminCoursesPage() {
                         </Button>
 
                         {/* Approve/Re-publish button for non-published courses */}
-                        {!course.is_published && (
+                        {course.status !== 'published' && (
                           <Button
                             variant="default"
                             size="sm"
@@ -444,7 +445,7 @@ export default function AdminCoursesPage() {
                         </Button>
 
                         {/* Unpublish button for published courses */}
-                        {course.is_published && (
+                        {course.status === 'published' && (
                           <Button
                             variant="secondary"
                             size="sm"
@@ -457,7 +458,7 @@ export default function AdminCoursesPage() {
                         )}
 
                         {/* Delete button - only for unpublished courses */}
-                        {!course.is_published && (
+                        {course.status !== 'published' && (
                           <Button
                             variant="destructive"
                             size="sm"

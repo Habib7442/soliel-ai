@@ -92,7 +92,7 @@ export function PricingSection() {
         {pricingPlans.map((plan, index) => (
           <motion.div
             key={plan.id}
-            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden ${
+            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col ${
               plan.popular ? "ring-2 ring-[#FF6B35] relative" : ""
             }`}
             initial={{ opacity: 0, y: 20 }}
@@ -105,7 +105,7 @@ export function PricingSection() {
               </div>
             )}
             
-            <div className="p-8">
+            <div className="p-8 flex flex-col flex-1">
               <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{plan.name}</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-6">{plan.description}</p>
               
@@ -123,7 +123,7 @@ export function PricingSection() {
                 )}
               </div>
               
-              <ul className="mb-8 space-y-3">
+              <ul className="mb-8 space-y-3 flex-1">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start">
                     <span className="text-[#FF6B35] mr-2">✓</span>
@@ -133,7 +133,7 @@ export function PricingSection() {
               </ul>
               
               <Button 
-                className={`w-full ${
+                className={`w-full mt-auto ${
                   plan.popular 
                     ? "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white" 
                     : "border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white"

@@ -9,8 +9,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertCircle, Video, FileText, HelpCircle, CheckSquare, Code, CheckCircle, Edit2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { AlertCircle, Video, FileText, HelpCircle, CheckSquare, Code, CheckCircle, Edit2, Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase-client";
 import type { CourseData } from "./CourseWizard";
 
 interface StepProps {
@@ -50,6 +52,9 @@ export function Step3ContentUpload({ courseData, updateCourseData, onNext }: Ste
   } | null>(null);
   const [content, setContent] = useState<LessonContent>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [pdfUploadProgress, setPdfUploadProgress] = useState(0);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   const totalLessons = courseData.sections.reduce((sum, section) => sum + section.lessons.length, 0);
   const completedLessons = courseData.sections.reduce(
@@ -61,7 +66,96 @@ export function Step3ContentUpload({ courseData, updateCourseData, onNext }: Ste
     const lesson = courseData.sections[sectionIndex].lessons[lessonIndex];
     setEditingLesson({ sectionIndex, lessonIndex, lesson });
     setContent((lesson.content as LessonContent) || {});
+    setPdfFile(null);
+    setPdfUploadProgress(0);
     setIsDialogOpen(true);
+  };
+
+  const handlePdfFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Please select a PDF file');
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+      toast.error('PDF size should be less than 50MB');
+      return;
+    }
+
+    setPdfFile(file);
+    
+    // Auto-upload immediately after file selection
+    await handleUploadPdf(file);
+  };
+
+  const handleUploadPdf = async (fileToUpload?: File) => {
+    const file = fileToUpload || pdfFile;
+    if (!file) {
+      toast.error('Please select a PDF file first');
+      return;
+    }
+
+    try {
+      setUploadingPdf(true);
+      setPdfUploadProgress(10);
+      
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      setPdfUploadProgress(20);
+      
+      if (authError || !user) {
+        toast.error('You must be logged in to upload files');
+        return;
+      }
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      
+      setPdfUploadProgress(30);
+      
+      const { data, error: uploadError } = await supabase.storage
+        .from('course-pdfs')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      setPdfUploadProgress(70);
+
+      if (uploadError) {
+        toast.error(`Failed to upload: ${uploadError.message}`);
+        return;
+      }
+
+      if (!data) {
+        toast.error('Upload failed: No data returned');
+        return;
+      }
+
+      setPdfUploadProgress(85);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-pdfs')
+        .getPublicUrl(fileName);
+      
+      setPdfUploadProgress(100);
+      
+      setContent({ ...content, pdf_url: publicUrl });
+      toast.success('PDF uploaded successfully!');
+      setPdfFile(null);
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setPdfUploadProgress(0);
+    } catch (err) {
+      console.error('PDF upload error:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to upload PDF');
+      setPdfUploadProgress(0);
+    } finally {
+      setUploadingPdf(false);
+    }
   };
 
   const handleSaveContent = () => {
@@ -133,10 +227,41 @@ export function Step3ContentUpload({ courseData, updateCourseData, onNext }: Ste
                 value={content.pdf_url || ""}
                 onChange={(e) => setContent({ ...content, pdf_url: e.target.value })}
                 placeholder="https://... or upload PDF"
+                disabled={uploadingPdf}
               />
               <p className="text-sm text-muted-foreground">
                 Direct link to PDF file or upload to storage
               </p>
+            </div>
+
+            {/* PDF Upload Section */}
+            <div className="border-t pt-4">
+              <Label className="text-sm font-medium">Or Upload PDF File</Label>
+              <div className="mt-2 space-y-3">
+                <Input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handlePdfFileChange}
+                  disabled={uploadingPdf}
+                />
+                {pdfFile && (
+                  <p className="text-sm text-muted-foreground">
+                    Selected: {pdfFile.name} ({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
+                {uploadingPdf && pdfUploadProgress > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Uploading...</span>
+                    </div>
+                    <Progress value={pdfUploadProgress} className="h-2" />
+                    <p className="text-xs text-muted-foreground text-center">
+                      {pdfUploadProgress}%
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );

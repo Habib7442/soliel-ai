@@ -252,7 +252,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     <SelectContent>
                       <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
                       <SelectItem value={UserRole.INSTRUCTOR}>Instructor</SelectItem>
-                      <SelectItem value={UserRole.COMPANY_ADMIN}>Company Admin</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

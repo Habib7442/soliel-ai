@@ -134,13 +134,13 @@ export default async function AdminDashboardPage() {
               <Card className="p-6">
                 <CardTitle className="text-xl font-semibold mb-2">View Payments</CardTitle>
                 <CardDescription className="mb-4">View all payment transactions</CardDescription>
-                <Button variant="secondary">View Payments</Button>
+                <Button variant="secondary" disabled>View Payments (Coming Soon)</Button>
               </Card>
               
               <Card className="p-6">
                 <CardTitle className="text-xl font-semibold mb-2">System Reports</CardTitle>
                 <CardDescription className="mb-4">View platform analytics and reports</CardDescription>
-                <Button variant="secondary">View Reports</Button>
+                <Button variant="secondary" disabled>View Reports (Coming Soon)</Button>
               </Card>
             </div>
           </CardContent>

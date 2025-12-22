@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -71,26 +71,109 @@ const STEPS = [
 
 export function CourseWizard({ instructorId }: CourseWizardProps) {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [courseData, setCourseData] = useState<CourseData>({
-    title: "",
-    subtitle: "",
-    description: "",
-    level: "beginner",
-    language: "english",
-    category: "",
-    sections: [],
-    price_cents: 0,
-    currency: "USD",
-    allow_in_bundles: true,
-    bundle_discount_percent: 0,
-    learning_outcomes: [],
-    target_audience: "",
-    requirements: "",
-    enable_qna: true,
-    enable_reviews: true,
-    enable_certificates: true,
+  const STORAGE_KEY = `course-wizard-${instructorId}`;
+  
+  // Load from localStorage on mount
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return parsed.currentStep || 1;
+        } catch (e) {
+          return 1;
+        }
+      }
+    }
+    return 1;
   });
+  
+  const [courseData, setCourseData] = useState<CourseData>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return parsed.courseData || {
+            title: "",
+            subtitle: "",
+            description: "",
+            level: "beginner",
+            language: "english",
+            category: "",
+            sections: [],
+            price_cents: 0,
+            currency: "USD",
+            allow_in_bundles: true,
+            bundle_discount_percent: 0,
+            learning_outcomes: [],
+            target_audience: "",
+            requirements: "",
+            enable_qna: true,
+            enable_reviews: true,
+            enable_certificates: true,
+          };
+        } catch (e) {
+          return {
+            title: "",
+            subtitle: "",
+            description: "",
+            level: "beginner",
+            language: "english",
+            category: "",
+            sections: [],
+            price_cents: 0,
+            currency: "USD",
+            allow_in_bundles: true,
+            bundle_discount_percent: 0,
+            learning_outcomes: [],
+            target_audience: "",
+            requirements: "",
+            enable_qna: true,
+            enable_reviews: true,
+            enable_certificates: true,
+          };
+        }
+      }
+    }
+    return {
+      title: "",
+      subtitle: "",
+      description: "",
+      level: "beginner",
+      language: "english",
+      category: "",
+      sections: [],
+      price_cents: 0,
+      currency: "USD",
+      allow_in_bundles: true,
+      bundle_discount_percent: 0,
+      learning_outcomes: [],
+      target_audience: "",
+      requirements: "",
+      enable_qna: true,
+      enable_reviews: true,
+      enable_certificates: true,
+    };
+  });
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        currentStep,
+        courseData
+      }));
+    }
+  }, [currentStep, courseData, STORAGE_KEY]);
+
+  // Clear localStorage when wizard completes (call this in final step)
+  const clearWizardData = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  };
 
   const updateCourseData = (data: Partial<CourseData>) => {
     setCourseData(prev => ({ ...prev, ...data }));
@@ -198,6 +281,7 @@ export function CourseWizard({ instructorId }: CourseWizardProps) {
           onBack={handleBack}
           isFirstStep={currentStep === 1}
           isLastStep={currentStep === STEPS.length}
+          clearWizardData={clearWizardData}
         />
       </Card>
 

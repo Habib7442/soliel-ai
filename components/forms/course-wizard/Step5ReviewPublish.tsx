@@ -19,9 +19,10 @@ interface StepProps {
   onBack: () => void;
   isFirstStep: boolean;
   isLastStep: boolean;
+  clearWizardData?: () => void;
 }
 
-export function Step5ReviewPublish({ courseData }: StepProps) {
+export function Step5ReviewPublish({ courseData, clearWizardData }: StepProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,6 +58,12 @@ export function Step5ReviewPublish({ courseData }: StepProps) {
       
       if (result.success) {
         toast.success("Course submitted for admin review!");
+        
+        // Clear wizard data from localStorage
+        if (clearWizardData) {
+          clearWizardData();
+        }
+        
         router.push("/instructor-dashboard");
       } else {
         toast.error(result.error || "Failed to submit for review");

@@ -24,6 +24,7 @@ interface StepProps {
 export function Step4PricingSettings({ courseData, updateCourseData, onNext }: StepProps) {
   const [price, setPrice] = useState((courseData.price_cents / 100).toFixed(2));
   const [outcomeInput, setOutcomeInput] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handlePriceChange = (value: string) => {
     setPrice(value);
@@ -62,6 +63,7 @@ export function Step4PricingSettings({ courseData, updateCourseData, onNext }: S
       return;
     }
 
+    setIsSaving(true);
     try {
       // Save pricing and settings to database
       const { updateCourse } = await import("@/server/actions/instructor.actions");
@@ -83,6 +85,8 @@ export function Step4PricingSettings({ courseData, updateCourseData, onNext }: S
     } catch (error) {
       console.error("Error saving pricing settings:", error);
       toast.error("Failed to save settings. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -260,11 +264,12 @@ export function Step4PricingSettings({ courseData, updateCourseData, onNext }: S
           onClick={handleContinue}
           disabled={
             (courseData.learning_outcomes || []).length < 3 ||
-            !courseData.target_audience?.trim()
+            !courseData.target_audience?.trim() ||
+            isSaving
           }
           className="min-w-[200px]"
         >
-          Save & Continue
+          {isSaving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>
     </div>
