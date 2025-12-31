@@ -21,34 +21,56 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
   const { user, loading } = useSupabase();
 
   // Get navigation items based on user role
-  const getNavItems = () => {
-    let items: NavItem[] = [];
+  const getNavItems = () => {    let items: NavItem[] = [];
     
-    // Always include public items
-    items = [...publicNavItems];
+    console.log('📌 UnifiedNavbar building nav for role:', userRole);
     
-    // Add additional public items only when not on instructor dashboard
-    if (!isInstructorDashboard) {
-      items.push(...additionalPublicNavItems);
-    }
-    
-    // Add role-specific items
-    if (userRole) {
+    if (!userRole) {
+      // Public user (not logged in)
+      items = [...publicNavItems];
+      if (!isInstructorDashboard) {
+        items.push(...additionalPublicNavItems);
+      }
+      console.log('👤 Public navigation:', items.map(i => i.name));
+    } else {
+      // Authenticated user with role
       switch (userRole) {
-        case UserRole.STUDENT:
-          items.push(...studentNavItems);
-          break;
-        case UserRole.INSTRUCTOR:
-          items.push(...instructorNavItems);
+        case UserRole.SUPER_ADMIN:
+          // Admin only sees Dashboard and Users (no public items)
+          items.push(...adminNavItems);
+          console.log('🔧 Super Admin navigation:', items.map(i => i.name));
           break;
         case UserRole.COMPANY_ADMIN:
+          // Company admins only see essential navigation (no public items)
           items.push(...companyNavItems);
+          console.log('🏢 Company Admin navigation:', items.map(i => i.name));
           break;
-        case UserRole.SUPER_ADMIN:
-          items.push(...adminNavItems);
+        case UserRole.STUDENT:
+          // Students see public items + student dashboard
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
+          items.push(...studentNavItems);
+          console.log('🎓 Student navigation:', items.map(i => i.name));
+          break;
+        case UserRole.INSTRUCTOR:
+          // Instructors see public items + instructor dashboard
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
+          items.push(...instructorNavItems);
+          console.log('👨‍🏫 Instructor navigation:', items.map(i => i.name));
           break;
         default:
+          // Default to student navigation
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...studentNavItems);
+          console.log('❓ Default (student) navigation:', items.map(i => i.name));
       }
     }
     

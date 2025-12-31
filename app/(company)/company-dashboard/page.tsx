@@ -6,6 +6,28 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
+type EnrollmentWithCourse = {
+  id: string;
+  user_id: string;
+  course_id: string;
+  created_at: string;
+  courses: {
+    id: string;
+    title: string;
+    description: string;
+    thumbnail_url: string;
+    price_cents: number;
+  } | null;
+};
+
+type Employee = {
+  id: string;
+  full_name: string;
+  email: string;
+  company_role: string;
+  created_at: string;
+};
+
 export default async function CompanyDashboardPage() {
   const supabase = await createServerClient();
   // Use getUser() instead of getSession() for security
@@ -57,8 +79,11 @@ export default async function CompanyDashboardPage() {
             {company && (
               <Card className="mb-8 p-4">
                 <CardTitle className="text-2xl mb-2">{company.name}</CardTitle>
-                <CardDescription className="mb-2">{company.description}</CardDescription>
-                <p className="text-muted-foreground">Website: {company.website || 'N/A'}</p>
+                <CardDescription className="mb-2">
+                  Plan: <strong>{company.plan}</strong> | Seats: {company.active_seats}/{company.seat_limit}
+                </CardDescription>
+                <p className="text-muted-foreground">Email: {company.email}</p>
+                <p className="text-muted-foreground">Billing Email: {company.billing_email || 'N/A'}</p>
               </Card>
             )}
             
@@ -96,26 +121,20 @@ export default async function CompanyDashboardPage() {
               <CardTitle className="text-2xl mb-4">Assigned Courses</CardTitle>
               {courses && courses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {courses.map((assignment) => (
-                    <Card key={assignment.id} className="p-4 hover:shadow-md transition-shadow">
+                  {(courses as unknown as EnrollmentWithCourse[]).map((enrollment) => (
+                    <Card key={enrollment.id} className="p-4 hover:shadow-md transition-shadow">
                       <CardTitle className="font-semibold text-lg mb-2">
-                        {assignment.courses && assignment.courses.length > 0 
-                          ? assignment.courses[0].title 
-                          : 'Untitled Course'}
+                        {enrollment.courses?.title || 'Untitled Course'}
                       </CardTitle>
                       <CardDescription className="text-sm mb-4 line-clamp-2">
-                        {assignment.courses && assignment.courses.length > 0 
-                          ? assignment.courses[0].description 
-                          : 'No description available'}
+                        {enrollment.courses?.description || 'No description available'}
                       </CardDescription>
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-primary">
-                          ${assignment.courses && assignment.courses.length > 0 
-                            ? assignment.courses[0].price 
-                            : 0}
+                          ${enrollment.courses?.price_cents ? (enrollment.courses.price_cents / 100).toFixed(2) : '0.00'}
                         </span>
                         <span className="text-sm text-muted-foreground">
-                          Assigned: {new Date(assignment.assigned_at).toLocaleDateString()}
+                          Enrolled: {new Date(enrollment.created_at).toLocaleDateString()}
                         </span>
                       </div>
                     </Card>
@@ -136,24 +155,20 @@ export default async function CompanyDashboardPage() {
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Joined</TableHead>
+                        <TableHead>Role</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {employees.map((employee) => (
+                      {(employees as unknown as Employee[]).map((employee) => (
                         <TableRow key={employee.id}>
                           <TableCell className="font-medium">
-                            {employee.user_profiles && employee.user_profiles.length > 0
-                              ? employee.user_profiles[0].full_name 
-                              : 'Unknown User'}
+                            {employee.full_name || 'Unknown User'}
                           </TableCell>
                           <TableCell>
-                            {employee.user_profiles && employee.user_profiles.length > 0
-                              ? employee.user_profiles[0].email 
-                              : 'No email'}
+                            {employee.email || 'No email'}
                           </TableCell>
                           <TableCell>
-                            {employee.joined_at ? new Date(employee.joined_at).toLocaleDateString() : 'N/A'}
+                            {employee.company_role || 'N/A'}
                           </TableCell>
                         </TableRow>
                       ))}

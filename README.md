@@ -92,3 +92,7 @@ lib/
 providers/
 ├── supabase-provider.tsx  # Supabase context provider
 ```
+
+
+
+e6e4958908253ef1611fb9a7a7f445ce

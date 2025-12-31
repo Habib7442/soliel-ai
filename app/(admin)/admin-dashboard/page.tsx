@@ -140,9 +140,11 @@ export default async function AdminDashboardPage() {
               </Card>
               
               <Card className="p-6">
-                <CardTitle className="text-xl font-semibold mb-2">View Payments</CardTitle>
-                <CardDescription className="mb-4">View all payment transactions</CardDescription>
-                <Button variant="secondary" disabled>View Payments (Coming Soon)</Button>
+                <CardTitle className="text-xl font-semibold mb-2">Manage Companies</CardTitle>
+                <CardDescription className="mb-4">Manage corporate accounts and employee enrollments</CardDescription>
+                <Button variant="secondary" asChild>
+                  <Link href="/admin-companies">Manage Companies</Link>
+                </Button>
               </Card>
             </div>
           </CardContent>
