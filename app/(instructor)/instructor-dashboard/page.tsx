@@ -54,9 +54,14 @@ export default async function InstructorDashboardPage() {
                   Welcome to your instructor dashboard. Here you can manage your courses, view analytics, and interact with students.
                 </CardDescription>
               </div>
-              <Button asChild className="mt-4 md:mt-0">
-                <Link href="/instructor/courses/create">Create New Course</Link>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+                <Button asChild variant="outline">
+                  <Link href="/admin-bundles">Manage Bundles</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/instructor/courses/create">Create New Course</Link>
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

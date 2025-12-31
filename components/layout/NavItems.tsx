@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, BookOpen, DollarSign, Info, HelpCircle, GraduationCap, Users, FileText, User } from "lucide-react";
+import { Home, BookOpen, DollarSign, Info, HelpCircle, GraduationCap, Users, FileText, User, Package } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSupabase } from "@/providers/supabase-provider";
@@ -36,9 +36,9 @@ export const additionalPublicNavItems: NavItem[] = [
     icon: <BookOpen className="h-5 w-5" />,
   },
   {
-    name: "Pricing",
-    href: "/pricing",
-    icon: <DollarSign className="h-5 w-5" />,
+    name: "Bundles",
+    href: "/bundles",
+    icon: <Package className="h-5 w-5" />,
   },
   {
     name: "FAQ",
@@ -52,11 +52,6 @@ export const studentNavItems: NavItem[] = [
     name: "Dashboard",
     href: "/student-dashboard",
     icon: <Home className="h-5 w-5" />,
-  },
-  {
-    name: "Browse Courses",
-    href: "/courses",
-    icon: <BookOpen className="h-5 w-5" />,
   },
 ];
 
@@ -106,17 +101,12 @@ export const adminNavItems: NavItem[] = [
     name: "Dashboard",
     href: "/admin-dashboard",
     icon: <Home className="h-5 w-5" />,
+    role: [UserRole.SUPER_ADMIN],
   },
   {
     name: "Users",
     href: "/admin-users",
     icon: <Users className="h-5 w-5" />,
-    role: [UserRole.SUPER_ADMIN],
-  },
-  {
-    name: "Manage Courses",
-    href: "/admin-courses",
-    icon: <GraduationCap className="h-5 w-5" />,
     role: [UserRole.SUPER_ADMIN],
   },
 ];
@@ -168,27 +158,37 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
       }
     } else {
       // Authenticated user
-      items = [...publicNavItems];
-      
-      // Add additional items only when not on instructor dashboard
-      if (!isInstructorDashboard) {
-        items.push(...additionalPublicNavItems);
-      }
-      
       switch (userRole) {
+        case UserRole.SUPER_ADMIN:
+          // Admin only sees Dashboard and Users (no public items)
+          items.push(...adminNavItems);
+          break;
         case UserRole.STUDENT:
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...studentNavItems);
           break;
         case UserRole.INSTRUCTOR:
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...instructorNavItems);
           break;
         case UserRole.COMPANY_ADMIN:
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...companyNavItems);
           break;
-        case UserRole.SUPER_ADMIN:
-          items.push(...adminNavItems);
-          break;
         default:
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...studentNavItems);
       }
     }

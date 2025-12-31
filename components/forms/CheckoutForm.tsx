@@ -1,51 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { CreditCard, Loader2, Check, DollarSign } from "lucide-react";
+import { Loader2, Check, CreditCard, CheckCircle } from "lucide-react";
 import { createEnrollment } from "@/server/actions/enrollment.actions";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface CheckoutFormProps {
-  courseId: string;
+  courseId?: string;
+  bundleId?: string;
   userId: string;
   userEmail: string;
   userName: string;
   courseTitle: string;
   coursePrice: number;
+  instructorId?: string;
 }
 
 export function CheckoutForm({ 
   courseId, 
+  bundleId,
   userId, 
   userEmail, 
   userName,
   courseTitle,
   coursePrice 
 }: CheckoutFormProps) {
-  const router = useRouter();
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'free'>('stripe');
-  const [processing, setProcessing] = useState(false);
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: userName,
-  });
-  
   const isFree = coursePrice === 0;
   
-  // Handle free enrollment
+  if (isFree) {
+    return <FreeEnrollmentForm courseId={courseId} bundleId={bundleId} userId={userId} />;
+  }
+  
+  return (
+    <StripeCheckoutWrapper
+      courseId={courseId}
+      bundleId={bundleId}
+      userId={userId}
+      userEmail={userEmail}
+      userName={userName}
+      courseTitle={courseTitle}
+      coursePrice={coursePrice}
+    />
+  );
+}
+
+// Free Enrollment Component
+function FreeEnrollmentForm({ courseId,  userId }: { courseId?: string; bundleId?: string; userId: string }) {
+  const router = useRouter();
+  const [processing, setProcessing] = useState(false);
+  
   const handleFreeEnrollment = async () => {
     setProcessing(true);
     
     try {
+      // For now, only support free course enrollment (bundles typically aren't free)
+      if (!courseId) {
+        toast.error("Invalid enrollment request");
+        setProcessing(false);
+        return;
+      }
+      
       const result = await createEnrollment({
         userId,
         courseId,
@@ -70,204 +93,218 @@ export function CheckoutForm({
     }
   };
   
-  // Simulate Stripe payment (DUMMY)
-  const handleStripePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setProcessing(true);
-    
-    // Validate card details (dummy validation)
-    if (!cardDetails.cardNumber || !cardDetails.expiryDate || !cardDetails.cvv || !cardDetails.cardholderName) {
-      toast.error("Please fill in all card details");
-      setProcessing(false);
-      return;
-    }
-    
-    // Simulate Stripe API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    try {
-      // Simulate Stripe payment intent creation
-      const mockStripeResponse = {
-        id: `pi_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-        status: 'succeeded',
-        amount: coursePrice,
-        currency: 'usd',
-        payment_method: 'card',
-        receipt_url: `https://stripe.com/receipts/${Date.now()}`,
-        created: Date.now(),
-      };
-      
-      // Create enrollment after "successful" payment
-      const result = await createEnrollment({
-        userId,
-        courseId,
-        purchaseType: 'single_course',
-        paymentProvider: 'stripe',
-        amountCents: coursePrice,
-        stripePaymentIntentId: mockStripeResponse.id,
-        receiptUrl: mockStripeResponse.receipt_url,
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Free Course Enrollment</CardTitle>
+        <CardDescription>
+          This course is free! Click below to start learning.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Alert className="mb-6 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+          <Check className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800 dark:text-green-200">
+            No payment required. Enroll instantly and start learning!
+          </AlertDescription>
+        </Alert>
+        
+        <Button 
+          onClick={handleFreeEnrollment}
+          disabled={processing}
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 text-lg"
+        >
+          {processing ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Enrolling...
+            </>
+          ) : (
+            <>
+              <Check className="mr-2 h-5 w-5" />
+              Enroll for Free
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Stripe Checkout Wrapper
+function StripeCheckoutWrapper(props: CheckoutFormProps) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Create payment intent
+    fetch("/api/create-payment-intent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        courseId: props.courseId,
+        bundleId: props.bundleId,
+        amount: props.coursePrice,
+        currency: "usd",
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          setError(data.error);
+          setLoading(false);
+        } else {
+          setClientSecret(data.clientSecret);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Error creating payment intent:", err);
+        setError("Failed to initialize payment");
+        setLoading(false);
       });
-      
-      if (result.success) {
-        toast.success("Payment successful! Enrollment complete!");
-        setTimeout(() => {
-          router.push(`/learn/${courseId}/player`);
-        }, 1500);
-      } else {
-        toast.error(result.error || "Enrollment failed after payment");
-        setProcessing(false);
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast.error("Payment processing failed");
-      setProcessing(false);
-    }
-  };
-  
-  if (isFree) {
+  }, [props.courseId, props.bundleId, props.coursePrice]);
+
+  if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Free Course Enrollment</CardTitle>
-          <CardDescription>
-            This course is free! Click below to start learning.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert className="mb-6 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-            <Check className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800 dark:text-green-200">
-              No payment required. Enroll instantly and start learning!
-            </AlertDescription>
-          </Alert>
-          
-          <Button 
-            onClick={handleFreeEnrollment}
-            disabled={processing}
-            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 text-lg"
-          >
-            {processing ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Enrolling...
-              </>
-            ) : (
-              <>
-                <Check className="mr-2 h-5 w-5" />
-                Enroll for Free
-              </>
-            )}
-          </Button>
+        <CardContent className="py-12">
+          <div className="flex flex-col items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Loading payment form...</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
-  
+
+  if (error || !clientSecret) {
+    return (
+      <Card>
+        <CardContent className="py-12">
+          <Alert variant="destructive">
+            <AlertDescription>{error || "Failed to load payment form"}</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <form onSubmit={handleStripePayment}>
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        appearance: {
+          theme: "stripe",
+        },
+      }}
+    >
+      <PaymentForm {...props} />
+    </Elements>
+  );
+}
+
+// Payment Form Component
+function PaymentForm({
+  courseId,
+  bundleId,
+  coursePrice,
+}: CheckoutFormProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const router = useRouter();
+  const [processing, setProcessing] = useState(false);
+  const [succeeded, setSucceeded] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      toast.error("Stripe has not loaded yet");
+      return;
+    }
+
+    setProcessing(true);
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
+      });
+
+      if (error) {
+        toast.error(error.message || "Payment failed");
+        setProcessing(false);
+      } else if (paymentIntent && paymentIntent.status === "succeeded") {
+        setSucceeded(true);
+        const successMessage = bundleId 
+          ? "Payment successful! You've been enrolled in all bundle courses..."
+          : "Payment successful! Enrolling you in the course...";
+        toast.success(successMessage);
+        
+        // The webhook will handle creating the enrollment, but we redirect the user
+        setTimeout(() => {
+          // For bundles, redirect to dashboard. For single courses, go to course player
+          if (bundleId) {
+            router.push(`/student-dashboard`);
+          } else if (courseId) {
+            router.push(`/learn/${courseId}/player`);
+          } else {
+            router.push(`/student-dashboard`);
+          }
+        }, 2000);
+      } else {
+        toast.error("Payment processing. Please check your enrollment status.");
+        setProcessing(false);
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      toast.error("An unexpected error occurred");
+      setProcessing(false);
+    }
+  };
+
+  if (succeeded) {
+    return (
+      <Card>
+        <CardContent className="py-12">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <h3 className="text-2xl font-bold mb-2">Payment Successful!</h3>
+            <p className="text-muted-foreground mb-4">
+              {bundleId 
+                ? "You've been enrolled in all bundle courses. Redirecting to your dashboard..."
+                : "You've been enrolled in the course. Redirecting..."}
+            </p>
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle>Payment Information</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Payment Information
+          </CardTitle>
           <CardDescription>
             Enter your payment details to complete enrollment
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Payment Method Selection */}
-          <div className="space-y-3">
-            <Label>Payment Method</Label>
-            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'stripe')}>
-              <div className="flex items-center space-x-2 border rounded-lg p-4">
-                <RadioGroupItem value="stripe" id="stripe" />
-                <Label htmlFor="stripe" className="flex items-center gap-2 cursor-pointer flex-1">
-                  <CreditCard className="h-5 w-5" />
-                  <span>Credit / Debit Card</span>
-                </Label>
-                <div className="flex gap-2">
-                  <div className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Visa</div>
-                  <div className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Mastercard</div>
-                </div>
-              </div>
-            </RadioGroup>
-          </div>
+          <PaymentElement />
           
-          <Alert>
-            <DollarSign className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Demo Mode:</strong> This is a simulated Stripe integration. Use any card details to test the enrollment flow.
-            </AlertDescription>
-          </Alert>
-          
-          {/* Card Details */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardholderName">Cardholder Name</Label>
-              <Input
-                id="cardholderName"
-                placeholder="John Doe"
-                value={cardDetails.cardholderName}
-                onChange={(e) => setCardDetails({ ...cardDetails, cardholderName: e.target.value })}
-                required
-                className="h-12"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="4242 4242 4242 4242"
-                value={cardDetails.cardNumber}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                  setCardDetails({ ...cardDetails, cardNumber: value });
-                }}
-                maxLength={19}
-                required
-                className="h-12"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Expiry Date</Label>
-                <Input
-                  id="expiryDate"
-                  placeholder="MM/YY"
-                  value={cardDetails.expiryDate}
-                  onChange={(e) => {
-                    let value = e.target.value.replace(/\D/g, '');
-                    if (value.length >= 2) {
-                      value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                    }
-                    setCardDetails({ ...cardDetails, expiryDate: value });
-                  }}
-                  maxLength={5}
-                  required
-                  className="h-12"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  type="password"
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value.replace(/\D/g, '') })}
-                  maxLength={4}
-                  required
-                  className="h-12"
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Submit Button */}
           <Button 
             type="submit"
-            disabled={processing}
+            disabled={!stripe || processing}
             className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white h-14 text-lg font-semibold"
           >
             {processing ? (
@@ -284,7 +321,7 @@ export function CheckoutForm({
           </Button>
           
           <p className="text-xs text-center text-muted-foreground">
-            By completing this purchase, you agree to our Terms of Service and Privacy Policy
+            Secured by Stripe. By completing this purchase, you agree to our Terms of Service.
           </p>
         </CardContent>
       </Card>

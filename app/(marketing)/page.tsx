@@ -1,6 +1,6 @@
 import { HeroSection } from "@/components/layout/HeroSection";
 import { Courses } from "@/components/layout/Courses";
-import { PricingSection } from "@/components/layout/PricingSection";
+import { BundlesSection } from "@/components/layout/BundlesSection";
 import { EnterpriseSection } from "@/components/layout/EnterpriseSection";
 import { FeaturesSection } from "@/components/layout/FeaturesSection";
 import { LabsSection } from "@/components/layout/LabsSection";
@@ -43,8 +43,8 @@ export default async function Home() {
     <div className="w-full">
       <HeroSection />
       <Courses />
+      <BundlesSection />
       <HowItWorksSection />
-      <PricingSection />
       <EnterpriseSection />
       <LabsSection />
       <QuizSection />

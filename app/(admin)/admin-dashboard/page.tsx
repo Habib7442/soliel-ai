@@ -132,15 +132,17 @@ export default async function AdminDashboardPage() {
               </Card>
               
               <Card className="p-6">
-                <CardTitle className="text-xl font-semibold mb-2">View Payments</CardTitle>
-                <CardDescription className="mb-4">View all payment transactions</CardDescription>
-                <Button variant="secondary" disabled>View Payments (Coming Soon)</Button>
+                <CardTitle className="text-xl font-semibold mb-2">Manage Bundles</CardTitle>
+                <CardDescription className="mb-4">Create and manage course bundles with discounts</CardDescription>
+                <Button variant="secondary" asChild>
+                  <Link href="/admin-bundles">Manage Bundles</Link>
+                </Button>
               </Card>
               
               <Card className="p-6">
-                <CardTitle className="text-xl font-semibold mb-2">System Reports</CardTitle>
-                <CardDescription className="mb-4">View platform analytics and reports</CardDescription>
-                <Button variant="secondary" disabled>View Reports (Coming Soon)</Button>
+                <CardTitle className="text-xl font-semibold mb-2">View Payments</CardTitle>
+                <CardDescription className="mb-4">View all payment transactions</CardDescription>
+                <Button variant="secondary" disabled>View Payments (Coming Soon)</Button>
               </Card>
             </div>
           </CardContent>
