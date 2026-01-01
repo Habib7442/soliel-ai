@@ -104,3 +104,17 @@ export type FAQCategory = {
   name: string;
   count: number;
 };
+
+// Course-specific FAQ types
+export type CourseFAQ = {
+  id: string;
+  course_id: string;
+  question: string;
+  answer_md: string; // Markdown format
+  category: string | null;
+  order_index: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+};

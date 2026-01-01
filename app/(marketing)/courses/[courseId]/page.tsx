@@ -523,8 +523,8 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
               </CardContent>
             </Card>
             
-            {/* FAQ - Only show for enrolled users or hide completely */}
-            {isEnrolled && <CourseFaqDisplay courseId={courseId} />}
+            {/* FAQ - Show to everyone */}
+            <CourseFaqDisplay courseId={courseId} />
           </div>
           
           {/* Right Sidebar */}

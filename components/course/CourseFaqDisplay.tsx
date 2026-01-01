@@ -8,32 +8,22 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCourseFaqs } from "@/server/actions/instructor.actions";
+import { getCourseFAQs } from "@/server/actions/course-faq.actions";
+import type { CourseFAQ } from "@/types/db";
 import ReactMarkdown from "react-markdown";
 import { HelpCircle, GripVertical } from "lucide-react";
-
-interface CourseFaq {
-  id: string;
-  course_id: string;
-  question: string;
-  answer_md: string;
-  category?: string;
-  order_index?: number;
-  created_at: string;
-  updated_at?: string;
-}
 
 interface CourseFaqDisplayProps {
   courseId: string;
 }
 
 export const CourseFaqDisplay = ({ courseId }: CourseFaqDisplayProps) => {
-  const [faqs, setFaqs] = useState<CourseFaq[]>([]);
+  const [faqs, setFaqs] = useState<CourseFAQ[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFaqs = async () => {
-      const result = await getCourseFaqs(courseId);
+      const result = await getCourseFAQs(courseId);
       if (result.success && result.data) {
         setFaqs(result.data);
       }
@@ -64,8 +54,8 @@ export const CourseFaqDisplay = ({ courseId }: CourseFaqDisplayProps) => {
   }
 
   // Group FAQs by category
-  const faqsByCategory: Record<string, CourseFaq[]> = {};
-  const uncategorized: CourseFaq[] = [];
+  const faqsByCategory: Record<string, CourseFAQ[]> = {};
+  const uncategorized: CourseFAQ[] = [];
   
   faqs.forEach(faq => {
     if (faq.category) {

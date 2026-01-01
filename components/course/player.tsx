@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { VideoPlayer } from "./VideoPlayer";
 import { ReviewForm } from "./ReviewForm";
+import { CourseFaqDisplay } from "./CourseFaqDisplay";
 import { 
   CheckCircle2, 
   Circle, 
@@ -446,6 +447,9 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                     </CollapsibleContent>
                   </Collapsible>
                 </Card>
+                
+                {/* FAQ Section */}
+                <CourseFaqDisplay courseId={course.id} />
               </>
             ) : (
               <Card>

@@ -44,20 +44,14 @@ const handleSignOut = async () => {
       console.error('Sign out error:', error);
       toast.error('Failed to sign out. Please try again.');
       setLoading(false);
-      return; // Don't redirect if there's an error
+      return;
     }
     
     console.log('Signout successful, redirecting to home page');
     toast.success('You have been signed out successfully.');
     
-    // Immediate redirect without waiting
-    router.push('/');
-    
-    // Reset loading state and refresh after navigation starts
-    setTimeout(() => {
-      setLoading(false);
-      router.refresh(); // Refresh to clear any cached data
-    }, 100);
+    // Use window.location for hard redirect to clear all state
+    window.location.href = '/';
     
   } catch (error) {
     console.error('Sign out error:', error);

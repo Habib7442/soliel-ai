@@ -9,9 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { GripVertical, PlusCircle, Edit, Trash2, HelpCircle } from "lucide-react";
-import { getCourseFaqs, createCourseFaq, updateCourseFaq, deleteCourseFaq } from "@/server/actions/instructor.actions";
-import { useInstructorStore } from "@/hooks/useInstructorStore";
+import { GripVertical, PlusCircle, Edit, Trash2, HelpCircle, Eye, EyeOff } from "lucide-react";
+import { getAllCourseFAQs, createCourseFAQ, updateCourseFAQ, deleteCourseFAQ, toggleCourseFAQStatus } from "@/server/actions/course-faq.actions";
+import type { CourseFAQ } from "@/types/db";
 import ReactMarkdown from "react-markdown";
 import dynamic from "next/dynamic";
 
@@ -32,7 +32,8 @@ interface FaqFormData {
 }
 
 export const FaqManager = ({ courseId }: FaqManagerProps) => {
-  const { courseFaqs, setCourseFaqs, faqsLoading, setFaqsLoading } = useInstructorStore();
+  const [courseFaqs, setCourseFaqs] = useState<CourseFAQ[]>([]);
+  const [faqsLoading, setFaqsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<{
     id: string;
@@ -49,7 +50,7 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
   useEffect(() => {
     const fetchFaqs = async () => {
       setFaqsLoading(true);
-      const result = await getCourseFaqs(courseId);
+      const result = await getAllCourseFAQs(courseId);
       if (result.success && result.data) {
         setCourseFaqs(result.data);
       }
@@ -74,10 +75,10 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
 
     try {
       if (editingFaq) {
-        const result = await updateCourseFaq(editingFaq.id, formData);
+        const result = await updateCourseFAQ(editingFaq.id, courseId, formData);
         if (result.success) {
           toast.success("FAQ updated successfully!");
-          const updatedFaqs = await getCourseFaqs(courseId);
+          const updatedFaqs = await getAllCourseFAQs(courseId);
           if (updatedFaqs.success && updatedFaqs.data) {
             setCourseFaqs(updatedFaqs.data);
           }
@@ -85,7 +86,7 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
           toast.error(result.error || "Failed to update FAQ");
         }
       } else {
-        const result = await createCourseFaq({
+        const result = await createCourseFAQ({
           course_id: courseId,
           question: formData.question,
           answer_md: formData.answer_md,
@@ -94,7 +95,7 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
 
         if (result.success) {
           toast.success("FAQ created successfully!");
-          const updatedFaqs = await getCourseFaqs(courseId);
+          const updatedFaqs = await getAllCourseFAQs(courseId);
           if (updatedFaqs.success && updatedFaqs.data) {
             setCourseFaqs(updatedFaqs.data);
           }
@@ -126,10 +127,10 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
       return;
     }
 
-    const result = await deleteCourseFaq(faqId);
+    const result = await deleteCourseFAQ(faqId, courseId);
     if (result.success) {
       toast.success("FAQ deleted successfully!");
-      const updatedFaqs = await getCourseFaqs(courseId);
+      const updatedFaqs = await getAllCourseFAQs(courseId);
       if (updatedFaqs.success && updatedFaqs.data) {
         setCourseFaqs(updatedFaqs.data);
       }
