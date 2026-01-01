@@ -313,7 +313,7 @@ Type the company name to confirm.`
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-[#FF6B35]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF0000]" />
       </div>
     );
   }
@@ -337,7 +337,7 @@ Type the company name to confirm.`
             <DialogTrigger asChild>
               <Button
                 onClick={() => handleOpenDialog()}
-                className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D]"
+                className="bg-gradient-to-r from-[#FF0000] to-[#CC0000]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Company
@@ -498,7 +498,7 @@ Type the company name to confirm.`
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D]"
+                    className="bg-gradient-to-r from-[#FF0000] to-[#CC0000]"
                   >
                     {submitting ? (
                       <>
@@ -526,7 +526,7 @@ Type the company name to confirm.`
                   </p>
                   <p className="text-2xl font-bold">{companies.length}</p>
                 </div>
-                <Building2 className="w-8 h-8 text-[#FF6B35]" />
+                <Building2 className="w-8 h-8 text-[#FF0000]" />
               </div>
             </CardContent>
           </Card>
@@ -648,7 +648,7 @@ Type the company name to confirm.`
                             title={company.is_active ? "Deactivate company" : "Activate company"}
                           >
                             {company.is_active ? (
-                              <ToggleRight className="w-4 h-4 text-orange-600" />
+                              <ToggleRight className="w-4 h-4 text-red-600" />
                             ) : (
                               <ToggleLeft className="w-4 h-4 text-green-600" />
                             )}
@@ -726,8 +726,8 @@ Type the company name to confirm.`
                   </div>
                 </div>
 
-                <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
-                  <p className="text-sm text-orange-900 dark:text-orange-100">
+                <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-900 dark:text-red-100">
                     <strong>Important:</strong> Admin should change this password after first login at /sign-in
                   </p>
                 </div>

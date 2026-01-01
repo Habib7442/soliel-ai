@@ -131,7 +131,7 @@ export default function CoursesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white py-16">
+      <div className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white py-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ export default function CoursesPage() {
                 placeholder="Search courses..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 border-2 focus:border-[#FF6B35] rounded-lg text-base"
+                className="pl-10 h-12 border-2 focus:border-[#FF0000] rounded-lg text-base"
               />
             </div>
 
@@ -199,7 +199,7 @@ export default function CoursesPage() {
                   <Filter size={20} className="mr-2" />
                   Filters
                   {activeFiltersCount > 0 && (
-                    <Badge className="ml-2 bg-[#FF6B35] hover:bg-[#FF844B] rounded-full h-5 px-2 text-xs">
+                    <Badge className="ml-2 bg-[#FF0000] hover:bg-[#CC0000] rounded-full h-5 px-2 text-xs">
                       {activeFiltersCount}
                     </Badge>
                   )}
@@ -356,7 +356,7 @@ export default function CoursesPage() {
             </p>
             <Button 
               onClick={clearFilters} 
-              className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088]"
+              className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90"
             >
               Clear All Filters
             </Button>
@@ -430,7 +430,7 @@ export default function CoursesPage() {
                     <Button
                       variant={currentPage === page ? "default" : "outline"}
                       onClick={() => paginate(page)}
-                      className={`rounded-lg ${currentPage === page ? "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white" : ""}`}
+                      className={`rounded-lg ${currentPage === page ? "bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white" : ""}`}
                     >
                       {page}
                     </Button>

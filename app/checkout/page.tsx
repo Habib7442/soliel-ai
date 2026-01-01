@@ -181,7 +181,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
                   
                   <div>
                     {itemData.type === 'bundle' && (
-                      <Badge className="mb-2 bg-[#FF6B35] text-white">
+                      <Badge className="mb-2 bg-[#FF0000] text-white">
                         <Package className="w-3 h-3 mr-1" />
                         Bundle
                       </Badge>
@@ -218,7 +218,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
                   </div>
                   <div className="border-t pt-2 flex justify-between">
                     <span className="font-bold text-lg">Total</span>
-                    <span className="font-bold text-lg text-[#FF6B35]">
+                    <span className="font-bold text-lg text-[#FF0000]">
                       {itemData.price_cents === 0 ? 'Free' : `$${(itemData.price_cents / 100).toFixed(2)}`}
                     </span>
                   </div>

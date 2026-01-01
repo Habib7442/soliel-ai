@@ -15,15 +15,15 @@ export async function BundlesSection() {
   }
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+    <section className="py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <Badge className="mb-4 bg-[#FF6B35] text-white text-sm px-4 py-1">
+          <Badge className="mb-4 bg-[#FF0000] text-white text-sm px-4 py-1">
             <TrendingDown className="w-4 h-4 mr-1" />
             Save up to 20%
           </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#FF0000] to-[#CC0000] bg-clip-text text-transparent">
             Course Bundles
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -32,7 +32,7 @@ export async function BundlesSection() {
         </div>
 
         {/* Bundles Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 max-w-7xl mx-auto">
           {bundles.map((bundle) => {
             const courses = bundle.bundle_courses || [];
             const courseCount = courses.length;
@@ -49,10 +49,10 @@ export async function BundlesSection() {
             return (
               <Card 
                 key={bundle.id} 
-                className="group hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden border-2 hover:border-[#FF6B35]/30"
+                className="group hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden border-2 hover:border-[#FF0000]/30"
               >
                 {/* Bundle Cover Image */}
-                <div className="relative h-48 bg-gradient-to-br from-[#FF6B35]/20 to-[#FF914D]/20 overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-[#FF0000]/20 to-[#CC0000]/20 overflow-hidden">
                   {bundle.cover_url ? (
                     <Image
                       src={bundle.cover_url}
@@ -62,20 +62,20 @@ export async function BundlesSection() {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Package className="w-20 h-20 text-[#FF6B35] opacity-50" />
+                      <Package className="w-20 h-20 text-[#FF0000] opacity-50" />
                     </div>
                   )}
                   
                   {/* Discount Badge */}
                   <div className="absolute top-4 right-4">
-                    <Badge className="bg-[#FF6B35] text-white font-bold text-lg px-3 py-1">
+                    <Badge className="bg-[#FF0000] text-white font-bold text-lg px-3 py-1">
                       {bundle.discount_percent}% OFF
                     </Badge>
                   </div>
                 </div>
 
                 <CardHeader>
-                  <CardTitle className="text-xl group-hover:text-[#FF6B35] transition-colors line-clamp-2">
+                  <CardTitle className="text-xl group-hover:text-[#FF0000] transition-colors line-clamp-2">
                     {bundle.name}
                   </CardTitle>
                   <CardDescription className="line-clamp-2">
@@ -100,7 +100,7 @@ export async function BundlesSection() {
 
                   {/* Pricing */}
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-[#FF6B35]">
+                    <span className="text-2xl font-bold text-[#FF0000]">
                       ${(bundle.price_cents / 100).toFixed(2)}
                     </span>
                     {originalPrice > bundle.price_cents && (
@@ -117,7 +117,7 @@ export async function BundlesSection() {
                 </CardContent>
 
                 <CardFooter>
-                  <Button asChild className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:opacity-90">
+                  <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90">
                     <Link href={`/bundles/${bundle.id}`}>
                       View Details
                     </Link>
@@ -130,7 +130,7 @@ export async function BundlesSection() {
 
         {/* View All Bundles Button */}
         <div className="text-center">
-          <Button asChild size="lg" variant="outline" className="border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white">
+          <Button asChild size="lg" variant="outline" className="border-[#FF0000] text-[#FF0000] hover:bg-[#FF0000] hover:text-white">
             <Link href="/bundles">
               View All Bundles
               <ArrowRight className="w-4 h-4 ml-2" />

@@ -86,3 +86,21 @@ export type BlogCategoryRelation = {
   category_id: string;
   created_at: string;
 };
+
+// FAQ types
+export type FAQ = {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+};
+
+export type FAQCategory = {
+  name: string;
+  count: number;
+};

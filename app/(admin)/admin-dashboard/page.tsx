@@ -115,35 +115,43 @@ export default async function AdminDashboardPage() {
             
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="p-6">
+              <Card className="p-6 flex flex-col">
                 <CardTitle className="text-xl font-semibold mb-2">Manage Users</CardTitle>
-                <CardDescription className="mb-4">View and manage all platform users, including role assignments</CardDescription>
-                <Button asChild>
+                <CardDescription className="mb-4 flex-1">View and manage all platform users, including role assignments</CardDescription>
+                <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 mt-auto">
                   <Link href="/admin-users">Manage Users</Link>
                 </Button>
               </Card>
               
-              <Card className="p-6">
+              <Card className="p-6 flex flex-col">
                 <CardTitle className="text-xl font-semibold mb-2">Manage Courses</CardTitle>
-                <CardDescription className="mb-4">Review and manage all courses</CardDescription>
-                <Button variant="secondary" asChild>
+                <CardDescription className="mb-4 flex-1">Review and manage all courses</CardDescription>
+                <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 mt-auto">
                   <Link href="/admin-courses">Manage Courses</Link>
                 </Button>
               </Card>
               
-              <Card className="p-6">
+              <Card className="p-6 flex flex-col">
                 <CardTitle className="text-xl font-semibold mb-2">Manage Bundles</CardTitle>
-                <CardDescription className="mb-4">Create and manage course bundles with discounts</CardDescription>
-                <Button variant="secondary" asChild>
+                <CardDescription className="mb-4 flex-1">Create and manage course bundles with discounts</CardDescription>
+                <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 mt-auto">
                   <Link href="/admin-bundles">Manage Bundles</Link>
                 </Button>
               </Card>
               
-              <Card className="p-6">
+              <Card className="p-6 flex flex-col">
                 <CardTitle className="text-xl font-semibold mb-2">Manage Companies</CardTitle>
-                <CardDescription className="mb-4">Manage corporate accounts and employee enrollments</CardDescription>
-                <Button variant="secondary" asChild>
+                <CardDescription className="mb-4 flex-1">Manage corporate accounts and employee enrollments</CardDescription>
+                <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 mt-auto">
                   <Link href="/admin-companies">Manage Companies</Link>
+                </Button>
+              </Card>
+              
+              <Card className="p-6 flex flex-col">
+                <CardTitle className="text-xl font-semibold mb-2">Manage FAQs</CardTitle>
+                <CardDescription className="mb-4 flex-1">Create and manage frequently asked questions</CardDescription>
+                <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 mt-auto">
+                  <Link href="/admin-faq">Manage FAQs</Link>
                 </Button>
               </Card>
             </div>

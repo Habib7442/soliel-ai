@@ -45,7 +45,7 @@ export function Courses() {
     <section className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] bg-clip-text text-transparent">
             Featured Courses
           </span>
         </h2>
@@ -62,7 +62,7 @@ export function Courses() {
             variant={activeCategory === category ? "default" : "outline"}
             className={`rounded-full px-6 ${
               activeCategory === category
-                ? "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white hover:from-[#FF844B] hover:to-[#FFB088]"
+                ? "bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white hover:opacity-90"
                 : "border-gray-300 dark:border-gray-600"
             }`}
             onClick={() => setActiveCategory(category)}
@@ -94,7 +94,7 @@ export function Courses() {
         </div>
       ) : (
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
           layout
         >
           {filteredCourses.map((course, index) => (
@@ -133,7 +133,7 @@ export function Courses() {
       <div className="text-center mt-12">
         <Button 
           size="lg" 
-          className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white shadow-lg"
+          className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-white shadow-lg"
           asChild
         >
           <Link href="/courses">View All Courses</Link>

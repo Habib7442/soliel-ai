@@ -95,7 +95,7 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
           <div className="lg:col-span-2 space-y-8">
             {/* Bundle Header */}
             <div>
-              <Badge className="mb-4 bg-[#FF6B35] text-white text-lg px-4 py-1">
+              <Badge className="mb-4 bg-[#FF0000] text-white text-lg px-4 py-1">
                 <TrendingDown className="w-4 h-4 mr-1" />
                 {bundle.discount_percent}% OFF
               </Badge>
@@ -107,12 +107,12 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
               {/* Stats */}
               <div className="flex flex-wrap gap-6 text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-[#FF6B35]" />
+                  <BookOpen className="w-5 h-5 text-[#FF0000]" />
                   <span>{courseCount} {courseCount === 1 ? 'Course' : 'Courses'}</span>
                 </div>
                 {totalDuration > 0 && (
                   <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-[#FF6B35]" />
+                    <Clock className="w-5 h-5 text-[#FF0000]" />
                     <span>{totalDuration} hours total content</span>
                   </div>
                 )}
@@ -153,7 +153,7 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
                       <CardContent className="p-6">
                         <div className="flex gap-4">
                           {/* Course Thumbnail */}
-                          <div className="relative w-32 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#FF6B35]/20 to-[#FF914D]/20">
+                          <div className="relative w-32 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#FF0000]/20 to-[#CC0000]/20">
                             {course.thumbnail_url ? (
                               <Image
                                 src={course.thumbnail_url}
@@ -163,7 +163,7 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
                               />
                             ) : (
                               <div className="flex items-center justify-center h-full">
-                                <BookOpen className="w-8 h-8 text-[#FF6B35] opacity-50" />
+                                <BookOpen className="w-8 h-8 text-[#FF0000] opacity-50" />
                               </div>
                             )}
                           </div>
@@ -217,7 +217,7 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
 
           {/* Sidebar - Purchase Card */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8 border-2 border-[#FF6B35]/20">
+            <Card className="sticky top-8 border-2 border-[#FF0000]/20">
               {/* Cover Image */}
               {bundle.cover_url && (
                 <div className="relative h-48 w-full">
@@ -234,7 +234,7 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
                 {/* Pricing */}
                 <div className="mb-6">
                   <div className="flex items-baseline gap-3 mb-2">
-                    <span className="text-4xl font-bold text-[#FF6B35]">
+                    <span className="text-4xl font-bold text-[#FF0000]">
                       ${(bundle.price_cents / 100).toFixed(2)}
                     </span>
                     {originalPrice > bundle.price_cents && (
@@ -271,7 +271,7 @@ export default async function BundleDetailsPage({ params }: BundleDetailsPagePro
                   <Button 
                     asChild 
                     size="lg" 
-                    className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:opacity-90 text-lg"
+                    className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-lg"
                   >
                     <Link href={`/checkout?bundle=${bundleId}`}>
                       Buy Bundle Now

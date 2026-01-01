@@ -625,7 +625,7 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                                     {getLessonTypeLabel()}
                                   </Badge>
                                   {lesson.is_preview && (
-                                    <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300">
+                                    <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
                                       Preview
                                     </Badge>
                                   )}

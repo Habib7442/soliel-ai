@@ -106,7 +106,7 @@ export default async function StudentDashboardPage() {
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div 
-                            className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] h-2 rounded-full transition-all"
+                            className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] h-2 rounded-full transition-all"
                             style={{ width: `${Math.max(0, progress.progress_percent)}%` }}
                           />
                         </div>

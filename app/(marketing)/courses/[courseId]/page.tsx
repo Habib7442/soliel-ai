@@ -86,7 +86,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Header */}
-      <div className="bg-gradient-to-br from-[#FF6B35] via-[#FF7D47] to-[#FF914D] text-white">
+      <div className="bg-gradient-to-br from-[#FF0000] via-[#DD0000] to-[#CC0000] text-white">
         <div className="container mx-auto px-4 py-6">
           <Button 
             asChild 
@@ -192,7 +192,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                     <div className="flex items-baseline justify-between">
                       <div>
                         <span className="text-sm text-muted-foreground">Price</span>
-                        <p className="text-4xl font-bold text-[#FF6B35]">{formattedPrice}</p>
+                        <p className="text-4xl font-bold text-[#FF0000]">{formattedPrice}</p>
                       </div>
                       {isInBundle && (
                         <Badge className="bg-green-500 text-white">
@@ -217,7 +217,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                         <Button 
                           asChild
                           size="lg"
-                          className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white shadow-lg text-lg py-6"
+                          className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-white shadow-lg text-lg py-6"
                         >
                           <Link href={`/checkout?courseId=${courseId}`}>
                             Enroll Now
@@ -229,7 +229,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                         <Button 
                           variant="outline" 
                           size="lg"
-                          className="w-full border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35]/10"
+                          className="w-full border-2 border-[#FF0000] text-[#FF0000] hover:bg-[#FF0000]/10"
                         >
                           See in Bundle
                         </Button>
@@ -271,7 +271,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Play className="h-6 w-6 text-[#FF6B35]" />
+                    <Play className="h-6 w-6 text-[#FF0000]" />
                     Course Preview
                   </CardTitle>
                   <CardDescription>
@@ -312,7 +312,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                 <CardTitle className="text-2xl">Course Description</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-[#FF6B35] prose-a:text-[#FF6B35]">
+                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-[#FF0000] prose-a:text-[#FF0000]">
                   <ReactMarkdown>{course.description || ""}</ReactMarkdown>
                 </div>
               </CardContent>
@@ -341,7 +341,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-2xl flex items-center gap-2">
-                      <BookOpen className="h-6 w-6 text-[#FF6B35]" />
+                      <BookOpen className="h-6 w-6 text-[#FF0000]" />
                       Course Content
                     </CardTitle>
                     <CardDescription className="mt-2">
@@ -350,7 +350,7 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                     </CardDescription>
                   </div>
                   {!isEnrolled && (
-                    <Badge variant="outline" className="border-[#FF6B35] text-[#FF6B35]">
+                    <Badge variant="outline" className="border-[#FF0000] text-[#FF0000]">
                       <Lock className="h-3 w-3 mr-1" />
                       Enroll to unlock
                     </Badge>
@@ -466,8 +466,8 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-full bg-[#FF6B35]/10 flex items-center justify-center">
-                                        <Play className="h-4 w-4 text-[#FF6B35]" />
+                                      <div className="w-8 h-8 rounded-full bg-[#FF0000]/10 flex items-center justify-center">
+                                        <Play className="h-4 w-4 text-[#FF0000]" />
                                       </div>
                                       <div>
                                         <p className="font-medium text-sm">{lesson.title}</p>
@@ -503,15 +503,15 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                   )}
                   
                   {!isEnrolled && (
-                    <div className="mt-6 p-6 bg-gradient-to-r from-[#FF6B35]/5 to-[#FF914D]/5 dark:from-[#FF6B35]/10 dark:to-[#FF914D]/10 rounded-lg border border-[#FF6B35]/20 text-center">
-                      <Lock className="h-12 w-12 mx-auto mb-3 text-[#FF6B35]" />
+                    <div className="mt-6 p-6 bg-gradient-to-r from-[#FF0000]/5 to-[#CC0000]/5 dark:from-[#FF0000]/10 dark:to-[#CC0000]/10 rounded-lg border border-[#FF0000]/20 text-center">
+                      <Lock className="h-12 w-12 mx-auto mb-3 text-[#FF0000]" />
                       <h3 className="font-semibold text-lg mb-2">Unlock Full Course Content</h3>
                       <p className="text-sm text-muted-foreground mb-4">
                         Enroll now to access all {course.lessons_count} lessons and start learning
                       </p>
                       <Button 
                         asChild
-                        className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white"
+                        className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-white"
                       >
                         <Link href={`/checkout?courseId=${courseId}`}>
                           Enroll Now - {formattedPrice}
@@ -623,10 +623,10 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                       alt={course.instructor.full_name || 'Instructor'}
                       width={60}
                       height={60}
-                      className="w-15 h-15 rounded-full object-cover ring-2 ring-[#FF6B35]/20"
+                      className="w-15 h-15 rounded-full object-cover ring-2 ring-[#FF0000]/20"
                     />
                   ) : (
-                    <div className="w-15 h-15 rounded-full bg-gradient-to-br from-[#FF6B35] to-[#FF914D] flex items-center justify-center ring-2 ring-[#FF6B35]/20">
+                    <div className="w-15 h-15 rounded-full bg-gradient-to-br from-[#FF0000] to-[#CC0000] flex items-center justify-center ring-2 ring-[#FF0000]/20">
                       <span className="text-xl font-bold text-white">
                         {course.instructor?.full_name?.charAt(0) || 'I'}
                       </span>

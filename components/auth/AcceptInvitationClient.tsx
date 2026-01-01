@@ -113,7 +113,7 @@ export default function AcceptInvitationClient({ invitation, token }: AcceptInvi
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-[#FF6B35] rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-12 h-12 bg-[#FF0000] rounded-full flex items-center justify-center mb-4">
             <Building2 className="w-6 h-6 text-white" />
           </div>
           <CardTitle className="text-2xl">Company Invitation</CardTitle>

@@ -50,12 +50,14 @@ const handleSignOut = async () => {
     console.log('Signout successful, redirecting to home page');
     toast.success('You have been signed out successfully.');
     
-    // Wait a moment for the toast to show, then redirect
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Use Next.js router for navigation
+    // Immediate redirect without waiting
     router.push('/');
-    router.refresh(); // Refresh to clear any cached data
+    
+    // Reset loading state and refresh after navigation starts
+    setTimeout(() => {
+      setLoading(false);
+      router.refresh(); // Refresh to clear any cached data
+    }, 100);
     
   } catch (error) {
     console.error('Sign out error:', error);

@@ -63,7 +63,7 @@ export default async function Home() {
         <section className="container mx-auto px-4 py-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] bg-clip-text text-transparent">
                 Latest from Our Blog
               </span>
             </h2>
@@ -72,7 +72,7 @@ export default async function Home() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-7xl mx-auto">
             {blogs.slice(0, 3).map((blog) => (
               <Link key={blog.id} href={`/blog/${blog.slug}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">

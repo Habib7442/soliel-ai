@@ -43,7 +43,7 @@ export default async function BlogPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#FF0000] to-[#CC0000] bg-clip-text text-transparent">
             Blog
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

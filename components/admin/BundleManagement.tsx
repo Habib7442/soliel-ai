@@ -304,7 +304,7 @@ export default function AdminBundlesClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-[#FF6B35]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF0000]" />
       </div>
     );
   }
@@ -324,7 +324,7 @@ export default function AdminBundlesClient() {
             <DialogTrigger asChild>
               <Button 
                 onClick={() => handleOpenDialog()}
-                className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D]"
+                className="bg-gradient-to-r from-[#FF0000] to-[#CC0000]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Bundle
@@ -529,7 +529,7 @@ export default function AdminBundlesClient() {
                         </div>
                         <div className="flex justify-between text-lg font-bold pt-2 border-t">
                           <span>Bundle Price:</span>
-                          <span className="text-[#FF6B35]">
+                          <span className="text-[#FF0000]">
                             ${(bundlePrice / 100).toFixed(2)}
                           </span>
                         </div>
@@ -550,7 +550,7 @@ export default function AdminBundlesClient() {
                   <Button 
                     type="submit" 
                     disabled={submitting || formData.course_ids.length < 2}
-                    className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D]"
+                    className="bg-gradient-to-r from-[#FF0000] to-[#CC0000]"
                   >
                     {submitting ? (
                       <>
@@ -576,7 +576,7 @@ export default function AdminBundlesClient() {
                   <p className="text-sm font-medium text-muted-foreground">Total Bundles</p>
                   <p className="text-2xl font-bold">{bundles.length}</p>
                 </div>
-                <Package className="w-8 h-8 text-[#FF6B35]" />
+                <Package className="w-8 h-8 text-[#FF0000]" />
               </div>
             </CardContent>
           </Card>

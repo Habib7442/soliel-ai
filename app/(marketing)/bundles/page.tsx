@@ -19,13 +19,13 @@ export default async function BundlesPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B35]/10 via-[#FF914D]/10 to-[#FF6B35]/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FF0000]/10 via-[#CC0000]/10 to-[#FF0000]/10" />
         <div className="relative max-w-7xl mx-auto text-center">
-          <Badge className="mb-4 bg-[#FF6B35] text-white">
+          <Badge className="mb-4 bg-[#FF0000] text-white">
             <TrendingDown className="w-3 h-3 mr-1" />
             Save up to 20%
           </Badge>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-[#FF0000] to-[#CC0000] bg-clip-text text-transparent">
             Course Bundles
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
@@ -35,15 +35,15 @@ export default async function BundlesPage() {
           
           {/* Discount Info Cards */}
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-12">
-            <Card className="border-2 border-[#FF6B35]/20">
+            <Card className="border-2 border-[#FF0000]/20">
               <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-[#FF6B35] mb-2">10% OFF</div>
+                <div className="text-3xl font-bold text-[#FF0000] mb-2">10% OFF</div>
                 <p className="text-muted-foreground">When you buy 2 courses together</p>
               </CardContent>
             </Card>
-            <Card className="border-2 border-[#FF914D]/20">
+            <Card className="border-2 border-[#CC0000]/20">
               <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-[#FF914D] mb-2">20% OFF</div>
+                <div className="text-3xl font-bold text-[#CC0000] mb-2">20% OFF</div>
                 <p className="text-muted-foreground">When you buy 3 or more courses</p>
               </CardContent>
             </Card>
@@ -73,10 +73,10 @@ export default async function BundlesPage() {
                 return (
                   <Card 
                     key={bundle.id} 
-                    className="group hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden border-2 hover:border-[#FF6B35]/30"
+                    className="group hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden border-2 hover:border-[#FF0000]/30"
                   >
                     {/* Bundle Cover Image */}
-                    <div className="relative h-48 bg-gradient-to-br from-[#FF6B35]/20 to-[#FF914D]/20 overflow-hidden">
+                    <div className="relative h-48 bg-gradient-to-br from-[#FF0000]/20 to-[#CC0000]/20 overflow-hidden">
                       {bundle.cover_url ? (
                         <Image
                           src={bundle.cover_url}
@@ -86,20 +86,20 @@ export default async function BundlesPage() {
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Package className="w-20 h-20 text-[#FF6B35] opacity-50" />
+                          <Package className="w-20 h-20 text-[#FF0000] opacity-50" />
                         </div>
                       )}
                       
                       {/* Discount Badge */}
                       <div className="absolute top-4 right-4">
-                        <Badge className="bg-[#FF6B35] text-white font-bold text-lg px-3 py-1">
+                        <Badge className="bg-[#FF0000] text-white font-bold text-lg px-3 py-1">
                           {bundle.discount_percent}% OFF
                         </Badge>
                       </div>
                     </div>
 
                     <CardHeader>
-                      <CardTitle className="text-2xl group-hover:text-[#FF6B35] transition-colors">
+                      <CardTitle className="text-2xl group-hover:text-[#FF0000] transition-colors">
                         {bundle.name}
                       </CardTitle>
                       <CardDescription className="line-clamp-2">
@@ -125,7 +125,7 @@ export default async function BundlesPage() {
                       {/* Pricing */}
                       <div className="space-y-2 mb-4">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold text-[#FF6B35]">
+                          <span className="text-3xl font-bold text-[#FF0000]">
                             ${(bundle.price_cents / 100).toFixed(2)}
                           </span>
                           {originalPrice > bundle.price_cents && (
@@ -149,7 +149,7 @@ export default async function BundlesPage() {
                             const course = Array.isArray(bc.courses) ? bc.courses[0] : bc.courses;
                             return (
                               <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                                <span className="text-[#FF6B35] mt-1">•</span>
+                                <span className="text-[#FF0000] mt-1">•</span>
                                 <span className="line-clamp-1">{course?.title || 'Course'}</span>
                               </li>
                             );
@@ -164,7 +164,7 @@ export default async function BundlesPage() {
                     </CardContent>
 
                     <CardFooter className="pt-4">
-                      <Button asChild className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:opacity-90">
+                      <Button asChild className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90">
                         <Link href={`/bundles/${bundle.id}`}>
                           View Bundle Details
                         </Link>
@@ -196,7 +196,7 @@ export default async function BundlesPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
               <CardHeader>
-                <TrendingDown className="w-12 h-12 text-[#FF6B35] mb-4" />
+                <TrendingDown className="w-12 h-12 text-[#FF0000] mb-4" />
                 <CardTitle>Save Money</CardTitle>
               </CardHeader>
               <CardContent>
@@ -208,7 +208,7 @@ export default async function BundlesPage() {
 
             <Card>
               <CardHeader>
-                <BookOpen className="w-12 h-12 text-[#FF6B35] mb-4" />
+                <BookOpen className="w-12 h-12 text-[#FF0000] mb-4" />
                 <CardTitle>Comprehensive Learning</CardTitle>
               </CardHeader>
               <CardContent>
@@ -220,7 +220,7 @@ export default async function BundlesPage() {
 
             <Card>
               <CardHeader>
-                <Package className="w-12 h-12 text-[#FF6B35] mb-4" />
+                <Package className="w-12 h-12 text-[#FF0000] mb-4" />
                 <CardTitle>Convenient Access</CardTitle>
               </CardHeader>
               <CardContent>

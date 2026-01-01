@@ -447,7 +447,7 @@ export default function AdminBlogPage() {
                         onClick={() => handleTogglePublish(blog)}
                         className={
                           blog.status === "published"
-                            ? "text-orange-600"
+                            ? "text-red-600"
                             : "text-green-600"
                         }
                       >

@@ -173,7 +173,7 @@ export default async function AdminCourseViewPage({ params }: { params: Promise<
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <DollarSign className="h-8 w-8 text-orange-500" />
+                <DollarSign className="h-8 w-8 text-red-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">Price</p>
                   <p className="text-2xl font-bold">${(course.price_cents / 100).toFixed(2)}</p>
