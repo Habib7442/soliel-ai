@@ -305,7 +305,7 @@ function PaymentForm({
           <Button 
             type="submit"
             disabled={!stripe || processing}
-            className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white h-14 text-lg font-semibold"
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground h-14 text-lg font-semibold border-0"
           >
             {processing ? (
               <>

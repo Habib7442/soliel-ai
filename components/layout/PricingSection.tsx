@@ -75,15 +75,15 @@ export function PricingSection() {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
-        <Badge className="mb-4 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white">
+        <Badge className="mb-4 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
           Limited Time Offer
         </Badge>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             Course Bundles & Corporate Plans
           </span>
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-muted-foreground max-w-2xl mx-auto">
           Save big with our curated course bundles or get enterprise solutions for your team.
         </p>
       </div>
@@ -92,32 +92,32 @@ export function PricingSection() {
         {pricingPlans.map((plan, index) => (
           <motion.div
             key={plan.id}
-            className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col ${
-              plan.popular ? "ring-2 ring-[#FF6B35] relative" : ""
+            className={`bg-card rounded-xl shadow-lg overflow-hidden flex flex-col ${
+              plan.popular ? "ring-2 ring-primary relative" : ""
             }`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
           >
             {plan.popular && (
-              <div className="bg-[#FF6B35] text-white text-center py-2">
+              <div className="bg-primary text-primary-foreground text-center py-2">
                 <span className="font-bold">Most Popular</span>
               </div>
             )}
             
             <div className="p-8 flex flex-col flex-1">
-              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{plan.name}</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">{plan.description}</p>
+              <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+              <p className="text-muted-foreground mb-6">{plan.description}</p>
               
               <div className="mb-6">
                 <div className="flex items-baseline">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">${plan.price}</span>
+                  <span className="text-4xl font-bold">${plan.price}</span>
                   {plan.originalPrice && (
-                    <span className="ml-2 text-xl text-gray-500 line-through">${plan.originalPrice}</span>
+                    <span className="ml-2 text-xl text-muted-foreground line-through">${plan.originalPrice}</span>
                   )}
                 </div>
                 {plan.originalPrice && (
-                  <div className="mt-2 text-[#FF6B35] font-medium">
+                  <div className="mt-2 text-primary font-medium">
                     Save ${plan.originalPrice - plan.price}
                   </div>
                 )}
@@ -126,8 +126,8 @@ export function PricingSection() {
               <ul className="mb-8 space-y-3 flex-1">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start">
-                    <span className="text-[#FF6B35] mr-2">✓</span>
-                    <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                    <span className="text-primary mr-2">✓</span>
+                    <span className="text-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -135,8 +135,8 @@ export function PricingSection() {
               <Button 
                 className={`w-full mt-auto ${
                   plan.popular 
-                    ? "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white" 
-                    : "border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-white"
+                    ? "bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground shadow-lg border-0" 
+                    : "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 }`}
                 size="lg"
               >
@@ -148,12 +148,12 @@ export function PricingSection() {
       </div>
       
       <div className="text-center mt-16">
-        <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Need a Custom Solution?</h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
+        <h3 className="text-2xl font-bold mb-4">Need a Custom Solution?</h3>
+        <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
           Contact us for enterprise licensing, team training, or custom course development.
         </p>
         <Button 
-          className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white shadow-lg"
+          className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground shadow-lg border-0"
           size="lg"
           asChild
         >

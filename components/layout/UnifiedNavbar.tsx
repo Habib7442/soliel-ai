@@ -88,18 +88,15 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-0">
         {/* Logo on the left */}
-        <div className="flex items-center space-x-2">
-          <Link href="/" className="flex items-center space-x-2">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center">
             <Image
-              src="/images/logo.jpeg"
+              src="/images/logo.png"
               alt="Soliel AI Logo"
-              width={32}
-              height={32}
+              width={40}
+              height={40}
               className="rounded-full"
             />
-            <span className="font-bold text-xl bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
-              Soliel AI
-            </span>
           </Link>
         </div>
 
@@ -109,7 +106,7 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center space-x-2 text-sm font-medium transition-colors text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
+              className="flex items-center space-x-2 text-sm font-medium transition-colors text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary"
             >
               {item.icon}
               <span>{item.name}</span>
@@ -118,7 +115,7 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
           {user && (
             <Link
               href="/profile"
-              className="flex items-center space-x-2 text-sm font-medium transition-colors text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
+              className="flex items-center space-x-2 text-sm font-medium transition-colors text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary"
             >
               <span>Profile</span>
             </Link>
@@ -164,7 +161,7 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="flex items-center space-x-2 text-lg py-2 font-medium transition-colors text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
+                      className="flex items-center space-x-2 text-lg py-2 font-medium transition-colors text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary"
                     >
                       {item.icon}
                       <span>{item.name}</span>
@@ -173,7 +170,7 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
                   {user && (
                     <Link
                       href="/profile"
-                      className="flex items-center space-x-2 text-lg py-2 font-medium transition-colors text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
+                      className="flex items-center space-x-2 text-lg py-2 font-medium transition-colors text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary"
                     >
                       <span>Profile</span>
                     </Link>

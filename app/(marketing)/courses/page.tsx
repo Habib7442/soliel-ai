@@ -129,45 +129,49 @@ export default function CoursesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white py-16">
-        <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+      {/* Hero Section */}
+      <div className="relative bg-white dark:bg-gray-950 border-b dark:border-gray-800 pb-32 pt-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50" />
+        <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Explore Our Course Catalog
+            <Badge variant="outline" className="mb-4 border-primary/20 text-primary bg-primary/5 rounded-full px-4 py-1.5 text-sm uppercase tracking-wider font-semibold">
+              Course Catalog
+            </Badge>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-gray-900 dark:text-white">
+              Expand Your <span className="text-primary">Knowledge</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/90">
-              Discover courses designed by experts to help you master new skills and advance your career
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              Explore our curated library of expert-led courses designed to help you master new skills and advance your career.
             </p>
           </motion.div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-10 max-w-7xl">
+      <div className="container mx-auto px-4 max-w-7xl -mt-20 relative z-20">
         {/* Search and Filters Bar */}
-        <div className="mb-10 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 mb-12">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
               <Input
                 type="text"
-                placeholder="Search courses..."
+                placeholder="Search for courses, skills, or topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 border-2 focus:border-[#FF0000] rounded-lg text-base"
+                className="pl-12 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base"
               />
             </div>
 
             {/* Category Filter */}
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full lg:w-48 h-12 border-2 rounded-lg text-base">
+              <SelectTrigger className="w-full lg:w-48 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-base">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -181,7 +185,7 @@ export default function CoursesPage() {
 
             {/* Level Filter */}
             <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-              <SelectTrigger className="w-full lg:w-48 h-12 border-2 rounded-lg text-base">
+              <SelectTrigger className="w-full lg:w-48 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-base">
                 <SelectValue placeholder="Level" />
               </SelectTrigger>
               <SelectContent>
@@ -195,11 +199,11 @@ export default function CoursesPage() {
             {/* More Filters */}
             <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="h-12 border-2 rounded-lg relative px-4 text-base">
+                <Button variant="outline" className="h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl px-4 text-base hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary hover:border-primary/50 transition-all">
                   <Filter size={20} className="mr-2" />
                   Filters
                   {activeFiltersCount > 0 && (
-                    <Badge className="ml-2 bg-[#FF0000] hover:bg-[#CC0000] rounded-full h-5 px-2 text-xs">
+                    <Badge className="ml-2 bg-primary text-primary-foreground rounded-full h-5 px-2 text-xs">
                       {activeFiltersCount}
                     </Badge>
                   )}
@@ -356,7 +360,7 @@ export default function CoursesPage() {
             </p>
             <Button 
               onClick={clearFilters} 
-              className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8"
             >
               Clear All Filters
             </Button>
@@ -430,7 +434,7 @@ export default function CoursesPage() {
                     <Button
                       variant={currentPage === page ? "default" : "outline"}
                       onClick={() => paginate(page)}
-                      className={`rounded-lg ${currentPage === page ? "bg-gradient-to-r from-[#FF0000] to-[#CC0000] text-white" : ""}`}
+                      className={`rounded-lg ${currentPage === page ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-gray-50 dark:hover:bg-gray-800"}`}
                     >
                       {page}
                     </Button>

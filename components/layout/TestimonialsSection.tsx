@@ -65,11 +65,9 @@ export function TestimonialsSection() {
     <section className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
-            What Our Students Say
-          </span>
+          What Our Students Say
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
           Join thousands of professionals who have transformed their careers with our AI education platform.
         </p>
       </div>
@@ -78,14 +76,14 @@ export function TestimonialsSection() {
         {stats.map((stat, index) => (
           <motion.div
             key={index}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg text-center"
+            className="bg-card rounded-xl p-6 shadow-lg text-center"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
             viewport={{ once: true }}
           >
-            <div className="text-4xl font-bold text-[#FF6B35] mb-2">{stat.value}</div>
-            <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+            <div className="text-4xl font-bold text-primary mb-2">{stat.value}</div>
+            <div className="text-muted-foreground">{stat.label}</div>
           </motion.div>
         ))}
       </div>
@@ -94,7 +92,7 @@ export function TestimonialsSection() {
         {testimonials.map((testimonial, index) => (
           <motion.div
             key={testimonial.id}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
+            className="bg-card rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -107,14 +105,14 @@ export function TestimonialsSection() {
                 <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-bold text-gray-900 dark:text-white">{testimonial.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}</p>
+                <h3 className="font-bold">{testimonial.name}</h3>
+                <p className="text-sm text-muted-foreground">{testimonial.role}</p>
               </div>
             </div>
             
-            <p className="text-gray-700 dark:text-gray-300 mb-4 italic">&#34;{testimonial.content}&#34;</p>
+            <p className="text-foreground mb-4 italic">&#34;{testimonial.content}&#34;</p>
             
-            <div className="text-sm text-[#FF6B35] font-medium">
+            <div className="text-sm text-primary font-medium">
               Completed: {testimonial.course}
             </div>
           </motion.div>

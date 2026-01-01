@@ -1,4 +1,5 @@
 import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
+import { Footer } from "@/components/layout/Footer";
 
 export default function MarketingLayout({
   children,
@@ -11,6 +12,7 @@ export default function MarketingLayout({
       <main className="w-full pt-16">
         {children}
       </main>
+      <Footer />
     </>
   );
 }

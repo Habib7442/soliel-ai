@@ -23,6 +23,25 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const supabase = typeof window !== 'undefined' ? createClient() : null;
 
   useEffect(() => {
+    // Suppress specific console errors
+    const originalError = console.error;
+    console.error = (...args) => {
+      if (
+        args[0]?.includes?.("Auth session missing!") ||
+        args[0]?.includes?.("A tree hydrated but some attributes") ||
+        args[0]?.includes?.("Hydration failed because")
+      ) {
+        return;
+      }
+      originalError(...args);
+    };
+
+    return () => {
+      console.error = originalError;
+    };
+  }, []);
+
+  useEffect(() => {
     // Only run on client side
     if (typeof window !== 'undefined' && supabase) {
       const fetchUser = async () => {

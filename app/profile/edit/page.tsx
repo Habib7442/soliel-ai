@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateUserProfile } from "@/server/actions/user.actions";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
+import { ChevronLeft, Save, User, Loader2, Camera, Mail } from "lucide-react";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Profile {
   id: string;
@@ -98,107 +101,144 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleCancel = () => {
-    router.push("/profile");
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="p-6">
-            <div className="flex items-center justify-center min-h-[200px]">
-              <div className="flex flex-col items-center gap-2">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                <p className="text-muted-foreground">Loading profile...</p>
-              </div>
-            </div>
-          </Card>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+         <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading profile...</p>
+         </div>
       </div>
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="min-h-screen py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="p-6">
-            <div className="flex items-center justify-center min-h-[200px]">
-              <p>Please sign in to edit your profile</p>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  if (!profile) return null;
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card className="p-6">
-          <CardHeader>
-            <CardTitle className="text-3xl mb-6">Edit Profile</CardTitle>
-          </CardHeader>
-          
-          <CardContent>
-            <div className="space-y-6">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" value={profile.email} disabled className="mt-1" />
-                <p className="text-sm text-muted-foreground mt-1">Email cannot be changed</p>
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 pb-20">
+      {/* Header */}
+      <div className="sticky top-0 z-30 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 h-16 flex items-center">
+         <div className="max-w-3xl mx-auto w-full flex items-center justify-between">
+            <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary">
+               <Link href="/profile">
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  Back to Profile
+               </Link>
+            </Button>
+            <h1 className="text-sm font-semibold text-gray-900 dark:text-gray-100 hidden sm:block">
+               Edit Profile
+            </h1>
+            <div className="w-[100px] sm:hidden" />
+         </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+        <Card className="border-none shadow-xl bg-white dark:bg-gray-900 overflow-hidden">
+           <div className="h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-900/10 dark:to-purple-900/10 border-b border-gray-100 dark:border-gray-800" />
+           
+           <CardContent className="px-6 md:px-10 pb-10 -mt-12">
+              <div className="flex flex-col items-center mb-8">
+                 <div className="relative group">
+                    <Avatar className="h-24 w-24 border-4 border-white dark:border-gray-900 shadow-lg">
+                       <AvatarImage src={avatarUrl || profile.avatar_url || ""} />
+                       <AvatarFallback className="text-2xl bg-gray-100 dark:bg-gray-800">
+                          {profile.email?.charAt(0).toUpperCase()}
+                       </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-sm">
+                       <Camera className="h-3 w-3" />
+                    </div>
+                 </div>
+                 <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
+                    Edit Your Profile
+                 </h2>
+                 <p className="text-muted-foreground text-center text-sm max-w-sm mt-1">
+                    Update your personal information and public profile details.
+                 </p>
               </div>
-              
-              <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  className="mt-1"
-                />
+
+              <div className="space-y-6 max-w-lg mx-auto">
+                 <div className="space-y-4">
+                    <div className="space-y-2">
+                       <Label htmlFor="email" className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="h-3 w-3" /> Email Address
+                       </Label>
+                       <Input 
+                          id="email" 
+                          value={profile.email} 
+                          disabled 
+                          className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-muted-foreground cursor-not-allowed" 
+                       />
+                       <p className="text-xs text-muted-foreground ml-1">
+                          Your email address cannot be changed.
+                       </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                       <Label htmlFor="fullName" className="flex items-center gap-2">
+                          <User className="h-3 w-3" /> Full Name
+                       </Label>
+                       <Input
+                         id="fullName"
+                         value={fullName}
+                         onChange={(e) => setFullName(e.target.value)}
+                         placeholder="e.g. John Doe"
+                         className="h-11"
+                       />
+                    </div>
+                    
+                    <div className="space-y-2">
+                       <Label htmlFor="avatarUrl" className="flex items-center gap-2">
+                          <Camera className="h-3 w-3" /> Avatar URL
+                       </Label>
+                       <Input
+                         id="avatarUrl"
+                         value={avatarUrl}
+                         onChange={(e) => setAvatarUrl(e.target.value)}
+                         placeholder="https://example.com/your-photo.jpg"
+                         className="h-11"
+                       />
+                       <p className="text-xs text-muted-foreground ml-1">
+                          Paste a direct link to an image (png, jpg).
+                       </p>
+                    </div>
+                 </div>
+                 
+                 {error && (
+                   <div className="text-red-600 text-sm p-3 bg-red-50 dark:bg-red-900/20 rounded-md border border-red-100 dark:border-red-900/30 flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
+                      {error}
+                   </div>
+                 )}
+                 
+                 <div className="flex gap-4 pt-4">
+                    <Button 
+                       variant="outline" 
+                       onClick={() => router.push("/profile")}
+                       className="flex-1 h-11"
+                    >
+                       Cancel
+                    </Button>
+                    <Button 
+                       onClick={handleSave} 
+                       disabled={saving}
+                       className="flex-1 h-11 relative"
+                    >
+                       {saving ? (
+                          <>
+                             <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                             Saving...
+                          </>
+                       ) : (
+                          <>
+                             <Save className="h-4 w-4 mr-2" />
+                             Save Changes
+                          </>
+                       )}
+                    </Button>
+                 </div>
               </div>
-              
-              <div>
-                <Label htmlFor="avatarUrl">Avatar URL</Label>
-                <Input
-                  id="avatarUrl"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="mt-1"
-                />
-                {avatarUrl && (
-                  <div className="mt-2">
-                    <img 
-                      src={avatarUrl} 
-                      alt="Avatar preview" 
-                      className="h-20 w-20 rounded-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              
-              {error && (
-                <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded">
-                  {error}
-                </div>
-              )}
-              
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} disabled={saving}>
-                  {saving ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
+           </CardContent>
         </Card>
       </div>
     </div>

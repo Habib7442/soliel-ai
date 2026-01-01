@@ -22,17 +22,17 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <span className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               Master AI & Technology
             </span>
             <br />
-            <span className="text-gray-800 dark:text-white">
+            <span className="text-foreground">
               with Interactive Hands-On Learning
             </span>
           </motion.h1>
           
           <motion.p 
-            className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0"
+            className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto lg:mx-0"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -46,7 +46,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Button asChild size="lg" className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-white shadow-lg">
+            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground shadow-lg border-0">
               <Link href="/courses">
                 Explore Courses
               </Link>

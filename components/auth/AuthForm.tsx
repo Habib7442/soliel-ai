@@ -192,7 +192,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     <div className="w-full flex items-center justify-center">
       <Card className="w-full max-w-2xl shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             {mode === "signup" ? "Create Account" : "Sign In"}
           </CardTitle>
           <CardDescription>
@@ -325,7 +325,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
             <Button 
               variant="link" 
-              className="p-0 h-auto font-medium text-[#FF6B35] hover:text-[#FF914D]"
+              className="p-0 h-auto font-medium text-primary hover:text-primary/80"
               onClick={() => router.push(mode === "signup" ? "/sign-in" : "/sign-up")}
             >
               {mode === "signup" ? "Sign In" : "Sign Up"}

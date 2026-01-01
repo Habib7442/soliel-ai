@@ -196,7 +196,7 @@ function StudentProgressDetails({ student, courseId }: { student: Student; cours
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-2xl font-bold">{student.progress_percent}%</span>
-                <TrendingUp className="h-5 w-5 text-[#FF6B35]" />
+                <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <Progress value={student.progress_percent} className="h-3" />
               <p className="text-xs text-muted-foreground">

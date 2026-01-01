@@ -237,6 +237,7 @@ export const getInstructorCourses = async (instructorId: string) => {
         currency,
         status,
         is_published,
+        thumbnail_url,
         created_at,
         updated_at
       `)
@@ -275,9 +276,8 @@ export const getCourseEarnings = async (instructorId: string) => {
       .from('enrollments')
       .select(`
         id,
-        amount,
         created_at,
-        courses (title)
+        courses (title, price_cents)
       `)
       .in('course_id', courseIds)
       .order('created_at', { ascending: false });
@@ -287,7 +287,18 @@ export const getCourseEarnings = async (instructorId: string) => {
       return { success: false, error: `Failed to fetch earnings: ${error.message}` };
     }
 
-    return { success: true, data };
+    // Map the response to include amount
+    const earningsWithAmount = data.map((item: any) => {
+       const course = Array.isArray(item.courses) ? item.courses[0] : item.courses;
+       const priceCents = course?.price_cents || 0;
+       return {
+         ...item,
+         amount: priceCents / 100,
+         courses: item.courses
+       };
+    });
+
+    return { success: true, data: earningsWithAmount };
   } catch (error) {
     console.error('Error in getCourseEarnings:', error);
     return { success: false, error: 'Failed to fetch earnings. Please try again.' };

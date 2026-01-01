@@ -52,31 +52,9 @@ export const additionalPublicNavItems: NavItem[] = [
   },
 ];
 
-export const studentNavItems: NavItem[] = [
-  {
-    name: "Dashboard",
-    href: "/student-dashboard",
-    icon: <Home className="h-5 w-5" />,
-  },
-];
+export const studentNavItems: NavItem[] = [];
 
-export const instructorNavItems: NavItem[] = [
-  {
-    name: "Dashboard",
-    href: "/instructor-dashboard",
-    icon: <Home className="h-5 w-5" />,
-  },
-  {
-    name: "My Courses",
-    href: "/instructor/courses",
-    icon: <GraduationCap className="h-5 w-5" />,
-  },
-  {
-    name: "Earnings",
-    href: "/instructor/earnings",
-    icon: <DollarSign className="h-5 w-5" />,
-  },
-];
+export const instructorNavItems: NavItem[] = [];
 
 export const companyNavItems: NavItem[] = [
   {
@@ -247,8 +225,8 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
         mobile ? "text-lg py-2" : ""
       } ${
         pathname === "/profile"
-          ? "text-[#FF6B35] font-semibold"
-          : "text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
+          ? "text-primary font-semibold"
+          : "text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary"
       }`}
     >
       <User className="h-5 w-5" />
@@ -270,8 +248,8 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
             mobile ? "text-lg py-2" : ""
           } ${
             pathname === item.href
-              ? "text-[#FF6B35] font-semibold"
-              : "text-gray-700 hover:text-[#FF6B35] dark:text-white dark:hover:text-[#FF914D]"
+              ? "text-primary font-semibold"
+              : "text-gray-700 hover:text-primary dark:text-white dark:hover:text-primary"
           }`}
         >
           {item.icon}

@@ -363,9 +363,9 @@ export async function getCompanyEmployees(companyId: string) {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, full_name, email, company_role, created_at")
+      .select("id, full_name, email, company_role, updated_at")
       .eq("company_id", companyId)
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
 
     if (error) {
       return { success: false, error: error.message };
@@ -454,28 +454,22 @@ export async function inviteEmployee(
       return { success: false, error: error.message };
     }
 
-    // Send invitation email using Supabase
+    // Send invitation email using Supabase Admin Client
     try {
+      const adminClient = await createAdminClient();
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       const invitationLink = `${baseUrl}/accept-invitation?token=${invitationToken}`;
 
-      // Send magic link email
-      const { error: authError } = await supabase.auth.admin.generateLink({
-        type: "magiclink",
-        email,
-        options: {
-          redirectTo: invitationLink,
-        },
-      });
-
-      if (authError) {
-        console.error("Failed to send invitation email:", authError.message);
-      }
+      // Note: Supabase doesn't automatically send emails for invitations
+      // You would need to implement email sending using a service like Resend, SendGrid, etc.
+      // For now, we'll return the invitation link in the success response
+      console.log("Invitation link generated:", invitationLink);
+      console.log("Send this link to:", email);
     } catch (emailError) {
-      console.error("Error sending invitation email:", emailError);
+      console.error("Error generating invitation link:", emailError);
     }
 
-    return { success: true, data, invitationToken };
+    return { success: true, data, invitationToken, invitationLink: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/accept-invitation?token=${invitationToken}` };
   } catch (error) {
     console.error("Error inviting employee:", error);
     return { success: false, error: "Failed to invite employee" };

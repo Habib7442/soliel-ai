@@ -16,7 +16,7 @@ export function LabsSection() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-              <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 Hands-On Learning Labs
               </span>
             </h2>
@@ -26,8 +26,8 @@ export function LabsSection() {
             
             <div className="space-y-6 mb-8">
               <div className="flex items-start">
-                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#FF6B35] flex items-center justify-center mr-4 mt-1">
-                  <span className="text-white text-xs">✓</span>
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary flex items-center justify-center mr-4 mt-1">
+                  <span className="text-primary-foreground text-xs">✓</span>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Interactive Coding</h3>
@@ -36,8 +36,8 @@ export function LabsSection() {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#FF6B35] flex items-center justify-center mr-4 mt-1">
-                  <span className="text-white text-xs">✓</span>
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary flex items-center justify-center mr-4 mt-1">
+                  <span className="text-primary-foreground text-xs">✓</span>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Instant Execution</h3>
@@ -46,8 +46,8 @@ export function LabsSection() {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#FF6B35] flex items-center justify-center mr-4 mt-1">
-                  <span className="text-white text-xs">✓</span>
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary flex items-center justify-center mr-4 mt-1">
+                  <span className="text-primary-foreground text-xs">✓</span>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Auto Grading</h3>
@@ -57,7 +57,7 @@ export function LabsSection() {
             </div>
             
             <Button 
-              className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white shadow-lg"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground shadow-lg border-0"
               size="lg"
             >
               Try a Lab Demo

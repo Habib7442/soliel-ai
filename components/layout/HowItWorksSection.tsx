@@ -34,7 +34,7 @@ export function HowItWorksSection() {
     <section className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             How It Works
           </span>
         </h2>
@@ -55,7 +55,7 @@ export function HowItWorksSection() {
             whileHover={{ y: -5 }}
           >
             <div className="text-4xl mb-4">{step.icon}</div>
-            <div className="text-2xl font-bold text-[#FF6B35] mb-2">0{step.id}</div>
+            <div className="text-2xl font-bold text-primary mb-2">0{step.id}</div>
             <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{step.title}</h3>
             <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
           </motion.div>

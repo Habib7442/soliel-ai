@@ -61,7 +61,7 @@ export function CourseCard({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {originalPrice && (
-          <Badge className="absolute top-3 right-3 bg-[#FF6B35] hover:bg-[#FF844B] text-white px-2 py-1 rounded-full text-xs font-medium">
+          <Badge className="absolute top-3 right-3 bg-primary hover:bg-primary/90 text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
             Save {Math.round(((originalPrice - price) / originalPrice) * 100)}%
           </Badge>
         )}
@@ -74,17 +74,17 @@ export function CourseCard({
       
       <div className="p-5 flex flex-col flex-1">
         <div className="flex justify-between items-start mb-3">
-          <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700 text-xs px-2 py-1">
+          <Badge variant="secondary" className="text-xs px-2 py-1">
             {level}
           </Badge>
-          <div className="flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+          <div className="flex items-center bg-muted px-2 py-1 rounded-full">
             <span className="text-yellow-500 mr-1">★</span>
             <span className="text-xs font-medium">{rating.toFixed(1)}</span>
           </div>
         </div>
         
-        <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white line-clamp-2 min-h-[3.5rem]">{title}</h3>
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">{description}</p>
+        <h3 className="text-lg font-bold mb-2 line-clamp-2 min-h-[3.5rem]">{title}</h3>
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-2 min-h-[2.5rem]">{description}</p>
         
         <div className="flex items-center mb-3">
           <div className="flex items-center">
@@ -95,21 +95,21 @@ export function CourseCard({
               height={28}
               className="rounded-full mr-2"
             />
-            <span className="text-xs text-gray-700 dark:text-gray-300 truncate">{instructor.name}</span>
+            <span className="text-xs text-muted-foreground truncate">{instructor.name}</span>
           </div>
         </div>
         
-        <div className="flex justify-between items-center mb-4 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex justify-between items-center mb-4 text-xs text-muted-foreground">
           <span>{lessons} lessons</span>
           <span>{students} students</span>
           <span>{duration}</span>
         </div>
         
-        <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex justify-between items-center mt-auto pt-4 border-t">
           <div className="flex items-baseline">
-            <span className="text-xl font-bold text-gray-900 dark:text-white">${price}</span>
+            <span className="text-xl font-bold">${price}</span>
             {originalPrice && (
-              <span className="ml-2 text-sm text-gray-500 line-through">${originalPrice}</span>
+              <span className="ml-2 text-sm text-muted-foreground line-through">${originalPrice}</span>
             )}
           </div>
           {isEnrolled ? (
@@ -117,7 +117,7 @@ export function CourseCard({
               <Link href={`/learn/${id}/player`}>Go to Course</Link>
             </Button>
           ) : (
-            <Button asChild size="sm" className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white rounded-lg text-xs h-9 px-4">
+            <Button asChild size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground rounded-lg text-xs h-9 px-4 border-0">
               <Link href={`/courses/${id}`}>Enroll Now</Link>
             </Button>
           )}

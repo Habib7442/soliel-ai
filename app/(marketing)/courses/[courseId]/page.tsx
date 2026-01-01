@@ -84,567 +84,416 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
   const isInBundle = course.allow_in_bundles && (course.bundle_discount_percent || 0) > 0;
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-br from-[#FF0000] via-[#DD0000] to-[#CC0000] text-white">
-        <div className="container mx-auto px-4 py-6">
-          <Button 
-            asChild 
-            variant="ghost" 
-            className="text-white hover:bg-white/20 mb-4 -ml-2"
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+      {/* Navbar Placeholder - Assuming Navbar is handled in layout */}
+      
+      {/* Breadcrumb / Back Link Area */}
+      <div className="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
+        <div className="container mx-auto px-4 py-4 max-w-7xl">
+          <Link 
+            href="/courses" 
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            <Link href="/courses">
-              <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
-              Back to Courses
-            </Link>
-          </Button>
+            <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
+            Back to Courses
+          </Link>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 pb-8">
-            {/* Left Content - 3 columns */}
-            <div className="lg:col-span-3 space-y-6">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-white/30">
-                    {course.level?.toUpperCase()}
+          {/* LEFT COLUMN - Main Content */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Header Info (Mobile/Desktop) */}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-transparent rounded-full px-3">
+                  {course.level?.toUpperCase()}
+                </Badge>
+                {course.category && (
+                  <Badge variant="outline" className="rounded-full px-3">
+                    {course.category}
                   </Badge>
-                  {course.category && (
-                    <Badge variant="outline" className="bg-white/10 border-white/30 text-white">
-                      {course.category}
-                    </Badge>
-                  )}
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-                  {course.title}
-                </h1>
-                <p className="text-xl text-white/90 mb-6 leading-relaxed">
-                  {course.subtitle}
-                </p>
+                )}
+                {isInBundle && (
+                  <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-3">
+                    Bundle Deal Available
+                  </Badge>
+                )}
               </div>
+              
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                {course.title}
+              </h1>
+              
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                {course.subtitle}
+              </p>
               
               {/* Stats Row */}
-              <div className="flex flex-wrap items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    <Star className="h-5 w-5 text-yellow-300 fill-yellow-300" />
-                    <span className="ml-1.5 font-bold text-lg">
-                      {course.stats.average_rating.toFixed(1)}
-                    </span>
-                  </div>
-                  <span className="text-white/70">({course.stats.total_reviews} reviews)</span>
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground pt-2">
+                <div className="flex items-center gap-1.5 text-gray-900 dark:text-gray-100 font-medium">
+                  <span className="flex items-center text-yellow-500">
+                    <Star className="h-4 w-4 fill-current" />
+                    <span className="ml-1">{course.stats.average_rating.toFixed(1)}</span>
+                  </span>
+                  <span className="text-muted-foreground font-normal underline decoration-dotted underline-offset-4">
+                    ({course.stats.total_reviews} reviews)
+                  </span>
                 </div>
-                <div className="flex items-center gap-2 text-white/90">
-                  <Users className="h-5 w-5" />
+                <div className="flex items-center gap-1.5">
+                  <Users className="h-4 w-4" />
                   <span>{course.stats.total_enrollments.toLocaleString()} students</span>
                 </div>
-                {course.estimated_duration_hours && (
-                  <div className="flex items-center gap-2 text-white/90">
-                    <Clock className="h-5 w-5" />
-                    <span>{course.estimated_duration_hours} hours</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-white/90">
-                  <BookOpen className="h-5 w-5" />
-                  <span>{course.lessons_count} lessons</span>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
+                  <span>Last updated {new Date(course.updated_at || Date.now()).toLocaleDateString()}</span>
                 </div>
               </div>
-              
-              {/* Instructor */}
-              <div className="flex items-center gap-3 pt-2">
+
+               {/* Instructor Mini Profile */}
+               <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
                 {course.instructor?.avatar_url ? (
                   <Image 
                     src={course.instructor.avatar_url} 
                     alt={course.instructor.full_name || 'Instructor'}
                     width={40}
                     height={40}
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-800"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center ring-2 ring-white/30">
-                    <span className="text-sm font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-800">
+                    <span className="text-sm font-semibold text-primary">
                       {course.instructor?.full_name?.charAt(0) || 'I'}
                     </span>
                   </div>
                 )}
-                <div>
-                  <p className="text-sm text-white/70">Created by</p>
-                  <p className="font-semibold">{course.instructor?.full_name || 'Unknown Instructor'}</p>
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Created by</p>
+                  <Link href="#instructor" className="font-semibold text-primary hover:underline">
+                    {course.instructor?.full_name || 'Unknown Instructor'}
+                  </Link>
                 </div>
               </div>
             </div>
-            
-            {/* Right Card - 2 columns */}
-            <div className="lg:col-span-2">
-              <Card className="bg-white dark:bg-gray-800 shadow-2xl">
-                <CardContent className="p-6">
-                  {course.thumbnail_url && (
-                    <div className="rounded-lg overflow-hidden mb-6 shadow-md">
-                      <Image 
-                        src={course.thumbnail_url} 
-                        alt={course.title}
-                        width={400}
-                        height={225}
-                        className="w-full object-cover aspect-video"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-baseline justify-between">
-                      <div>
-                        <span className="text-sm text-muted-foreground">Price</span>
-                        <p className="text-4xl font-bold text-[#FF0000]">{formattedPrice}</p>
-                      </div>
-                      {isInBundle && (
-                        <Badge className="bg-green-500 text-white">
-                          Save {course.bundle_discount_percent}%
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="pt-2 space-y-3">
-                      {isEnrolled ? (
-                        <Button 
-                          asChild
-                          size="lg"
-                          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg"
-                        >
-                          <Link href={`/learn/${courseId}/player`}>
-                            <Play className="h-5 w-5 mr-2" />
-                            Continue Learning
-                          </Link>
-                        </Button>
-                      ) : (
-                        <Button 
-                          asChild
-                          size="lg"
-                          className="w-full bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-white shadow-lg text-lg py-6"
-                        >
-                          <Link href={`/checkout?courseId=${courseId}`}>
-                            Enroll Now
-                          </Link>
-                        </Button>
-                      )}
-                      
-                      {isInBundle && !isEnrolled && (
-                        <Button 
-                          variant="outline" 
-                          size="lg"
-                          className="w-full border-2 border-[#FF0000] text-[#FF0000] hover:bg-[#FF0000]/10"
-                        >
-                          See in Bundle
-                        </Button>
-                      )}
-                    </div>
-                    
-                    <div className="border-t pt-4 mt-4 space-y-3">
-                      <p className="text-sm font-semibold mb-2">This course includes:</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Video className="h-4 w-4" />
-                          <span>{course.estimated_duration_hours || 0} hours on-demand video</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <BookOpen className="h-4 w-4" />
-                          <span>{course.lessons_count} lectures</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Award className="h-4 w-4" />
-                          <span>Certificate of completion</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Intro Video - Always visible */}
+
+            {/* Video Preview (if available) - moved to main column for better flow */}
             {course.intro_video_url && (
-              <Card className="shadow-md hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Play className="h-6 w-6 text-[#FF0000]" />
-                    Course Preview
-                  </CardTitle>
-                  <CardDescription>
-                    Get a sneak peek of what you&apos;ll learn in this course
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <VideoPlayer url={course.intro_video_url} title={`${course.title} - Preview`} />
-                </CardContent>
-              </Card>
+               <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800">
+                 <VideoPlayer url={course.intro_video_url} title={`${course.title} - Preview`} />
+               </div>
             )}
             
-            {/* What You'll Learn - Always visible */}
+            {/* What You'll Learn */}
             {course.learning_outcomes && course.learning_outcomes.length > 0 && (
-              <Card className="shadow-md hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-2xl">What You&apos;ll Learn</CardTitle>
-                  <CardDescription>
-                    Skills and knowledge you&apos;ll gain from this course
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {course.learning_outcomes.map((outcome, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                        <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm leading-relaxed">{outcome}</span>
+              <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+                <h2 className="text-2xl font-bold mb-6">What you&apos;ll learn</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {course.learning_outcomes.map((outcome, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="mt-1 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                        <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <span className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{outcome}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
             
-            {/* Description - Always visible */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-2xl">Course Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-[#FF0000] prose-a:text-[#FF0000]">
-                  <ReactMarkdown>{course.description || ""}</ReactMarkdown>
+            {/* Course Content Accordion */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Course Content</h2>
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                <div className="flex gap-4">
+                   <span>{course.sections?.length || 0} sections</span>
+                   <span>•</span>
+                   <span>{course.lessons_count} lessons</span>
+                   <span>•</span>
+                   <span>{formattedDuration} total length</span>
                 </div>
-              </CardContent>
-            </Card>
-            
-            {/* Prerequisites - Always visible */}
-            {course.prerequisites && (
-              <Card className="shadow-md hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-2xl">Prerequisites</CardTitle>
-                  <CardDescription>
-                    What you need to know before starting
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>{course.prerequisites}</ReactMarkdown>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Course Content - Show only preview lessons for non-enrolled users */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-2xl flex items-center gap-2">
-                      <BookOpen className="h-6 w-6 text-[#FF0000]" />
-                      Course Content
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      {course.sections?.length || 0} sections • {course.lessons_count} lessons
-                      {!isEnrolled && " • Preview available lessons"}
-                    </CardDescription>
-                  </div>
-                  {!isEnrolled && (
-                    <Badge variant="outline" className="border-[#FF0000] text-[#FF0000]">
-                      <Lock className="h-3 w-3 mr-1" />
-                      Enroll to unlock
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {course.sections && course.sections.length > 0 ? (
+              </div>
+              
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800/30">
+                 {course.sections && course.sections.length > 0 ? (
                     course.sections.map((section) => {
                       const previewLessons = section.lessons?.filter(l => l.is_preview) || [];
                       const lockedLessons = section.lessons?.filter(l => !l.is_preview) || [];
-                      
-                      // Show section only if enrolled or has preview lessons
-                      if (!isEnrolled && previewLessons.length === 0) return null;
-                      
+                       // Only show previews if not enrolled
+                      const lessonsToShow = isEnrolled ? section.lessons || [] : [...previewLessons, ...lockedLessons];
+                       
+                      if (!isEnrolled && previewLessons.length === 0 && lockedLessons.length === 0) return null;
+
                       return (
-                        <Accordion type="single" collapsible key={section.id} className="border rounded-lg">
+                        <Accordion type="single" collapsible key={section.id} className="border-b last:border-0 border-gray-100 dark:border-gray-700/50">
                           <AccordionItem value={section.id} className="border-none">
-                            <AccordionTrigger className="px-4 py-4 hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors">
-                              <div className="flex items-center justify-between w-full pr-4">
-                                <div className="text-left">
-                                  <h3 className="text-base font-semibold">{section.title}</h3>
-                                  {section.description && (
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {section.description}
-                                    </p>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  {!isEnrolled && lockedLessons.length > 0 && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      <Lock className="h-3 w-3 mr-1" />
-                                      {lockedLessons.length} locked
-                                    </Badge>
-                                  )}
-                                  <div className="flex items-center text-sm text-muted-foreground">
-                                    <BookOpen className="h-4 w-4 mr-1" />
-                                    <span>{section.lessons?.length || 0} lessons</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="px-4 pb-4">
-                              <div className="space-y-2 pt-2">
-                                {/* Show preview lessons */}
-                                {previewLessons.map((lesson) => (
-                                  <div key={lesson.id} className="space-y-3">
-                                    <div 
-                                      className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-transparent dark:from-green-900/20 dark:to-transparent rounded-lg border border-green-200 dark:border-green-800"
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                                          <Play className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                        </div>
-                                        <div>
-                                          <p className="font-medium text-sm">{lesson.title}</p>
-                                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                            <span className="capitalize">{lesson.lesson_type}</span>
-                                            {lesson.duration_minutes && (
-                                              <>
-                                                <span>•</span>
-                                                <span>{lesson.duration_minutes} min</span>
-                                              </>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <Badge className="bg-green-500 text-white border-green-600">
-                                        Preview
-                                      </Badge>
-                                    </div>
-                                    {/* Show video player for preview lessons with video URLs */}
-                                    {lesson.video_url && lesson.lesson_type === 'video' && (
-                                      <div className="pl-11">
-                                        <VideoPlayer url={lesson.video_url} title={lesson.title} />
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                                
-                                {/* Show locked lessons for non-enrolled users */}
-                                {!isEnrolled && lockedLessons.slice(0, 3).map((lesson) => (
-                                  <div 
-                                    key={lesson.id} 
-                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg opacity-60"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                        <Lock className="h-4 w-4 text-gray-400" />
-                                      </div>
-                                      <div>
-                                        <p className="font-medium text-sm">{lesson.title}</p>
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                          <span className="capitalize">{lesson.lesson_type}</span>
-                                          {lesson.duration_minutes && (
-                                            <>
-                                              <span>•</span>
-                                              <span>{lesson.duration_minutes} min</span>
-                                            </>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <Lock className="h-4 w-4 text-gray-400" />
-                                  </div>
-                                ))}
-                                
-                                {/* Show all lessons for enrolled users */}
-                                {isEnrolled && lockedLessons.map((lesson) => (
-                                  <div 
-                                    key={lesson.id} 
-                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-full bg-[#FF0000]/10 flex items-center justify-center">
-                                        <Play className="h-4 w-4 text-[#FF0000]" />
-                                      </div>
-                                      <div>
-                                        <p className="font-medium text-sm">{lesson.title}</p>
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                          <span className="capitalize">{lesson.lesson_type}</span>
-                                          {lesson.duration_minutes && (
-                                            <>
-                                              <span>•</span>
-                                              <span>{lesson.duration_minutes} min</span>
-                                            </>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                                
-                                {!isEnrolled && lockedLessons.length > 3 && (
-                                  <div className="text-center py-4">
-                                    <p className="text-sm text-muted-foreground">
-                                      +{lockedLessons.length - 3} more lessons
-                                    </p>
-                                  </div>
+                            <AccordionTrigger className="px-6 py-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                              <div className="text-left w-full pr-4">
+                                <h3 className="font-semibold text-gray-900 dark:text-gray-100">{section.title}</h3>
+                                {section.description && (
+                                    <p className="text-xs text-muted-foreground font-normal mt-0.5 line-clamp-1">{section.description}</p>
                                 )}
+                              </div>
+                              <span className="text-xs text-muted-foreground font-normal whitespace-nowrap ml-2">
+                                {section.lessons?.length || 0} lectures
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="px-0 pb-0 bg-gray-50/30 dark:bg-gray-900/30">
+                              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                                {lessonsToShow.map((lesson) => (
+                                  <div key={lesson.id} className={`flex items-center justify-between py-3 px-6 ${!isEnrolled && !lesson.is_preview ? 'opacity-60' : 'hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'}`}>
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                       {lesson.lesson_type === 'video' ? (
+                                         <Play className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                       ) : (
+                                         <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                       )}
+                                       <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                         {lesson.title}
+                                       </span>
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                      {lesson.is_preview && !isEnrolled ? (
+                                        <span className="text-xs font-semibold text-primary">Preview</span>
+                                      ) : !isEnrolled ? (
+                                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                                      ) : null}
+                                      <span className="text-xs text-muted-foreground w-12 text-right">
+                                        {lesson.duration_minutes ? `${lesson.duration_minutes}m` : ''}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </AccordionContent>
                           </AccordionItem>
                         </Accordion>
                       );
                     })
-                  ) : (
-                    <p className="text-muted-foreground text-center py-8">No content available yet.</p>
-                  )}
-                  
-                  {!isEnrolled && (
-                    <div className="mt-6 p-6 bg-gradient-to-r from-[#FF0000]/5 to-[#CC0000]/5 dark:from-[#FF0000]/10 dark:to-[#CC0000]/10 rounded-lg border border-[#FF0000]/20 text-center">
-                      <Lock className="h-12 w-12 mx-auto mb-3 text-[#FF0000]" />
-                      <h3 className="font-semibold text-lg mb-2">Unlock Full Course Content</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Enroll now to access all {course.lessons_count} lessons and start learning
-                      </p>
-                      <Button 
-                        asChild
-                        className="bg-gradient-to-r from-[#FF0000] to-[#CC0000] hover:opacity-90 text-white"
-                      >
-                        <Link href={`/checkout?courseId=${courseId}`}>
-                          Enroll Now - {formattedPrice}
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                 ) : (
+                   <div className="p-8 text-center text-muted-foreground">No content uploaded yet.</div>
+                 )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-4">
+               <h2 className="text-2xl font-bold">Description</h2>
+               <div className="prose prose-gray dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-img:rounded-xl">
+                  <ReactMarkdown>{course.description || "No description provided."}</ReactMarkdown>
+               </div>
+            </div>
             
-            {/* FAQ - Show to everyone */}
-            <CourseFaqDisplay courseId={courseId} />
-          </div>
-          
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Course Info */}
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle>Course Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between py-2 border-b">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    Level
-                  </span>
-                  <Badge variant="outline" className="capitalize">{course.level}</Badge>
+            {/* Prerequisites */}
+            {(course.prerequisites) && (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold">Requirements</h2>
+                <div className="prose prose-gray dark:prose-invert max-w-none text-sm">
+                   <ReactMarkdown>{course.prerequisites}</ReactMarkdown>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b">
-                  <span className="text-muted-foreground">Language</span>
-                  <span className="font-medium">{course.language}</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Duration
-                  </span>
-                  <span className="font-medium">{formattedDuration}</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    Lessons
-                  </span>
-                  <span className="font-medium">{course.lessons_count}</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-muted-foreground">Enrolled</span>
-                  <span className="font-medium">{course.stats.total_enrollments.toLocaleString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Reviews Section */}
-            <Card className="shadow-md mb-8">
-              <CardHeader>
-                <CardTitle className="text-2xl">Student Reviews</CardTitle>
-                <CardDescription>
-                  {course.stats.total_reviews > 0 
-                    ? `See what students are saying about this course`
-                    : `Be the first to review this course`
-                  }
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Rating Summary */}
-                {course.stats.total_reviews > 0 && (
-                  <RatingSummary 
-                    averageRating={course.stats.average_rating} 
-                    totalReviews={course.stats.total_reviews}
-                    ratingDistribution={ratingDistribution}
-                  />
-                )}
+              </div>
+            )}
+
+            {/* Instructor Details */}
+            <div id="instructor" className="space-y-6 pt-8 border-t border-gray-200 dark:border-gray-800">
+               <h2 className="text-2xl font-bold">Instructor</h2>
+               <div className="flex flex-col sm:flex-row gap-6">
+                 <div className="flex-shrink-0">
+                    {course.instructor?.avatar_url ? (
+                      <Image 
+                        src={course.instructor.avatar_url} 
+                        alt={course.instructor.full_name || 'Instructor'}
+                        width={96}
+                        height={96}
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
+                        <span className="text-3xl font-bold text-primary">
+                          {course.instructor?.full_name?.charAt(0) || 'I'}
+                        </span>
+                      </div>
+                    )}
+                 </div>
+                 <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-primary underline decoration-2 underline-offset-4 decoration-primary/20">
+                      {course.instructor?.full_name || "Course Instructor"}
+                    </h3>
+                    <p className="text-muted-foreground font-medium">Head Instructor • Senior Developer</p>
+                    {course.instructor?.bio_md && (
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground mt-4">
+                         <ReactMarkdown>{course.instructor.bio_md}</ReactMarkdown>
+                      </div>
+                    )}
+                 </div>
+               </div>
+            </div>
+
+             {/* Reviews */}
+             <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
+                <h2 className="text-2xl font-bold mb-6">Student Feedback</h2>
                 
-                {/* Review Form - Only for enrolled students */}
+                {/* Rating Summary Block */}
+                <div className="grid md:grid-cols-12 gap-8 mb-10">
+                   <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
+                      <div className="text-6xl font-bold text-gray-900 dark:text-white mb-2">
+                        {course.stats.average_rating.toFixed(1)}
+                      </div>
+                      <div className="flex mb-2">
+                         {[1, 2, 3, 4, 5].map((star) => (
+                           <Star 
+                             key={star} 
+                             className={`w-5 h-5 ${star <= Math.round(course.stats.average_rating) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'}`} 
+                           />
+                         ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground font-medium">Course Rating</p>
+                   </div>
+                   
+                   <div className="md:col-span-8">
+                      {/* Using the component but ignoring the passed props for simple custom UI here or reuse component with wrapper */}
+                       <div className="space-y-2">
+                           {[5, 4, 3, 2, 1].map((rating) => {
+                             const count = ratingDistribution[rating as keyof typeof ratingDistribution] || 0;
+                             const percentage = course.stats.total_reviews > 0 ? (count / course.stats.total_reviews) * 100 : 0;
+                             return (
+                               <div key={rating} className="flex items-center gap-3 text-sm">
+                                  <div className="w-12 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex-1">
+                                     <div className="h-full bg-gray-900 dark:bg-gray-400 rounded-full" style={{ width: `${percentage}%` }} />
+                                  </div>
+                                  <div className="flex items-center gap-1 min-w-[60px]">
+                                     <div className="flex text-yellow-500">
+                                       <Star className="w-3.5 h-3.5 fill-current" />
+                                       <Star className="w-3.5 h-3.5 fill-current" />
+                                       <Star className="w-3.5 h-3.5 fill-current" />
+                                       <Star className="w-3.5 h-3.5 fill-current" />
+                                       <Star className="w-3.5 h-3.5 fill-current" />
+                                     </div>
+                                     <span className="text-muted-foreground ml-2 text-xs">{percentage.toFixed(0)}%</span>
+                                  </div>
+                               </div>
+                             )
+                           })}
+                       </div>
+                   </div>
+                </div>
+
+                {/* Review Form */}
                 {isEnrolled && user && (
-                  <div>
-                    <ReviewForm 
-                      courseId={courseId} 
-                      userId={user.id}
-                      existingReview={userReview}
-                    />
-                  </div>
+                    <div className="mb-10">
+                      <ReviewForm 
+                        courseId={courseId} 
+                        userId={user.id}
+                        existingReview={userReview}
+                      />
+                    </div>
                 )}
                 
                 {/* Reviews List */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">
-                    {course.stats.total_reviews > 0 ? 'All Reviews' : 'No reviews yet'}
-                  </h3>
-                  <ReviewsList reviews={(reviews || []) as never[]} />
-                </div>
+                <ReviewsList reviews={(reviews || []) as never[]} />
+             </div>
 
-              </CardContent>
-            </Card>
-            
-            {/* Instructor */}
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle>Instructor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-4">
-                  {course.instructor?.avatar_url ? (
-                    <Image 
-                      src={course.instructor.avatar_url} 
-                      alt={course.instructor.full_name || 'Instructor'}
-                      width={60}
-                      height={60}
-                      className="w-15 h-15 rounded-full object-cover ring-2 ring-[#FF0000]/20"
-                    />
-                  ) : (
-                    <div className="w-15 h-15 rounded-full bg-gradient-to-br from-[#FF0000] to-[#CC0000] flex items-center justify-center ring-2 ring-[#FF0000]/20">
-                      <span className="text-xl font-bold text-white">
-                        {course.instructor?.full_name?.charAt(0) || 'I'}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-semibold text-lg">{course.instructor?.full_name || 'Unknown Instructor'}</p>
-                    <p className="text-sm text-muted-foreground mb-3">Course Instructor</p>
-                    
-                    {course.instructor?.bio_md && isEnrolled && (
-                      <div className="mt-3 text-sm text-muted-foreground line-clamp-3">
-                        {course.instructor.bio_md.substring(0, 150)}...
+          </div>
+          
+          {/* RIGHT COLUMN - Sticky Sidebar */}
+          <div className="lg:col-span-4 relative">
+             <div className="sticky top-24 space-y-6">
+                {/* Enrollment Card */}
+                <Card className="overflow-hidden border-0 shadow-xl ring-1 ring-gray-200 dark:ring-gray-800 bg-white dark:bg-gray-900 rounded-2xl">
+                   {/* Thumbnail (if video preview exists, maybe hide this or change logic) -> Kept for consistent card UI */}
+                   {course.thumbnail_url && !course.intro_video_url && (
+                     <div className="relative aspect-video w-full overflow-hidden">
+                       <Image 
+                          src={course.thumbnail_url} 
+                          alt={course.title}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/10" />
+                     </div>
+                   )}
+                   
+                   <CardContent className="p-6">
+                      <div className="flex items-end gap-3 mb-6">
+                        <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                           {formattedPrice}
+                        </span>
+                        {isInBundle && (
+                          <span className="text-sm text-muted-foreground line-through mb-1.5">
+                            ${(course.price_cents * 1.2 / 100).toFixed(2)}
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </div>
+                      
+                      <div className="space-y-3">
+                        {isEnrolled ? (
+                          <Button 
+                            asChild
+                            size="lg"
+                            className="w-full bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-xl h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                          >
+                            <Link href={`/learn/${courseId}/player`}>
+                              Continue Learning
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button 
+                            asChild
+                            size="lg"
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
+                          >
+                            <Link href={`/checkout?courseId=${courseId}`}>
+                              Enroll Now
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="mt-8 space-y-4">
+                         <h4 className="font-semibold text-sm text-gray-900 dark:text-white">This course includes:</h4>
+                         <ul className="space-y-3 text-sm text-muted-foreground">
+                            <li className="flex items-center gap-3">
+                               <Video className="w-4 h-4 text-gray-400" />
+                               <span>{formattedDuration} on-demand video</span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                               <BookOpen className="w-4 h-4 text-gray-400" />
+                               <span>{course.lessons_count} downloadable resources</span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                               <Award className="w-4 h-4 text-gray-400" />
+                               <span>Certificate of completion</span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                               <Lock className="w-4 h-4 text-gray-400" />
+                               <span>Full lifetime access</span>
+                            </li>
+                         </ul>
+                      </div>
+                   </CardContent>
+                   <div className="bg-gray-50 dark:bg-gray-800/50 p-4 border-t border-gray-100 dark:border-gray-800 text-center">
+                     <p className="text-xs text-muted-foreground font-medium">30-Day Money-Back Guarantee</p>
+                   </div>
+                </Card>
+                
+                {/* Meta Info (Badges) */}
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4 shadow-sm">
+                   <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Skill Level</span>
+                      <span className="font-medium text-gray-900 dark:text-white capitalize">{course.level}</span>
+                   </div>
+                   <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Language</span>
+                      <span className="font-medium text-gray-900 dark:text-white capitalize">{course.language}</span>
+                   </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Captions</span>
+                      <span className="font-medium text-gray-900 dark:text-white">Yes</span>
+                   </div>
                 </div>
-              </CardContent>
-            </Card>
+             </div>
           </div>
         </div>
       </div>

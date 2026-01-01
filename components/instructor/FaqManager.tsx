@@ -9,8 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
-import { GripVertical, PlusCircle, Edit, Trash2, HelpCircle, Eye, EyeOff } from "lucide-react";
-import { getAllCourseFAQs, createCourseFAQ, updateCourseFAQ, deleteCourseFAQ, toggleCourseFAQStatus } from "@/server/actions/course-faq.actions";
+import { GripVertical, PlusCircle, Edit, Trash2, HelpCircle } from "lucide-react";
+import { getAllCourseFAQs, createCourseFAQ, updateCourseFAQ, deleteCourseFAQ } from "@/server/actions/course-faq.actions";
 import type { CourseFAQ } from "@/types/db";
 import ReactMarkdown from "react-markdown";
 import dynamic from "next/dynamic";
@@ -39,7 +39,7 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
     id: string;
     question: string;
     answer_md: string;
-    category?: string;
+    category?: string | null;
   } | null>(null);
   const [formData, setFormData] = useState<FaqFormData>({
     question: "",
@@ -75,7 +75,11 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
 
     try {
       if (editingFaq) {
-        const result = await updateCourseFAQ(editingFaq.id, courseId, formData);
+        const result = await updateCourseFAQ(editingFaq.id, courseId, {
+          question: formData.question,
+          answer_md: formData.answer_md,
+          category: formData.category || undefined,
+        });
         if (result.success) {
           toast.success("FAQ updated successfully!");
           const updatedFaqs = await getAllCourseFAQs(courseId);
@@ -112,7 +116,7 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
     }
   };
 
-  const handleEdit = (faq: { id: string; question: string; answer_md: string; category?: string }) => {
+  const handleEdit = (faq: CourseFAQ) => {
     setEditingFaq(faq);
     setFormData({
       question: faq.question,
@@ -191,7 +195,7 @@ export const FaqManager = ({ courseId }: FaqManagerProps) => {
                 <Input
                   id="category"
                   name="category"
-                  value={formData.category}
+                  value={formData.category || ""}
                   onChange={handleChange}
                   placeholder="e.g., Enrollment, Technical, Content"
                 />

@@ -70,34 +70,34 @@ export function FeaturesSection() {
     <section className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
-            Powerful Features
+          <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            Features
           </span>
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Our platform combines cutting-edge technology with intuitive design to deliver the best learning experience.
+        <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+          Discover what makes Soliel AI the best platform for learning and teaching
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {features.map((feature, index) => (
-          <motion.div
+          <div
             key={index}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-            viewport={{ once: true }}
+            className="group relative p-8 rounded-2xl bg-card border hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
           >
-            <div className="text-5xl mb-4">{feature.icon}</div>
-            <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">{feature.description}</p>
-            <Badge variant="secondary">{feature.tech}</Badge>
-          </motion.div>
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+            <div className="relative z-10">
+              <div className="mb-4 inline-block p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                {feature.icon}
+              </div>
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-muted-foreground">{feature.description}</p>
+            </div>
+          </div>
         ))}
       </div>
 
-      <div className="text-center">
+      <div className="text-center mt-8">
         <h3 className="text-2xl font-bold mb-8">Technology Stack</h3>
         <div className="flex flex-wrap justify-center gap-3">
           {techStack.map((tech, index) => (
