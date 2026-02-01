@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,9 +95,8 @@ export function StudentsTable({ students, courseId }: StudentsTableProps) {
         </TableHeader>
         <TableBody>
           {students.map((student) => (
-            <>
+            <React.Fragment key={student.id}>
               <TableRow 
-                key={student.id}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => toggleExpand(student.id)}
               >
@@ -176,7 +175,7 @@ export function StudentsTable({ students, courseId }: StudentsTableProps) {
                   </TableCell>
                 </TableRow>
               )}
-            </>
+            </React.Fragment>
           ))}
         </TableBody>
       </Table>

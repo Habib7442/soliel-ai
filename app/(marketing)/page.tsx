@@ -60,78 +60,86 @@ export default async function Home() {
       
       {/* Blog Section */}
       {blogs && blogs.length > 0 && (
-        <section className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-primary">
-                Latest from Our Blog
-              </span>
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Insights, guides, and updates to help you on your learning journey
-            </p>
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-8 mb-8 max-w-7xl mx-auto">
-            {blogs.slice(0, 3).map((blog) => (
-              <Link key={blog.id} href={`/blog/${blog.slug}`} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="text-center mb-16">
+              <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest mb-6">
+                Insights
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
+                Latest from <span className="text-primary italic">Our Blog.</span>
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-medium">
+                Insights, guides, and updates to help you on your learning journey.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
+              {blogs.slice(0, 3).map((blog) => (
+                <Link key={blog.id} href={`/blog/${blog.slug}`} className="group flex flex-col bg-white rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-500">
                   {blog.featured_image_url && (
-                    <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+                    <div className="relative h-60 w-full overflow-hidden">
                       <Image
                         src={blog.featured_image_url}
                         alt={blog.title}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
                   )}
-                  <CardHeader>
-                    <div className="flex flex-wrap gap-2 mb-2">
+                  <div className="p-8 flex flex-col flex-1">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {blog.blog_category_relations?.slice(0, 2).map((rel) => (
-                        <Badge key={rel.blog_categories.id} variant="secondary" className="text-xs">
+                        <span key={rel.blog_categories.id} className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-3 py-1 rounded-full">
                           {rel.blog_categories.name}
-                        </Badge>
+                        </span>
                       ))}
                     </div>
-                    <CardTitle className="line-clamp-2">{blog.title}</CardTitle>
-                    {blog.subtitle && (
-                      <CardDescription className="line-clamp-1">
-                        {blog.subtitle}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                    
+                    <h3 className="text-xl font-bold mb-4 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                      {blog.title}
+                    </h3>
+                    
+                    <p className="text-sm text-muted-foreground/80 line-clamp-3 mb-8 leading-relaxed font-medium">
                       {blog.excerpt || blog.content.substring(0, 120) + "..."}
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        <span>{blog.profiles?.full_name || "Unknown"}</span>
+                    
+                    <div className="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                          {blog.profiles?.avatar_url ? (
+                            <Image src={blog.profiles.avatar_url} alt={blog.profiles.full_name || ""} width={32} height={32} />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-gray-400">
+                              {blog.profiles?.full_name?.charAt(0) || "U"}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs font-bold text-gray-600">{blog.profiles?.full_name || "Unknown"}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        <Calendar className="h-3.5 w-3.5" />
                         <span>
                           {blog.published_at
-                            ? new Date(blog.published_at).toLocaleDateString()
+                            ? new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                             : "Draft"}
                         </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <Button asChild size="lg" variant="outline">
-              <Link href="/blog">
-                View All Posts
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            
+            <div className="text-center">
+              <Button asChild size="xl" variant="outline" className="rounded-2xl border-gray-200 group hover:border-primary hover:text-primary px-10 transition-all">
+                <Link href="/blog" className="flex items-center gap-2">
+                  View All Posts
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </section>
       )}

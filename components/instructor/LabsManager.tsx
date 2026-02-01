@@ -213,114 +213,142 @@ export function LabsManager({ courseId }: LabsManagerProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <FlaskConical className="h-5 w-5" />
-              Labs & Hands-on Practice
-            </CardTitle>
-            <CardDescription>
-              Create interactive coding exercises and practice labs for students
-            </CardDescription>
-          </div>
-          <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Lab
-          </Button>
+    <Card className="border-0 shadow-sm bg-white/70 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+      <CardHeader className="p-8 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-2xl font-black text-gray-900 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
+               <FlaskConical className="h-6 w-6" />
+            </div>
+            Labs & Hands-on Practice
+          </CardTitle>
+          <CardDescription className="text-base font-medium mt-1 ml-14">
+            Create interactive coding exercises and practice labs for students
+          </CardDescription>
         </div>
+        <Button 
+          onClick={() => { resetForm(); setDialogOpen(true); }}
+          className="rounded-xl h-12 bg-gray-900 hover:bg-primary font-bold shadow-lg shadow-black/10 px-6 transition-all active:scale-95"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Lab
+        </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-8 pt-0">
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading labs...</div>
+          <div className="flex items-center justify-center py-20 text-muted-foreground font-medium">
+             <div className="flex flex-col items-center gap-3">
+                <div className="h-8 w-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+                <p>Loading labs...</p>
+             </div>
+          </div>
         ) : labs.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <FlaskConical className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No labs created yet</p>
-            <p className="text-sm">Create your first interactive lab to enhance student learning</p>
+          <div className="text-center py-24 bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-200">
+            <div className="w-20 h-20 bg-gray-200/50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6">
+               <FlaskConical className="h-10 w-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No labs created yet</h3>
+            <p className="text-muted-foreground font-medium mb-8 max-w-sm mx-auto">
+              Create your first interactive lab to enhance student learning with real-world practice.
+            </p>
+            <Button 
+              onClick={() => { resetForm(); setDialogOpen(true); }}
+              variant="outline"
+              className="rounded-xl font-bold h-12 px-8 border-gray-300 hover:border-primary hover:text-primary"
+            >
+              Start Building
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
             {labs.map((lab) => (
-              <div key={lab.id} className="border rounded-lg p-4">
+              <div key={lab.id} className="group border border-gray-100 bg-white rounded-[1.5rem] p-6 hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-200 transition-all duration-300">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      {getLabTypeIcon(lab.lab_type)}
-                      <h4 className="font-semibold">{lab.title}</h4>
-                      <Badge className={getDifficultyColor(lab.difficulty)}>
+                      <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                         {getLabTypeIcon(lab.lab_type)}
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900">{lab.title}</h4>
+                      <Badge className={`rounded-lg px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider border-0 ${getDifficultyColor(lab.difficulty)}`}>
                         {lab.difficulty || 'medium'}
                       </Badge>
                       {lab.is_graded && (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 font-bold rounded-lg px-2 py-0.5 text-[10px] uppercase tracking-wider">
                           Graded
                         </Badge>
                       )}
                     </div>
                     
                     {lab.description && (
-                      <p className="text-sm text-muted-foreground mb-3">{lab.description}</p>
+                      <p className="text-sm text-muted-foreground font-medium mb-4 pl-11 max-w-2xl">{lab.description}</p>
                     )}
 
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Code className="h-3 w-3" />
-                        <span className="capitalize">{lab.environment || lab.lab_type}</span>
+                    <div className="flex items-center gap-6 pl-11 text-sm text-muted-foreground font-medium">
+                      <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
+                        <Code className="h-3.5 w-3.5 text-gray-500" />
+                        <span className="capitalize text-xs font-bold text-gray-700">{lab.environment || lab.lab_type}</span>
                       </div>
                       {lab.estimated_time_minutes && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span>{lab.estimated_time_minutes} min</span>
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
+                          <Clock className="h-3.5 w-3.5 text-gray-500" />
+                          <span className="text-xs font-bold text-gray-700">{lab.estimated_time_minutes} min</span>
                         </div>
                       )}
                       {lab.max_attempts > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Trophy className="h-3 w-3" />
-                          <span>Max {lab.max_attempts} attempts</span>
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
+                          <Trophy className="h-3.5 w-3.5 text-gray-500" />
+                          <span className="text-xs font-bold text-gray-700">Max {lab.max_attempts} attempts</span>
                         </div>
                       )}
                     </div>
 
                     {expandedLab === lab.id && (
-                      <div className="mt-4 pt-4 border-t space-y-2 text-sm">
-                        <div>
-                          <strong>Lab Type:</strong> <span className="capitalize">{lab.lab_type.replace('_', ' ')}</span>
+                      <div className="mt-6 pt-6 border-t border-gray-100 pl-11 space-y-3 text-sm animate-in slide-in-from-top-2 duration-200">
+                        <div className="grid grid-cols-2 gap-4 max-w-lg">
+                           <div>
+                              <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-1">Lab Type</p>
+                              <p className="font-bold text-gray-900 capitalize">{lab.lab_type.replace('_', ' ')}</p>
+                           </div>
+                           {lab.lesson && (
+                              <div>
+                                 <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-1">Linked Lesson</p>
+                                 <p className="font-bold text-gray-900">{lab.lesson.title}</p>
+                              </div>
+                           )}
                         </div>
-                        {lab.lesson && (
-                          <div>
-                            <strong>Linked Lesson:</strong> {lab.lesson.title}
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 ml-4 self-start">
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="rounded-xl h-10 w-10 text-gray-400 hover:text-gray-900 hover:bg-gray-100"
                       onClick={() => setExpandedLab(expandedLab === lab.id ? null : lab.id)}
                     >
                       {expandedLab === lab.id ? (
-                        <ChevronUp className="h-4 w-4" />
+                        <ChevronUp className="h-5 w-5" />
                       ) : (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5" />
                       )}
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-xl h-10 w-10 text-gray-400 hover:text-primary hover:bg-primary/10"
                       onClick={() => handleEdit(lab)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-5 w-5" />
                     </Button>
                     <Button
-                      variant="destructive"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-xl h-10 w-10 text-gray-400 hover:text-red-600 hover:bg-red-50"
                       onClick={() => handleDelete(lab.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
@@ -330,48 +358,50 @@ export function LabsManager({ courseId }: LabsManagerProps) {
         )}
 
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingLab ? "Edit Lab" : "Create New Lab"}</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] p-0 gap-0">
+            <DialogHeader className="p-8 pb-4 border-b border-gray-100">
+              <DialogTitle className="text-2xl font-black">{editingLab ? "Edit Lab" : "Create New Lab"}</DialogTitle>
+              <DialogDescription className="text-base font-medium text-muted-foreground mt-1">
                 Create an interactive practice lab for students to apply their knowledge
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Lab Title *</Label>
+                <Label htmlFor="title" className="font-bold text-gray-900">Lab Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Build a Todo App with React"
                   required
+                  className="rounded-xl h-12"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="font-bold text-gray-900">Description</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description of what students will build..."
                   rows={2}
+                  className="rounded-xl resize-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="labType">Lab Type</Label>
+                  <Label htmlFor="labType" className="font-bold text-gray-900">Lab Type</Label>
                   <Select 
                     value={formData.labType} 
                     onValueChange={(value: 'coding' | 'quiz_based' | 'simulation' | 'practice') => setFormData({ ...formData, labType: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl">
                       <SelectItem value="coding">Coding Exercise</SelectItem>
                       <SelectItem value="quiz_based">Quiz-based Practice</SelectItem>
                       <SelectItem value="simulation">Simulation</SelectItem>
@@ -381,15 +411,15 @@ export function LabsManager({ courseId }: LabsManagerProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="environment">Environment</Label>
+                  <Label htmlFor="environment" className="font-bold text-gray-900">Environment</Label>
                   <Select 
                     value={formData.environment} 
                     onValueChange={(value: 'javascript' | 'python' | 'html_css' | 'sql' | 'general') => setFormData({ ...formData, environment: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl">
                       <SelectItem value="javascript">JavaScript</SelectItem>
                       <SelectItem value="python">Python</SelectItem>
                       <SelectItem value="html_css">HTML/CSS</SelectItem>
@@ -400,15 +430,15 @@ export function LabsManager({ courseId }: LabsManagerProps) {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="difficulty">Difficulty</Label>
+                  <Label htmlFor="difficulty" className="font-bold text-gray-900">Difficulty</Label>
                   <Select 
                     value={formData.difficulty} 
                     onValueChange={(value: 'easy' | 'medium' | 'hard') => setFormData({ ...formData, difficulty: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl">
                       <SelectItem value="easy">Easy</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="hard">Hard</SelectItem>
@@ -417,77 +447,81 @@ export function LabsManager({ courseId }: LabsManagerProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="estimatedTime">Est. Time (min)</Label>
+                  <Label htmlFor="estimatedTime" className="font-bold text-gray-900">Est. Time (min)</Label>
                   <Input
                     id="estimatedTime"
                     type="number"
                     value={formData.estimatedTimeMinutes}
                     onChange={(e) => setFormData({ ...formData, estimatedTimeMinutes: parseInt(e.target.value) || 0 })}
+                    className="rounded-xl h-12"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="maxAttempts">Max Attempts</Label>
+                  <Label htmlFor="maxAttempts" className="font-bold text-gray-900">Max Attempts</Label>
                   <Input
                     id="maxAttempts"
                     type="number"
                     value={formData.maxAttempts}
                     onChange={(e) => setFormData({ ...formData, maxAttempts: parseInt(e.target.value) || 0 })}
                     placeholder="0 = unlimited"
+                    className="rounded-xl h-12"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instructionsMd">Instructions (Markdown)</Label>
+                <Label htmlFor="instructionsMd" className="font-bold text-gray-900">Instructions (Markdown)</Label>
                 <Textarea
                   id="instructionsMd"
                   value={formData.instructionsMd}
                   onChange={(e) => setFormData({ ...formData, instructionsMd: e.target.value })}
                   placeholder="## Task&#10;Complete the function...&#10;&#10;### Requirements&#10;- Feature 1&#10;- Feature 2"
                   rows={5}
+                  className="rounded-xl resize-none font-mono text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="starterCode">Starter Code</Label>
+                <Label htmlFor="starterCode" className="font-bold text-gray-900">Starter Code</Label>
                 <Textarea
                   id="starterCode"
                   value={formData.starterCode}
                   onChange={(e) => setFormData({ ...formData, starterCode: e.target.value })}
                   placeholder="function solution() {&#10;  // Your code here&#10;}"
                   rows={4}
-                  className="font-mono text-sm"
+                  className="rounded-xl font-mono text-sm bg-gray-50 border-gray-200"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="solutionCode">Solution Code (Hidden from students)</Label>
+                <Label htmlFor="solutionCode" className="font-bold text-gray-900">Solution Code (Hidden from students)</Label>
                 <Textarea
                   id="solutionCode"
                   value={formData.solutionCode}
                   onChange={(e) => setFormData({ ...formData, solutionCode: e.target.value })}
                   placeholder="function solution() {&#10;  return 'answer';&#10;}"
                   rows={4}
-                  className="font-mono text-sm"
+                  className="rounded-xl font-mono text-sm bg-gray-50 border-gray-200"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hints">Hints (one per line)</Label>
+                <Label htmlFor="hints" className="font-bold text-gray-900">Hints (one per line)</Label>
                 <Textarea
                   id="hints"
                   value={formData.hints}
                   onChange={(e) => setFormData({ ...formData, hints: e.target.value })}
                   placeholder="Start by defining the main function&#10;Remember to handle edge cases&#10;Use a loop for iteration"
                   rows={3}
+                  className="rounded-xl resize-none"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50">
                 <div>
-                  <Label htmlFor="isGraded">Graded Lab</Label>
-                  <p className="text-sm text-muted-foreground">Include this lab in course completion</p>
+                  <Label htmlFor="isGraded" className="font-bold text-gray-900">Graded Lab</Label>
+                  <p className="text-sm font-medium text-muted-foreground">Include this lab in course completion</p>
                 </div>
                 <Switch
                   id="isGraded"
@@ -496,11 +530,11 @@ export function LabsManager({ courseId }: LabsManagerProps) {
                 />
               </div>
 
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <DialogFooter className="pt-4 border-t border-gray-100">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="rounded-xl h-12 font-bold px-6">
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" className="rounded-xl h-12 font-bold px-6 bg-gray-900 hover:bg-primary shadow-lg shadow-black/5">
                   {editingLab ? "Update Lab" : "Create Lab"}
                 </Button>
               </DialogFooter>

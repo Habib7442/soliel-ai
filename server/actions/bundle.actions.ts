@@ -383,15 +383,20 @@ export async function deleteBundle(bundleId: string) {
       return { success: false, error: "Unauthorized" };
     }
 
-    // Verify user is admin
+    // Verify user is admin or owner
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
 
-    if (!profile || profile.role !== "super_admin") {
-      return { success: false, error: "Only super admins can delete bundles" };
+    if (!profile) return { success: false, error: "Unauthorized" };
+
+    // Get bundle to check ownership
+    const { data: bundle } = await supabase.from('bundles').select('created_by').eq('id', bundleId).single();
+
+    if (profile.role !== "super_admin" && bundle?.created_by !== user.id) {
+      return { success: false, error: "You can only delete your own bundles" };
     }
 
     // Soft delete
@@ -481,6 +486,42 @@ export async function getAdminBundles() {
     return { success: true, data };
   } catch (error) {
     console.error("Error fetching admin bundles:", error);
+    return { success: false, error: "Failed to fetch bundles" };
+  }
+}
+
+/**
+ * Get bundles for instructor (created by them)
+ */
+export async function getInstructorBundles(instructorId: string) {
+  try {
+    const supabase = await createServerClient();
+
+    const { data, error } = await supabase
+      .from("bundles")
+      .select(
+        `
+        *,
+        bundle_courses(
+          course_id,
+          courses(
+            id,
+            title,
+            price_cents
+          )
+        )
+      `
+      )
+      .eq("created_by", instructorId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching instructor bundles:", error);
     return { success: false, error: "Failed to fetch bundles" };
   }
 }

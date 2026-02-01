@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, RotateCcw } from "lucide-react";
+import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
+import { Footer } from "@/components/layout/Footer";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -25,13 +27,11 @@ export default function ResetPasswordPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Check for error parameters from auth confirmation
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const error_code = urlParams.get("error_code");
       const error_description = urlParams.get("error_description");
       
-      // Check if link is expired or invalid
       if (error_code === "otp_expired" || error_description?.includes("expired") || error_description?.includes("invalid")) {
         setLinkExpired(true);
         setError("This password reset link has expired or is invalid. Please request a new one.");
@@ -45,19 +45,13 @@ export default function ResetPasswordPage() {
       setError("Please enter your email address");
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
       });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
+      if (error) throw new Error(error.message);
       setSuccess(true);
       setError(null);
     } catch (err) {
@@ -71,30 +65,19 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    // Check if passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
       return;
     }
-
-    // Check password strength
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new Error(error.message);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to reset password");
@@ -103,196 +86,152 @@ export default function ResetPasswordPage() {
     }
   };
 
-  // Show request new link form if link is expired
-  if (linkExpired || showRequestNewLink) {
-    return (
-      <div className="w-full flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Link Expired</CardTitle>
-            <CardDescription>
-              {success ? "New reset link sent!" : "Request a new password reset link"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && !success && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            {success ? (
-              <Alert className="mb-4">
-                <AlertTitle>Email Sent</AlertTitle>
-                <AlertDescription>
-                  We&apos;ve sent a new password reset link to your email. Please check your inbox and click the link within 1 hour.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <div className="space-y-4">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Link Expired or Invalid</AlertTitle>
-                  <AlertDescription>
-                    Password reset links expire after 1 hour for security. Enter your email below to receive a new link.
+  return (
+    <>
+      <UnifiedNavbar />
+      <div className="min-h-screen w-full flex items-center justify-center pt-32 pb-32 relative overflow-hidden bg-gray-50/50">
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[80px] -z-10" />
+
+        <div className="w-full max-w-xl px-4">
+          {linkExpired || showRequestNewLink ? (
+            <Card className="shadow-2xl border-gray-100 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+              <CardHeader className="space-y-2 text-center pt-12 pb-8">
+                <CardTitle className="text-4xl font-black text-gray-900 tracking-tight">
+                  Link <span className="text-primary italic">Expired</span>
+                </CardTitle>
+                <CardDescription className="text-base font-medium text-muted-foreground/80">
+                  {success ? "New reset link sent!" : "Request a new password reset link"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-8 pb-12">
+                {error && !success && (
+                  <Alert variant="destructive" className="mb-6 rounded-2xl border-primary/20 bg-primary/5 text-primary">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle className="font-bold">Error</AlertTitle>
+                    <AlertDescription className="font-medium">{error}</AlertDescription>
+                  </Alert>
+                )}
+                {success ? (
+                  <Alert className="mb-6 rounded-2xl border-blue-200 bg-blue-50 text-blue-700">
+                    <AlertTitle className="font-bold">Email Sent</AlertTitle>
+                    <AlertDescription className="font-medium">
+                      Check your inbox for the new password reset link.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-bold text-gray-700 ml-1">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all font-medium"
+                      />
+                    </div>
+                    <Button onClick={handleRequestNewLink} className="w-full h-16 rounded-2xl bg-gray-900 hover:bg-primary text-white font-black text-lg transition-all" disabled={loading}>
+                      {loading ? "Sending..." : "Send New Link"}
+                    </Button>
+                  </div>
+                )}
+                <Button variant="outline" className="w-full h-14 rounded-2xl border-gray-100 font-bold mt-4" onClick={() => router.push("/sign-in")}>
+                  Back to Sign In
+                </Button>
+              </CardContent>
+            </Card>
+          ) : success ? (
+            <Card className="shadow-2xl border-gray-100 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+              <CardHeader className="space-y-2 text-center pt-12 pb-8">
+                <CardTitle className="text-4xl font-black text-gray-900 tracking-tight">
+                  Success <span className="text-primary italic">!</span>
+                </CardTitle>
+                <CardDescription className="text-base font-medium text-muted-foreground/80">
+                  Your password has been reset successfully
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-8 pb-12">
+                <Alert className="mb-8 rounded-2xl border-blue-200 bg-blue-50 text-blue-700">
+                  <AlertTitle className="font-bold text-center">Security Updated</AlertTitle>
+                  <AlertDescription className="font-medium text-center">
+                    You can now sign in with your new password.
                   </AlertDescription>
                 </Alert>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleRequestNewLink}
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                      Sending...
+                <Button className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-xl shadow-primary/20 transition-all" onClick={() => router.push("/sign-in")}>
+                  Go to Sign In
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-2xl border-gray-100 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+              <CardHeader className="space-y-2 text-center pt-12 pb-8">
+                <CardTitle className="text-4xl font-black text-gray-900 tracking-tight">
+                  Reset <span className="text-primary italic">Password</span>
+                </CardTitle>
+                <CardDescription className="text-base font-medium text-muted-foreground/80">
+                  Enter your new security credentials below
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-8 pb-12">
+                {error && (
+                  <Alert variant="destructive" className="mb-6 rounded-2xl border-primary/20 bg-primary/5 text-primary">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle className="font-bold">Error</AlertTitle>
+                    <AlertDescription className="font-medium">{error}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm font-bold text-gray-700 ml-1">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        placeholder="••••••••"
+                        className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all pr-12"
+                      />
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent text-gray-400" onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </Button>
                     </div>
-                  ) : "Send New Reset Link"}
-                </Button>
-              </div>
-            )}
-            
-            <Button 
-              variant="outline"
-              className="w-full mt-4"
-              onClick={() => router.push("/sign-in")}
-            >
-              Back to Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="w-full flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Password Reset Successful</CardTitle>
-            <CardDescription>
-              Your password has been reset successfully
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Alert>
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>
-                Your password has been updated. You can now sign in with your new password.
-              </AlertDescription>
-            </Alert>
-            <Button 
-              className="w-full mt-4"
-              onClick={() => router.push("/sign-in")}
-            >
-              Go to Sign In
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
-          <CardDescription>
-            Enter your new password below
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-sm font-bold text-gray-700 ml-1">Confirm New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        placeholder="••••••••"
+                        className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all pr-12"
+                      />
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent text-gray-400" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full h-16 rounded-2xl bg-gray-900 hover:bg-primary text-white font-black text-lg transition-all mt-4" disabled={loading}>
+                    {loading ? "Updating..." : (
+                      <span className="flex items-center justify-center gap-2">
+                        Reset Password
+                        <RotateCcw className="w-5 h-5 opacity-50" />
+                      </span>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           )}
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your new password"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="Confirm your new password"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                  Reset Password
-                </div>
-              ) : "Reset Password"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+      <Footer />
+    </>
   );
 }

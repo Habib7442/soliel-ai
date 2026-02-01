@@ -46,81 +46,95 @@ export function CourseCard({
 }: CourseCardProps) {
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
-      whileHover={{ y: -5 }}
+      className="group bg-white rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-500 h-full flex flex-col border border-gray-100/50"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.4 }}
     >
-      <div className="relative h-48 w-full flex-shrink-0">
+      <div className="relative h-56 w-full flex-shrink-0 overflow-hidden">
         <Image
           src={thumbnail}
           alt={title}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
+        
+        {/* Glassmorphic Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
+          {isBundle && (
+            <div className="backdrop-blur-md bg-white/20 border border-white/30 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              Bundle Deal
+            </div>
+          )}
+          <div className="backdrop-blur-md bg-black/20 border border-white/10 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+            {level}
+          </div>
+        </div>
+
         {originalPrice && (
-          <Badge className="absolute top-3 right-3 bg-primary hover:bg-primary/90 text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
-            Save {Math.round(((originalPrice - price) / originalPrice) * 100)}%
-          </Badge>
-        )}
-        {isBundle && (
-          <Badge className="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-            Bundle Deal
-          </Badge>
+          <div className="absolute bottom-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-black shadow-lg shadow-primary/20">
+            -{Math.round(((originalPrice - price) / originalPrice) * 100)}%
+          </div>
         )}
       </div>
       
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex justify-between items-start mb-3">
-          <Badge variant="secondary" className="text-xs px-2 py-1">
-            {level}
-          </Badge>
-          <div className="flex items-center bg-muted px-2 py-1 rounded-full">
-            <span className="text-yellow-500 mr-1">★</span>
-            <span className="text-xs font-medium">{rating.toFixed(1)}</span>
+      <div className="p-7 flex flex-col flex-1">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-lg text-xs font-bold border border-yellow-100">
+            <span>★</span>
+            <span>{rating.toFixed(1)}</span>
           </div>
+          <span className="text-gray-300">•</span>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{category}</span>
         </div>
         
-        <h3 className="text-lg font-bold mb-2 line-clamp-2 min-h-[3.5rem]">{title}</h3>
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-2 min-h-[2.5rem]">{description}</p>
+        <h3 className="text-xl font-bold mb-3 leading-snug group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+          {title}
+        </h3>
         
-        <div className="flex items-center mb-3">
-          <div className="flex items-center">
+        <p className="text-muted-foreground/80 text-sm mb-6 line-clamp-2 leading-relaxed">
+          {description}
+        </p>
+        
+        <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm">
             <Image
               src={instructor.avatar || "/images/instructors/sarah.png"}
               alt={instructor.name}
-              width={28}
-              height={28}
-              className="rounded-full mr-2"
+              fill
+              className="object-cover"
             />
-            <span className="text-xs text-muted-foreground truncate">{instructor.name}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Instructor</span>
+            <span className="text-sm font-bold text-gray-900">{instructor.name}</span>
           </div>
         </div>
         
-        <div className="flex justify-between items-center mb-4 text-xs text-muted-foreground">
-          <span>{lessons} lessons</span>
-          <span>{students} students</span>
-          <span>{duration}</span>
-        </div>
-        
-        <div className="flex justify-between items-center mt-auto pt-4 border-t">
-          <div className="flex items-baseline">
-            <span className="text-xl font-bold">${price}</span>
-            {originalPrice && (
-              <span className="ml-2 text-sm text-muted-foreground line-through">${originalPrice}</span>
+        <div className="mt-auto pt-6 border-t border-gray-100">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col">
+              {originalPrice && (
+                <span className="text-sm text-muted-foreground line-through opacity-50 mb-0.5">${originalPrice}</span>
+              )}
+              <span className="text-4xl font-black text-gray-900 leading-none tracking-tighter">
+                ${price}
+              </span>
+            </div>
+            
+            {isEnrolled ? (
+              <Button asChild size="lg" variant="secondary" className="w-full rounded-2xl text-xs font-bold h-14 shadow-sm">
+                <Link href={`/learn/${id}/player`} className="flex items-center justify-center gap-2">Resume Learning</Link>
+              </Button>
+            ) : (
+              <Button asChild size="lg" className="w-full bg-primary hover:bg-primary/90 text-white rounded-2xl text-sm font-bold h-14 shadow-xl shadow-primary/10 transition-all hover:scale-[1.02] active:scale-95 border-0">
+                <Link href={`/courses/${id}`} className="flex items-center justify-center gap-2">
+                  Enroll Now
+                </Link>
+              </Button>
             )}
           </div>
-          {isEnrolled ? (
-            <Button asChild size="sm" variant="secondary" className="rounded-lg text-xs h-9 px-4">
-              <Link href={`/learn/${id}/player`}>Go to Course</Link>
-            </Button>
-          ) : (
-            <Button asChild size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground rounded-lg text-xs h-9 px-4 border-0">
-              <Link href={`/courses/${id}`}>Enroll Now</Link>
-            </Button>
-          )}
         </div>
       </div>
     </motion.div>

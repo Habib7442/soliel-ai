@@ -2,18 +2,23 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Enable Turbopack filesystem caching for development
-  experimental: {
-    turbopackFileSystemCacheForDev: true,
-  },
+  // experimental: {
+  //   turbopackFileSystemCacheForDev: true,
+  // },
   typescript: {
     ignoreBuildErrors: true,
   },
 
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
-      // Add Supabase storage domain
-      { hostname: "ykxeyistnxwdopmrcqht.supabase.co" }
+      { hostname: "ykxeyistnxwdopmrcqht.supabase.co" },
+      { hostname: "plxyuglexvpmicfaisno.supabase.co" },
+      { hostname: "api.dicebear.com" },
+      { hostname: "images.unsplash.com" },
+      { hostname: "lh3.googleusercontent.com" }
     ],
   },
   // Enable React Compiler (optional, may increase compile times)

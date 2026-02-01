@@ -14,7 +14,7 @@ import { getPublicCourse } from "@/server/actions/public.actions";
 import { getCourseReviews, getUserReview } from "@/server/actions/review.actions";
 import { createServerClient } from "@/lib/supabase-server";
 import ReactMarkdown from "react-markdown";
-import { Star, Users, Clock, BookOpen, Play, ChevronRight, Check, Lock, Award, Video } from "lucide-react";
+import { Star, Users, Clock, BookOpen, Play, ChevronRight, Check, Lock, Award, Video, ArrowRight } from "lucide-react";
 
 interface CourseDetailsPageProps {
   params: Promise<{
@@ -84,184 +84,170 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
   const isInBundle = course.allow_in_bundles && (course.bundle_discount_percent || 0) > 0;
   
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
-      {/* Navbar Placeholder - Assuming Navbar is handled in layout */}
-      
-      {/* Breadcrumb / Back Link Area */}
-      <div className="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
+    <div className="min-h-screen relative overflow-hidden bg-white selection:bg-primary selection:text-white">
+      {/* Background Blobs */}
+      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-1/2 left-0 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] -z-10" />
+
+      {/* Breadcrumb Area */}
+      <div className="relative z-10 border-b border-gray-100/50">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
           <Link 
             href="/courses" 
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+            className="group inline-flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors"
           >
-            <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
-            Back to Courses
+            <ChevronRight className="h-4 w-4 rotate-180 mr-2 transition-transform group-hover:-translate-x-1" />
+            Back to Catalog
           </Link>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      <div className="container mx-auto px-4 py-12 max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
           
           {/* LEFT COLUMN - Main Content */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-8 space-y-16">
             
-            {/* Header Info (Mobile/Desktop) */}
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Badge variant="secondary" className="bg-primary/10 text-primary border-transparent rounded-full px-3">
-                  {course.level?.toUpperCase()}
+            {/* Header Info */}
+            <div className="space-y-8">
+              <div className="flex flex-wrap items-center gap-4">
+                <Badge className="bg-primary/10 text-primary border-0 hover:bg-primary/20 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors">
+                  {course.level} level
                 </Badge>
                 {course.category && (
-                  <Badge variant="outline" className="rounded-full px-3">
+                  <Badge className="bg-gray-100 text-gray-500 border-0 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">
                     {course.category}
                   </Badge>
                 )}
                 {isInBundle && (
-                  <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-3">
-                    Bundle Deal Available
+                  <Badge className="bg-black text-white border-0 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest animate-pulse">
+                    Bundle Offer
                   </Badge>
                 )}
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+              <h1 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tight leading-[1.1]">
                 {course.title}
               </h1>
               
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p className="text-xl md:text-2xl text-muted-foreground/80 font-medium leading-relaxed max-w-3xl">
                 {course.subtitle}
               </p>
               
-              {/* Stats Row */}
-              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground pt-2">
-                <div className="flex items-center gap-1.5 text-gray-900 dark:text-gray-100 font-medium">
-                  <span className="flex items-center text-yellow-500">
-                    <Star className="h-4 w-4 fill-current" />
-                    <span className="ml-1">{course.stats.average_rating.toFixed(1)}</span>
-                  </span>
-                  <span className="text-muted-foreground font-normal underline decoration-dotted underline-offset-4">
-                    ({course.stats.total_reviews} reviews)
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Users className="h-4 w-4" />
-                  <span>{course.stats.total_enrollments.toLocaleString()} students</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" />
-                  <span>Last updated {new Date(course.updated_at || Date.now()).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-               {/* Instructor Mini Profile */}
-               <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
-                {course.instructor?.avatar_url ? (
-                  <Image 
-                    src={course.instructor.avatar_url} 
-                    alt={course.instructor.full_name || 'Instructor'}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-800"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-800">
-                    <span className="text-sm font-semibold text-primary">
-                      {course.instructor?.full_name?.charAt(0) || 'I'}
-                    </span>
+              {/* Stats & Instructor */}
+              <div className="flex flex-wrap items-center gap-x-10 gap-y-6 pt-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex text-yellow-500">
+                    <Star className="h-5 w-5 fill-current" />
+                    <span className="ml-2 text-lg font-black text-gray-900">{course.stats.average_rating.toFixed(1)}</span>
                   </div>
-                )}
-                <div className="text-sm">
-                  <p className="text-muted-foreground">Created by</p>
-                  <Link href="#instructor" className="font-semibold text-primary hover:underline">
-                    {course.instructor?.full_name || 'Unknown Instructor'}
-                  </Link>
+                  <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                    ({course.stats.total_reviews} REVIEWS)
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5 text-gray-400" />
+                  <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">{course.stats.total_enrollments.toLocaleString()} ENROLLED</span>
+                </div>
+
+                <div className="flex items-center gap-4 pl-4 border-l border-gray-200">
+                  <div className="w-10 h-10 rounded-2xl bg-gray-100 overflow-hidden border-2 border-white shadow-sm">
+                    {course.instructor?.avatar_url ? (
+                      <Image src={course.instructor.avatar_url} alt={course.instructor.full_name || ""} width={40} height={40} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-gray-400">
+                        {course.instructor?.full_name?.charAt(0) || "I"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">Expert Mentor</span>
+                    <span className="text-sm font-black text-gray-900 hover:text-primary transition-colors cursor-pointer">{course.instructor?.full_name || "Anonymous"}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Video Preview (if available) - moved to main column for better flow */}
+            {/* Video Preview */}
             {course.intro_video_url && (
-               <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800">
+               <div className="rounded-[3rem] overflow-hidden shadow-2xl shadow-black/10 border border-white/50 backdrop-blur-xl group">
                  <VideoPlayer url={course.intro_video_url} title={`${course.title} - Preview`} />
                </div>
             )}
             
             {/* What You'll Learn */}
             {course.learning_outcomes && course.learning_outcomes.length > 0 && (
-              <div className="bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-                <h2 className="text-2xl font-bold mb-6">What you&apos;ll learn</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white/50 backdrop-blur-xl rounded-[3rem] border border-white/50 p-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                <h2 className="text-3xl font-black tracking-tight mb-8">What you&apos;ll <span className="text-primary italic">achieve.</span></h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
                   {course.learning_outcomes.map((outcome, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="mt-1 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                        <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                    <div key={index} className="flex items-start gap-4 group">
+                      <div className="mt-1 w-6 h-6 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:rotate-12 transition-all duration-300">
+                        <Check className="h-3.5 w-3.5 text-primary group-hover:text-white" />
                       </div>
-                      <span className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{outcome}</span>
+                      <span className="text-gray-700 font-medium text-base leading-relaxed">{outcome}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             
-            {/* Course Content Accordion */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Course Content</h2>
-              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                <div className="flex gap-4">
-                   <span>{course.sections?.length || 0} sections</span>
-                   <span>•</span>
-                   <span>{course.lessons_count} lessons</span>
-                   <span>•</span>
-                   <span>{formattedDuration} total length</span>
+            {/* Course Content */}
+            <div className="space-y-10">
+              <div className="flex items-end justify-between">
+                <div>
+                  <h2 className="text-3xl font-black tracking-tight mb-2">Curriculum.</h2>
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                    {course.sections?.length || 0} SECTIONS • {course.lessons_count} MODULES • {formattedDuration} CONTENT
+                  </p>
                 </div>
               </div>
               
-              <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800/30">
+              <div className="bg-white/50 backdrop-blur-xl rounded-[3rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
                  {course.sections && course.sections.length > 0 ? (
-                    course.sections.map((section) => {
-                      const previewLessons = section.lessons?.filter(l => l.is_preview) || [];
-                      const lockedLessons = section.lessons?.filter(l => !l.is_preview) || [];
-                       // Only show previews if not enrolled
-                      const lessonsToShow = isEnrolled ? section.lessons || [] : [...previewLessons, ...lockedLessons];
-                       
-                      if (!isEnrolled && previewLessons.length === 0 && lockedLessons.length === 0) return null;
+                    course.sections.map((section, sIdx) => {
+                      const lessonsToShow = section.lessons || [];
+                      if (!isEnrolled && lessonsToShow.length === 0) return null;
 
                       return (
-                        <Accordion type="single" collapsible key={section.id} className="border-b last:border-0 border-gray-100 dark:border-gray-700/50">
+                        <Accordion type="single" collapsible key={section.id} className="border-b last:border-0 border-gray-100/50">
                           <AccordionItem value={section.id} className="border-none">
-                            <AccordionTrigger className="px-6 py-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                              <div className="text-left w-full pr-4">
-                                <h3 className="font-semibold text-gray-900 dark:text-gray-100">{section.title}</h3>
-                                {section.description && (
-                                    <p className="text-xs text-muted-foreground font-normal mt-0.5 line-clamp-1">{section.description}</p>
-                                )}
+                            <AccordionTrigger className="px-10 py-8 hover:bg-gray-50/50 transition-colors [&[data-state=open]]:bg-gray-50/50">
+                              <div className="flex items-center gap-6 text-left w-full">
+                                <span className="text-4xl font-black text-gray-100 tabular-nums">{(sIdx + 1).toString().padStart(2, '0')}</span>
+                                <div>
+                                  <h3 className="text-xl font-black text-gray-900 leading-tight">{section.title}</h3>
+                                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                                    {section.lessons?.length || 0} MODULES
+                                  </p>
+                                </div>
                               </div>
-                              <span className="text-xs text-muted-foreground font-normal whitespace-nowrap ml-2">
-                                {section.lessons?.length || 0} lectures
-                              </span>
                             </AccordionTrigger>
-                            <AccordionContent className="px-0 pb-0 bg-gray-50/30 dark:bg-gray-900/30">
-                              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                            <AccordionContent className="px-0 pb-0 bg-gray-50/30">
+                              <div className="divide-y divide-gray-100/50">
                                 {lessonsToShow.map((lesson) => (
-                                  <div key={lesson.id} className={`flex items-center justify-between py-3 px-6 ${!isEnrolled && !lesson.is_preview ? 'opacity-60' : 'hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'}`}>
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                       {lesson.lesson_type === 'video' ? (
-                                         <Play className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                       ) : (
-                                         <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                       )}
-                                       <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                  <div key={lesson.id} className={`flex items-center justify-between py-6 px-10 pl-24 transition-all ${!isEnrolled && !lesson.is_preview ? 'opacity-50' : 'hover:bg-white group/lesson'}`}>
+                                    <div className="flex items-center gap-4 overflow-hidden">
+                                       <div className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover/lesson:scale-110 transition-transform">
+                                          {lesson.lesson_type === 'video' ? (
+                                            <Play className="h-4 w-4 text-primary fill-current" />
+                                          ) : (
+                                            <BookOpen className="h-4 w-4 text-gray-400" />
+                                          )}
+                                       </div>
+                                       <span className="text-base font-bold text-gray-700 group-hover/lesson:text-primary transition-colors truncate">
                                          {lesson.title}
                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                    <div className="flex items-center gap-6 flex-shrink-0">
                                       {lesson.is_preview && !isEnrolled ? (
-                                        <span className="text-xs font-semibold text-primary">Preview</span>
+                                        <Badge className="bg-primary/10 text-primary border-0 text-[10px] font-black uppercase tracking-widest px-3 py-1">Preview</Badge>
                                       ) : !isEnrolled ? (
-                                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                                        <Lock className="h-4 w-4 text-gray-300" />
                                       ) : null}
-                                      <span className="text-xs text-muted-foreground w-12 text-right">
-                                        {lesson.duration_minutes ? `${lesson.duration_minutes}m` : ''}
+                                      <span className="text-xs font-black text-muted-foreground uppercase tracking-widest w-12 text-right">
+                                        {lesson.duration_minutes ? `${lesson.duration_minutes}M` : ''}
                                       </span>
                                     </div>
                                   </div>
@@ -273,57 +259,56 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                       );
                     })
                  ) : (
-                   <div className="p-8 text-center text-muted-foreground">No content uploaded yet.</div>
+                    <div className="p-20 text-center">
+                      <p className="text-lg font-bold text-gray-400">Curriculum is coming soon.</p>
+                    </div>
                  )}
               </div>
             </div>
 
             {/* Description */}
-            <div className="space-y-4">
-               <h2 className="text-2xl font-bold">Description</h2>
-               <div className="prose prose-gray dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-img:rounded-xl">
+            <div className="space-y-8">
+               <h2 className="text-3xl font-black tracking-tight">Description.</h2>
+               <div className="prose prose-lg prose-gray max-w-none prose-headings:font-black prose-p:font-medium prose-p:leading-relaxed prose-a:text-primary prose-a:font-black prose-img:rounded-[3rem] prose-img:shadow-2xl">
                   <ReactMarkdown>{course.description || "No description provided."}</ReactMarkdown>
                </div>
             </div>
             
-            {/* Prerequisites */}
-            {(course.prerequisites) && (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Requirements</h2>
-                <div className="prose prose-gray dark:prose-invert max-w-none text-sm">
-                   <ReactMarkdown>{course.prerequisites}</ReactMarkdown>
-                </div>
-              </div>
-            )}
-
             {/* Instructor Details */}
-            <div id="instructor" className="space-y-6 pt-8 border-t border-gray-200 dark:border-gray-800">
-               <h2 className="text-2xl font-bold">Instructor</h2>
-               <div className="flex flex-col sm:flex-row gap-6">
+            <div id="instructor" className="pt-20 border-t border-gray-100">
+               <h2 className="text-3xl font-black tracking-tight mb-12">Meet your <span className="text-primary italic">mentor.</span></h2>
+               <div className="bg-white/50 backdrop-blur-xl rounded-[3rem] border border-white/50 p-12 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col md:flex-row gap-12">
                  <div className="flex-shrink-0">
-                    {course.instructor?.avatar_url ? (
-                      <Image 
-                        src={course.instructor.avatar_url} 
-                        alt={course.instructor.full_name || 'Instructor'}
-                        width={96}
-                        height={96}
-                        className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
-                        <span className="text-3xl font-bold text-primary">
-                          {course.instructor?.full_name?.charAt(0) || 'I'}
-                        </span>
+                    <div className="relative">
+                      {course.instructor?.avatar_url ? (
+                        <Image 
+                          src={course.instructor.avatar_url} 
+                          alt={course.instructor.full_name || 'Instructor'}
+                          width={140}
+                          height={140}
+                          className="w-32 h-32 rounded-[2.5rem] object-cover border-4 border-white shadow-2xl"
+                        />
+                      ) : (
+                        <div className="w-32 h-32 rounded-[2.5rem] bg-primary/10 flex items-center justify-center border-4 border-white shadow-2xl">
+                          <span className="text-4xl font-black text-primary">
+                            {course.instructor?.full_name?.charAt(0) || 'I'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-2xl shadow-lg">
+                        <Award className="w-5 h-5" />
                       </div>
-                    )}
+                    </div>
                  </div>
-                 <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-primary underline decoration-2 underline-offset-4 decoration-primary/20">
-                      {course.instructor?.full_name || "Course Instructor"}
-                    </h3>
-                    <p className="text-muted-foreground font-medium">Head Instructor • Senior Developer</p>
+                 <div className="space-y-4 flex-1">
+                    <div>
+                      <h3 className="text-3xl font-black text-gray-900 tracking-tight">
+                        {course.instructor?.full_name || "Expert Instructor"}
+                      </h3>
+                      <p className="text-sm font-black text-primary uppercase tracking-widest mt-1">Senior AI Specialist & Mentor</p>
+                    </div>
                     {course.instructor?.bio_md && (
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground mt-4">
+                      <div className="prose prose-gray max-w-none prose-p:font-medium prose-p:text-muted-foreground/90">
                          <ReactMarkdown>{course.instructor.bio_md}</ReactMarkdown>
                       </div>
                     )}
@@ -332,47 +317,40 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
             </div>
 
              {/* Reviews */}
-             <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
-                <h2 className="text-2xl font-bold mb-6">Student Feedback</h2>
+             <div className="pt-20 border-t border-gray-100 pb-32">
+                <h2 className="text-3xl font-black tracking-tight mb-12">Student Feedback.</h2>
                 
-                {/* Rating Summary Block */}
-                <div className="grid md:grid-cols-12 gap-8 mb-10">
-                   <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
-                      <div className="text-6xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="grid md:grid-cols-12 gap-12 mb-16">
+                   <div className="md:col-span-4 flex flex-col items-center justify-center p-12 bg-white/50 backdrop-blur-xl rounded-[3rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] text-center">
+                      <div className="text-7xl font-black text-gray-900 mb-4 tracking-tighter tabular-nums">
                         {course.stats.average_rating.toFixed(1)}
                       </div>
-                      <div className="flex mb-2">
+                      <div className="flex gap-1 mb-4">
                          {[1, 2, 3, 4, 5].map((star) => (
                            <Star 
                              key={star} 
-                             className={`w-5 h-5 ${star <= Math.round(course.stats.average_rating) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'}`} 
+                             className={`w-6 h-6 ${star <= Math.round(course.stats.average_rating) ? 'text-yellow-400 fill-current' : 'text-gray-200'}`} 
                            />
                          ))}
                       </div>
-                      <p className="text-sm text-muted-foreground font-medium">Course Rating</p>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">COURSE RATING</p>
                    </div>
                    
-                   <div className="md:col-span-8">
-                      {/* Using the component but ignoring the passed props for simple custom UI here or reuse component with wrapper */}
-                       <div className="space-y-2">
+                   <div className="md:col-span-8 flex flex-col justify-center">
+                       <div className="space-y-4">
                            {[5, 4, 3, 2, 1].map((rating) => {
                              const count = ratingDistribution[rating as keyof typeof ratingDistribution] || 0;
                              const percentage = course.stats.total_reviews > 0 ? (count / course.stats.total_reviews) * 100 : 0;
                              return (
-                               <div key={rating} className="flex items-center gap-3 text-sm">
-                                  <div className="w-12 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex-1">
-                                     <div className="h-full bg-gray-900 dark:bg-gray-400 rounded-full" style={{ width: `${percentage}%` }} />
+                               <div key={rating} className="flex items-center gap-6">
+                                  <div className="flex items-center gap-1 min-w-[30px]">
+                                     <span className="text-sm font-black text-gray-900">{rating}</span>
+                                     <Star className="w-3.5 h-3.5 fill-current text-yellow-400" />
                                   </div>
-                                  <div className="flex items-center gap-1 min-w-[60px]">
-                                     <div className="flex text-yellow-500">
-                                       <Star className="w-3.5 h-3.5 fill-current" />
-                                       <Star className="w-3.5 h-3.5 fill-current" />
-                                       <Star className="w-3.5 h-3.5 fill-current" />
-                                       <Star className="w-3.5 h-3.5 fill-current" />
-                                       <Star className="w-3.5 h-3.5 fill-current" />
-                                     </div>
-                                     <span className="text-muted-foreground ml-2 text-xs">{percentage.toFixed(0)}%</span>
+                                  <div className="h-3 bg-gray-100 rounded-full overflow-hidden flex-1">
+                                     <div className="h-full bg-primary rounded-full" style={{ width: `${percentage}%` }} />
                                   </div>
+                                  <span className="text-xs font-black text-muted-foreground uppercase tracking-widest min-w-[40px] text-right">{percentage.toFixed(0)}%</span>
                                </div>
                              )
                            })}
@@ -380,9 +358,8 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                    </div>
                 </div>
 
-                {/* Review Form */}
                 {isEnrolled && user && (
-                    <div className="mb-10">
+                    <div className="mb-16">
                       <ReviewForm 
                         courseId={courseId} 
                         userId={user.id}
@@ -391,106 +368,109 @@ export default async function CourseDetailsPage({ params }: CourseDetailsPagePro
                     </div>
                 )}
                 
-                {/* Reviews List */}
                 <ReviewsList reviews={(reviews || []) as never[]} />
              </div>
-
           </div>
           
           {/* RIGHT COLUMN - Sticky Sidebar */}
-          <div className="lg:col-span-4 relative">
-             <div className="sticky top-24 space-y-6">
+          <div className="lg:col-span-4">
+             <div className="sticky top-12 space-y-8">
                 {/* Enrollment Card */}
-                <Card className="overflow-hidden border-0 shadow-xl ring-1 ring-gray-200 dark:ring-gray-800 bg-white dark:bg-gray-900 rounded-2xl">
-                   {/* Thumbnail (if video preview exists, maybe hide this or change logic) -> Kept for consistent card UI */}
+                <Card className="overflow-hidden border-0 shadow-2xl shadow-black/10 bg-white rounded-[3rem] p-0 ring-1 ring-gray-100">
                    {course.thumbnail_url && !course.intro_video_url && (
                      <div className="relative aspect-video w-full overflow-hidden">
-                       <Image 
-                          src={course.thumbnail_url} 
-                          alt={course.title}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={course.thumbnail_url} alt={course.title} fill className="object-cover" />
                         <div className="absolute inset-0 bg-black/10" />
                      </div>
                    )}
                    
-                   <CardContent className="p-6">
-                      <div className="flex items-end gap-3 mb-6">
-                        <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                   <CardContent className="p-10">
+                      <div className="flex items-center gap-4 mb-8">
+                        <span className="text-5xl font-black text-gray-900 tracking-tight tabular-nums">
                            {formattedPrice}
                         </span>
                         {isInBundle && (
-                          <span className="text-sm text-muted-foreground line-through mb-1.5">
-                            ${(course.price_cents * 1.2 / 100).toFixed(2)}
+                          <span className="text-lg text-muted-foreground/60 line-through tabular-nums">
+                            ${(course.price_cents * 1.3 / 100).toFixed(0)}
                           </span>
                         )}
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {isEnrolled ? (
                           <Button 
                             asChild
-                            size="lg"
-                            className="w-full bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-xl h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                            size="xl"
+                            className="w-full bg-black hover:bg-black/90 text-white rounded-[1.5rem] h-16 text-lg font-black tracking-tight shadow-xl shadow-black/20 group transition-all"
                           >
-                            <Link href={`/learn/${courseId}/player`}>
-                              Continue Learning
+                            <Link href={`/learn/${courseId}/player`} className="flex items-center justify-center gap-2">
+                              Resume Journey
+                              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                             </Link>
                           </Button>
                         ) : (
                           <Button 
                             asChild
-                            size="lg"
-                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-12 text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
+                            size="xl"
+                            className="w-full bg-primary hover:bg-primary/95 text-white rounded-[1.5rem] h-16 text-lg font-black tracking-tight shadow-xl shadow-primary/30 group transition-all border-0"
                           >
-                            <Link href={`/checkout?courseId=${courseId}`}>
+                            <Link href={`/checkout?courseId=${courseId}`} className="flex items-center justify-center gap-2">
                               Enroll Now
+                              <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                             </Link>
                           </Button>
                         )}
                       </div>
                       
-                      <div className="mt-8 space-y-4">
-                         <h4 className="font-semibold text-sm text-gray-900 dark:text-white">This course includes:</h4>
-                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li className="flex items-center gap-3">
-                               <Video className="w-4 h-4 text-gray-400" />
-                               <span>{formattedDuration} on-demand video</span>
+                      <div className="mt-12 pt-8 border-t border-gray-100">
+                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">WHAT&apos;S INCLUDED</h4>
+                         <ul className="space-y-5">
+                            <li className="flex items-center gap-4 group">
+                               <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                 <Video className="w-4 h-4 text-primary" />
+                               </div>
+                               <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">{formattedDuration} on-demand</span>
                             </li>
-                            <li className="flex items-center gap-3">
-                               <BookOpen className="w-4 h-4 text-gray-400" />
-                               <span>{course.lessons_count} downloadable resources</span>
+                            <li className="flex items-center gap-4 group">
+                               <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                 <BookOpen className="w-4 h-4 text-primary" />
+                               </div>
+                               <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">{course.lessons_count} total modules</span>
                             </li>
-                            <li className="flex items-center gap-3">
-                               <Award className="w-4 h-4 text-gray-400" />
-                               <span>Certificate of completion</span>
+                            <li className="flex items-center gap-4 group">
+                               <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                 <Award className="w-4 h-4 text-primary" />
+                               </div>
+                               <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">Global certification</span>
                             </li>
-                            <li className="flex items-center gap-3">
-                               <Lock className="w-4 h-4 text-gray-400" />
-                               <span>Full lifetime access</span>
+                            <li className="flex items-center gap-4 group">
+                               <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                 <Users className="w-4 h-4 text-primary" />
+                               </div>
+                               <span className="text-sm font-bold text-gray-600 uppercase tracking-widest">Community access</span>
                             </li>
                          </ul>
                       </div>
                    </CardContent>
-                   <div className="bg-gray-50 dark:bg-gray-800/50 p-4 border-t border-gray-100 dark:border-gray-800 text-center">
-                     <p className="text-xs text-muted-foreground font-medium">30-Day Money-Back Guarantee</p>
+                   <div className="bg-gray-50/50 p-6 flex items-center justify-center gap-2">
+                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                       <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">30-Day Happiness Guarantee</span>
                    </div>
                 </Card>
                 
-                {/* Meta Info (Badges) */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-4 shadow-sm">
-                   <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Skill Level</span>
-                      <span className="font-medium text-gray-900 dark:text-white capitalize">{course.level}</span>
+                {/* Meta Details */}
+                <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] border border-white/50 p-8 space-y-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                   <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Experience</span>
+                      <span className="text-sm font-black text-gray-900 uppercase tracking-widest">{course.level}</span>
                    </div>
-                   <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Language</span>
-                      <span className="font-medium text-gray-900 dark:text-white capitalize">{course.language}</span>
+                   <div className="flex justify-between items-center border-t border-gray-100/50 pt-4">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Language</span>
+                      <span className="text-sm font-black text-gray-900 uppercase tracking-widest">{course.language}</span>
                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Captions</span>
-                      <span className="font-medium text-gray-900 dark:text-white">Yes</span>
+                    <div className="flex justify-between items-center border-t border-gray-100/50 pt-4">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Subtitles</span>
+                      <span className="text-sm font-black text-gray-900 uppercase tracking-widest">EN, FR, DE</span>
                    </div>
                 </div>
              </div>

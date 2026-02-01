@@ -118,7 +118,8 @@ export async function getAllBlogs(params?: {
       profiles (
         id,
         full_name,
-        email
+        email,
+        avatar_url
       ),
       blog_category_relations (
         blog_categories (
@@ -171,7 +172,8 @@ export async function getBlogBySlug(slug: string) {
       profiles (
         id,
         full_name,
-        email
+        email,
+        avatar_url
       ),
       blog_category_relations (
         blog_categories (
@@ -201,7 +203,8 @@ export async function getBlogById(blogId: string) {
       profiles (
         id,
         full_name,
-        email
+        email,
+        avatar_url
       ),
       blog_category_relations (
         blog_categories (
@@ -447,7 +450,8 @@ export async function getRelatedBlogs(blogId: string, limit: number = 3) {
       profiles (
         id,
         full_name,
-        email
+        email,
+        avatar_url
       ),
       blog_category_relations!inner (
         blog_categories (

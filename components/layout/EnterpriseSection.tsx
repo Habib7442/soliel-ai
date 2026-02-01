@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { CheckCircle2, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 const enterpriseFeatures = [
   {
@@ -24,72 +26,91 @@ const enterpriseFeatures = [
 
 export function EnterpriseSection() {
   return (
-    <section className="container mx-auto px-4 py-16">
-      <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-8 md:p-12">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-          <motion.div 
-            className="flex-1"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Enterprise Solutions
-              </span>
-            </h2>
-            <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
-              Upskill your entire team with our corporate packages. Get bulk pricing, custom learning paths, and dedicated support.
-            </p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-              {enterpriseFeatures.map((feature, index) => (
-                <motion.div 
-                  key={index}
-                  className="bg-card backdrop-blur-sm rounded-lg p-4 shadow-sm"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <h3 className="font-bold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+    <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-white">
+      {/* Background Blobs for context */}
+      <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[140px] -z-10" />
+
+      <div className="max-w-7xl mx-auto">
+        <div className="relative rounded-[4rem] overflow-hidden bg-gray-900 px-8 py-20 md:px-20 md:py-28 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)]">
+          {/* Animated Background Gradients inside the dark card */}
+          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,0,0,0.25),transparent_60%)]" />
+          <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,rgba(255,0,0,0.1),transparent_50%)]" />
           
-          <motion.div 
-            className="flex-1 w-full"
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-          >
-            <div className="bg-card rounded-xl shadow-lg p-8 border">
-              <h3 className="text-2xl font-bold mb-6 text-center">Get Started</h3>
-              
-              <div className="space-y-4">
-                <Button 
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground shadow-lg border-0"
-                  size="lg"
-                  asChild
-                >
-                  <a href="/enterprise/demo">Request Enterprise Demo</a>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  size="lg"
-                  asChild
-                >
-                  <a href="/enterprise/brochure">Download Brochure</a>
-                </Button>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-20 relative z-10">
+            <motion.div 
+              className="flex-1 text-left"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="inline-block px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+                Enterprise Solutions
               </div>
-            </div>
-          </motion.div>
+              
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] mb-10 tracking-tighter">
+                Scale your <br />
+                <span className="text-primary italic">workforce</span> IQ.
+              </h2>
+              
+              <p className="text-gray-400 text-xl mb-12 max-w-xl leading-relaxed font-medium">
+                Transform your organization with tailored learning paths, deep intelligence, and world-class support.
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8">
+                {enterpriseFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-4 group">
+                    <div className="mt-1 w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/40 group-hover:rotate-12 transition-all duration-300">
+                      <CheckCircle2 className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-white text-lg font-black tracking-tight mb-1">{feature.title}</h4>
+                      <p className="text-gray-500 text-sm font-medium leading-relaxed">{feature.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              className="w-full lg:w-[480px]"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+            >
+              <div className="backdrop-blur-3xl bg-white/5 border border-white/10 rounded-[3rem] p-12 shadow-2xl relative overflow-hidden group">
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] group-hover:bg-primary/20 transition-all duration-1000" />
+                
+                <div className="text-center mb-12">
+                  <h3 className="text-3xl font-black text-white mb-3 tracking-tight">Ready to scale?</h3>
+                  <p className="text-gray-400 font-medium tracking-wide uppercase text-[10px] tracking-[0.2em]">Unlock corporate excellence today.</p>
+                </div>
+                
+                <div className="space-y-4">
+                  <Button size="xl" className="w-full rounded-2xl bg-primary hover:bg-primary/95 text-white font-black tracking-tight shadow-2xl shadow-primary/30 group/btn transition-all active:scale-95 border-0 h-16">
+                    Request Private Demo
+                    <ArrowRight className="w-5 h-5 ml-3 transition-transform group-hover/btn:translate-x-2" />
+                  </Button>
+                  
+                  <Button variant="outline" size="xl" className="w-full rounded-2xl bg-transparent border-white/10 text-white hover:bg-white hover:text-gray-900 font-black tracking-tight transition-all active:scale-95 h-16">
+                    Download Enterprise Deck
+                  </Button>
+                </div>
+                
+                <div className="mt-12 pt-10 border-t border-white/10 flex flex-col items-center gap-6">
+                  <div className="flex -space-x-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="w-12 h-12 rounded-2xl border-4 border-gray-900 bg-gray-800 overflow-hidden shadow-xl">
+                        <Image src={`https://api.dicebear.com/7.x/avataaars/svg?seed=enterprise-${i}`} alt="Partner" width={48} height={48} />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Trusted by 500+ Global Teams</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

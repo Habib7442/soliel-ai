@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/cards/CourseCard";
 import { getPublicCourses, getCourseCategories, PublicCourse } from "@/server/actions/public.actions";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export function Courses() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -16,7 +17,6 @@ export function Courses() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      // Fetch courses with limit of 10 for landing page
       const coursesResult = await getPublicCourses(
         activeCategory !== "All" ? { category: activeCategory } : undefined,
         10
@@ -26,7 +26,6 @@ export function Courses() {
         setCourses(coursesResult.data);
       }
 
-      // Fetch categories only once
       if (categories.length === 1) {
         const categoriesResult = await getCourseCategories();
         if (categoriesResult.success && categoriesResult.data) {
@@ -39,74 +38,63 @@ export function Courses() {
     fetchData();
   }, [activeCategory]);
   
-  const filteredCourses = courses;
-  
   return (
-    <section className="container mx-auto px-4 py-16">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            Featured Courses
-          </span>
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Discover our handpicked selection of courses designed to help you master the latest technologies and advance your career.
-        </p>
-      </div>
-      
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap justify-center gap-2 mb-12">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={activeCategory === category ? "default" : "outline"}
-            className={`rounded-full px-6 ${
-              activeCategory === category
-                ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:opacity-90 border-0"
-                : "border-gray-300 dark:border-gray-600"
-            }`}
-            onClick={() => setActiveCategory(category)}
+    <section className="relative py-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest mb-6"
           >
-            {category}
-          </Button>
-        ))}
-      </div>
-      
-      {/* Courses Grid */}
-      {loading ? (
-        <div className="flex flex-wrap justify-center gap-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg animate-pulse w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]">
-              <div className="h-48 bg-gray-300 dark:bg-gray-700" />
-              <div className="p-6 space-y-4">
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4" />
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded" />
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filteredCourses.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-gray-300 text-lg">
-            No courses found in this category. Check back soon!
+            <Sparkles className="w-4 h-4" />
+            <span>Top Picks</span>
+          </motion.div>
+          
+          <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
+            Featured <span className="text-primary italic">Courses.</span>
+          </h2>
+          
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-medium mb-12">
+            Build incredible skills with our most popular courses, taught by industry experts.
           </p>
+
+          {/* Filter Tabs - Modern Pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-16">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-8 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
+                  activeCategory === category
+                    ? "bg-primary text-white shadow-xl shadow-primary/20 scale-105"
+                    : "bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
-      ) : (
-        <motion.div 
-          className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto"
-          layout
-        >
-          {filteredCourses.map((course, index) => (
-            <motion.div
-              key={course.id}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]"
-            >
+        
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-50 rounded-[2.5rem] overflow-hidden h-[450px] animate-pulse" />
+            ))}
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="text-center py-24 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+            <p className="text-gray-400 font-bold text-lg">
+              No courses found in this category. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
+            {courses.map((course, index) => (
               <CourseCard
+                key={course.id}
                 id={course.id}
                 title={course.title}
                 description={course.subtitle || course.description || ""}
@@ -121,24 +109,22 @@ export function Courses() {
                 category={course.category || "General"}
                 instructor={{
                   name: course.instructor?.full_name || "Anonymous Instructor",
-                  avatar: course.instructor?.avatar_url || "/images/instructors/sarah.png",
+                  avatar: course.instructor?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher",
                 }}
                 isBundle={course.allow_in_bundles && (course.bundle_discount_percent || 0) > 0}
               />
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
-      
-      {/* View All Button */}
-      <div className="text-center mt-12">
-        <Button 
-          size="lg" 
-          className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground shadow-lg border-0"
-          asChild
-        >
-          <Link href="/courses">View All Courses</Link>
-        </Button>
+            ))}
+          </div>
+        )}
+        
+        <div className="text-center">
+          <Button asChild size="xl" className="rounded-2xl bg-gray-900 hover:bg-primary text-white font-bold px-12 transition-all hover:scale-105 active:scale-95 border-0 shadow-2xl shadow-black/10">
+            <Link href="/courses" className="flex items-center gap-2">
+              Browse All Courses
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );

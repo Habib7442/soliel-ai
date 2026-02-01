@@ -39,53 +39,54 @@ export default async function BlogPage({
     : blogs;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background Blobs */}
+      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-1/2 left-0 -translate-x-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] -z-10" />
+
       {/* Hero Section */}
-      <div className="relative bg-white dark:bg-gray-950 border-b dark:border-gray-800 pb-32 pt-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50" />
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <Badge variant="outline" className="mb-4 border-primary/20 text-primary bg-primary/5 rounded-full px-4 py-1.5 text-sm uppercase tracking-wider font-semibold">
-              Our Blog
-            </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-gray-900 dark:text-white">
-              Insights & <span className="text-primary">Updates</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              Expert guides, industry trends, and the latest news to help you master your craft.
-            </p>
-          </div>
+      <div className="relative pt-20 pb-32 md:pt-32 md:pb-40 selection:bg-primary selection:text-white">
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 transition-colors px-4 py-1.5 text-sm font-bold uppercase tracking-widest rounded-full mb-8">
+            Our Blog
+          </Badge>
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 tracking-tight text-gray-900 leading-[1.1]">
+            Insights & <br />
+            <span className="text-primary italic">Updates</span>
+          </h1>
+          <p className="text-xl text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed">
+            Expert guides, industry trends, and the latest news to help you master your craft with Soliel AI.
+          </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 max-w-7xl -mt-20 relative z-20">
+      <div className="container mx-auto px-4 max-w-7xl -mt-20 relative z-20 pb-32">
         {/* Search and Filters Bar */}
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 mb-12">
-          <form action="/blog" method="get" className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+        <div className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-white/50 p-8 mb-16">
+          <form action="/blog" method="get" className="flex flex-col md:flex-row gap-5 mb-8">
+            <div className="flex-1 relative group">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={22} />
               <Input
                 type="text"
                 name="search"
                 placeholder="Search articles..."
                 defaultValue={params.search}
-                className="pl-12 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base"
+                className="pl-14 h-16 border-gray-100 bg-gray-50/50 focus:bg-white rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-lg font-medium"
               />
             </div>
-            <Button type="submit" className="h-12 px-8 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-medium transition-all shadow-md hover:shadow-lg">
+            <Button type="submit" className="h-16 px-10 rounded-2xl bg-gray-900 hover:bg-primary text-white text-lg font-black transition-all shadow-xl shadow-black/10 hover:scale-[1.02] active:scale-95">
               Search
             </Button>
           </form>
 
           {/* Category Filters */}
-          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+          <div className="flex flex-wrap gap-3 justify-center md:justify-start">
             <Link href="/blog">
               <Badge
-                variant={!params.category ? "default" : "outline"}
-                className={`cursor-pointer px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                className={`cursor-pointer px-6 py-2.5 rounded-xl text-sm font-bold transition-all border-0 ${
                   !params.category 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800 border-muted"
+                    ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                    : "bg-gray-100/50 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                 }`}
               >
                 All Posts
@@ -94,11 +95,10 @@ export default async function BlogPage({
             {categories?.map((category) => (
               <Link key={category.id} href={`/blog?category=${category.slug}`}>
                 <Badge
-                  variant={params.category === category.slug ? "default" : "outline"}
-                  className={`cursor-pointer px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`cursor-pointer px-6 py-2.5 rounded-xl text-sm font-bold transition-all border-0 ${
                     params.category === category.slug 
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800 border-muted"
+                      ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                      : "bg-gray-100/50 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
                   {category.name}
@@ -110,51 +110,51 @@ export default async function BlogPage({
 
         {/* Blog Grid */}
         {filteredBlogs && filteredBlogs.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
             {filteredBlogs.map((blog) => (
-              <Link key={blog.id} href={`/blog/${blog.slug}`} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] group">
-                <Card className="h-full border border-gray-100 dark:border-gray-800 hover:border-primary/20 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden bg-white dark:bg-gray-900">
+              <Link key={blog.id} href={`/blog/${blog.slug}`} className="group h-full">
+                <Card className="h-full border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/70 backdrop-blur-xl hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-500 rounded-[2.5rem] overflow-hidden flex flex-col">
                   {blog.featured_image_url && (
-                    <div className="relative h-56 w-full overflow-hidden">
+                    <div className="relative h-64 w-full overflow-hidden">
                       <Image
                         src={blog.featured_image_url}
                         alt={blog.title}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
                   )}
-                  <CardHeader className="pb-2">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {blog.blog_category_relations?.slice(0, 2).map((rel) => (
-                        <Badge key={rel.blog_categories.id} variant="secondary" className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+                  <CardHeader className="pb-4 pt-8 px-8 flex-grow">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {blog.blog_category_relations?.slice(0, 1).map((rel) => (
+                        <Badge key={rel.blog_categories.id} className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border-0 rounded-lg px-3 py-1">
                           {rel.blog_categories.name}
                         </Badge>
                       ))}
                     </div>
-                    <CardTitle className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
+                    <CardTitle className="text-2xl font-black mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
                       {blog.title}
                     </CardTitle>
                     {blog.subtitle && (
-                      <CardDescription className="line-clamp-1 text-base mt-2">
+                      <CardDescription className="line-clamp-2 text-base font-medium leading-relaxed">
                         {blog.subtitle}
                       </CardDescription>
                     )}
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground line-clamp-3 mb-6 text-sm leading-relaxed">
+                  <CardContent className="px-8 pb-10 mt-auto">
+                    <p className="text-muted-foreground/80 line-clamp-3 mb-8 text-sm leading-relaxed font-normal">
                       {blog.excerpt || blog.content.substring(0, 150) + "..."}
                     </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                          <User className="h-3 w-3" />
+                    <div className="flex items-center justify-between pt-6 border-t border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                           <User className="h-4 w-4 text-gray-400" />
                         </div>
-                        <span className="font-medium">{blog.profiles?.full_name || "Unknown"}</span>
+                        <span className="text-gray-600">{blog.profiles?.full_name || "Soliel AI"}</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 opacity-50" />
                         <span>
                           {blog.published_at
                             ? new Date(blog.published_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -168,21 +168,25 @@ export default async function BlogPage({
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white/50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800">
-            <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+          <div className="text-center py-32 bg-white/50 backdrop-blur-xl rounded-[3rem] border-4 border-dashed border-gray-100 overflow-hidden relative">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl" />
+            
+            <div className="relative z-10">
+              <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <Search className="h-10 w-10 text-gray-400" />
+              </div>
+              <h3 className="text-3xl font-black mb-4 tracking-tight">No articles found</h3>
+              <p className="text-xl text-muted-foreground/70 mb-10 max-w-sm mx-auto leading-relaxed">
+                We couldn't find any posts matching your search criteria. Try another keyword?
+              </p>
+              {params.search && (
+                <Button asChild className="rounded-2xl h-14 px-10 bg-gray-900 text-white font-black text-lg shadow-xl shadow-black/10 hover:bg-primary transition-all">
+                  <Link href="/blog">
+                    Clear Search
+                  </Link>
+                </Button>
+              )}
             </div>
-            <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-              We couldn't find any posts matching your search criteria.
-            </p>
-            {params.search && (
-              <Button asChild variant="outline" className="rounded-full">
-                <Link href="/blog">
-                  Clear Search
-                </Link>
-              </Button>
-            )}
           </div>
         )}
       </div>

@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Space_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SupabaseProvider } from "@/providers/supabase-provider";
 import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({
-  variable: "--font-inter",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
   display: "swap",
 });
 
-const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -33,17 +32,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${spaceMono.variable} antialiased`}
+        className={`${bricolage.variable} ${outfit.variable} antialiased font-sans`}
       >
         <SupabaseProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
+            forcedTheme="light"
+            enableSystem={false}
             disableTransitionOnChange
           >
             {/* <UnifiedNavbar /> */}
-            <div className="min-h-screen w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen w-full">
               {children}
             </div>
             <Toaster />

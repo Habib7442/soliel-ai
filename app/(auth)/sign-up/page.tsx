@@ -6,10 +6,9 @@ import { Suspense } from "react";
 
 export default function SignUpPage() {
   return (
-    <div>
-      <Suspense fallback={<GlobalLoading text="Loading sign up..." /> }>
-        <AuthForm mode="signup" />
-      </Suspense>
-    </div>
+    <Suspense fallback={<GlobalLoading text="Loading sign up..." /> }>
+      <AuthForm mode="signup" />
+    </Suspense>
   );
+
 }

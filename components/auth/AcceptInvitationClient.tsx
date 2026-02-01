@@ -10,6 +10,7 @@ import { Loader2, Building2, Mail, User, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase-client";
 import { acceptInvitation } from "@/server/actions/company.actions";
+import { Loading } from "@/components/ui/loading";
 
 interface InvitationData {
   id: string;
@@ -27,6 +28,10 @@ interface AcceptInvitationClientProps {
   invitation: InvitationData;
   token: string;
 }
+
+import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
+import { Footer } from "@/components/layout/Footer";
+import { RotateCcw } from "lucide-react";
 
 export default function AcceptInvitationClient({ invitation, token }: AcceptInvitationClientProps) {
   const router = useRouter();
@@ -110,113 +115,128 @@ export default function AcceptInvitationClient({ invitation, token }: AcceptInvi
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-[#FF0000] rounded-full flex items-center justify-center mb-4">
-            <Building2 className="w-6 h-6 text-white" />
-          </div>
-          <CardTitle className="text-2xl">Company Invitation</CardTitle>
-          <CardDescription>
-            You&apos;ve been invited to join <strong>{invitation.companies.name}</strong>
-          </CardDescription>
-        </CardHeader>
+    <>
+      <UnifiedNavbar />
+      <div className="min-h-screen w-full flex items-center justify-center pt-32 pb-32 relative overflow-hidden bg-gray-50/50">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[80px] -z-10" />
 
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email (readonly) */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={invitation.email}
-                  disabled
-                  className="pl-10"
-                />
+        <div className="w-full max-w-xl px-4">
+          <Card className="shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border-gray-100 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="space-y-2 text-center pt-12 pb-8">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                <Building2 className="w-8 h-8 text-primary" />
               </div>
-            </div>
+              <CardTitle className="text-4xl font-black text-gray-900 tracking-tight">
+                Company <span className="text-primary italic">Invitation</span>
+              </CardTitle>
+              <CardDescription className="text-base font-medium text-muted-foreground/80">
+                You've been invited to join <span className="text-gray-900 font-bold">{invitation.companies.name}</span>
+              </CardDescription>
+            </CardHeader>
 
-            {/* Full Name */}
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name *</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
+            <CardContent className="px-8 pb-12">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Email (readonly) */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-bold text-gray-700 ml-1">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={invitation.email}
+                      disabled
+                      className="h-14 rounded-2xl border-gray-100 bg-gray-100/50 pl-12 font-medium"
+                    />
+                  </div>
+                </div>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-sm font-bold text-gray-700 ml-1">Full Name *</Label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all pl-12 font-medium"
+                      required
+                    />
+                  </div>
+                </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password *</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="pl-10"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
+                {/* Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-bold text-gray-700 ml-1">Create Password *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all pl-12 font-medium"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
 
-            {/* Role Badge */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-blue-900 dark:text-blue-100">
-                <strong>Role:</strong> {invitation.role === "company_admin" ? "Company Administrator" : "Employee"}
-              </p>
-            </div>
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-bold text-gray-700 ml-1">Confirm Password *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all pl-12 font-medium"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF914D]"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                "Accept Invitation & Create Account"
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+                {/* Role Badge */}
+                <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                  <p className="text-sm font-bold text-primary">
+                    Role: <span className="text-gray-900 ml-1 font-black">{invitation.role === "company_admin" ? "Company Administrator" : "Employee"}</span>
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-16 rounded-2xl bg-gray-900 hover:bg-primary text-white font-black text-lg shadow-xl shadow-black/10 transition-all hover:scale-[1.02] active:scale-95 border-0 mt-4 group"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loading size="sm" className="border-white/30 border-t-white" />
+                      <span>Creating Account...</span>
+                    </div>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      Accept & Get Started
+                      <RotateCcw className="w-5 h-5 opacity-50 group-hover:rotate-180 transition-transform duration-500" />
+                    </span>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      <Footer />
+    </>
   );
 }

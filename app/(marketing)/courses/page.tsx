@@ -129,178 +129,194 @@ export default function CoursesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background Blobs */}
+      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-1/2 left-0 -translate-x-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] -z-10" />
+
       {/* Hero Section */}
-      <div className="relative bg-white dark:bg-gray-950 border-b dark:border-gray-800 pb-32 pt-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50" />
+      <div className="relative pt-20 pb-32 md:pt-32 md:pb-40 selection:bg-primary selection:text-white">
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center max-w-3xl mx-auto"
+            className="text-center max-w-4xl mx-auto"
           >
-            <Badge variant="outline" className="mb-4 border-primary/20 text-primary bg-primary/5 rounded-full px-4 py-1.5 text-sm uppercase tracking-wider font-semibold">
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 transition-colors px-4 py-1.5 text-sm font-bold uppercase tracking-widest rounded-full mb-8">
               Course Catalog
             </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-gray-900 dark:text-white">
-              Expand Your <span className="text-primary">Knowledge</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 tracking-tight text-gray-900 leading-[1.1]">
+              Expand Your <br />
+              <span className="text-primary italic">Knowledge</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+            <p className="text-xl text-muted-foreground/80 leading-relaxed max-w-2xl mx-auto">
               Explore our curated library of expert-led courses designed to help you master new skills and advance your career.
             </p>
           </motion.div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 max-w-7xl -mt-20 relative z-20">
+      <div className="container mx-auto px-4 max-w-7xl -mt-20 relative z-20 pb-32">
         {/* Search and Filters Bar */}
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6 mb-12">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <div className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-white/50 p-8 mb-16">
+          <div className="flex flex-col lg:flex-row gap-5">
             {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+            <div className="flex-1 relative group">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={22} />
               <Input
                 type="text"
                 placeholder="Search for courses, skills, or topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base"
+                className="pl-14 h-16 border-gray-100 bg-gray-50/50 focus:bg-white rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-lg font-medium"
               />
             </div>
 
-            {/* Category Filter */}
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full lg:w-48 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-base">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Category Filter */}
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full sm:w-52 h-16 border-gray-100 bg-gray-50/50 rounded-2xl focus:ring-primary/20 focus:border-primary text-base font-bold">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category} className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Level Filter */}
-            <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-              <SelectTrigger className="w-full lg:w-48 h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-base">
-                <SelectValue placeholder="Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Levels</SelectItem>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* Level Filter */}
+              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                <SelectTrigger className="w-full sm:w-52 h-16 border-gray-100 bg-gray-50/50 rounded-2xl focus:ring-primary/20 focus:border-primary text-base font-bold">
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                  <SelectItem value="All" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">All Levels</SelectItem>
+                  <SelectItem value="Beginner" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">Beginner</SelectItem>
+                  <SelectItem value="Intermediate" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">Intermediate</SelectItem>
+                  <SelectItem value="Advanced" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {/* More Filters */}
-            <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="h-12 border border-muted bg-white dark:bg-gray-800 rounded-xl px-4 text-base hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary hover:border-primary/50 transition-all">
-                  <Filter size={20} className="mr-2" />
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <Badge className="ml-2 bg-primary text-primary-foreground rounded-full h-5 px-2 text-xs">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-md p-6">
-                <SheetHeader className="mb-6">
-                  <SheetTitle className="text-2xl">Additional Filters</SheetTitle>
-                  <SheetDescription>
-                    Refine your course search with more options
-                  </SheetDescription>
-                </SheetHeader>
-                
-                <div className="space-y-6">
-                  {/* Price Range */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold block">
-                      Price Range: ${priceRange[0]} - ${priceRange[1]}
-                    </Label>
-                    <div className="px-2">
-                      <Slider
-                        min={0}
-                        max={500}
-                        step={10}
-                        value={priceRange}
-                        onValueChange={setPriceRange}
+              {/* More Filters */}
+              <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="h-16 border-gray-100 bg-gray-50/50 rounded-2xl px-6 text-base font-black hover:bg-white hover:text-primary hover:border-primary/20 shadow-sm transition-all group">
+                    <Filter size={20} className="mr-3 group-hover:rotate-12 transition-transform" />
+                    Filters
+                    {activeFiltersCount > 0 && (
+                      <Badge className="ml-3 bg-primary text-white rounded-full h-6 px-2 text-xs font-black ring-4 ring-primary/10">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-md p-8 rounded-l-[3rem] border-0 backdrop-blur-3xl bg-white/95">
+                  <SheetHeader className="mb-10">
+                    <SheetTitle className="text-3xl font-black tracking-tight">Additional <span className="text-primary italic">Filters</span></SheetTitle>
+                    <SheetDescription className="text-base font-medium">
+                      Refine your course search with targeted options
+                    </SheetDescription>
+                  </SheetHeader>
+                  
+                  <div className="space-y-10">
+                    {/* Price Range */}
+                    <div className="space-y-5">
+                      <div className="flex justify-between items-center">
+                        <Label className="text-lg font-black tracking-tight">Price Range</Label>
+                        <span className="text-primary font-bold bg-primary/10 px-3 py-1 rounded-lg text-sm">
+                          ${priceRange[0]} - ${priceRange[1]}
+                        </span>
+                      </div>
+                      <div className="px-2">
+                        <Slider
+                          min={0}
+                          max={500}
+                          step={10}
+                          value={priceRange}
+                          onValueChange={setPriceRange}
+                          className="py-4"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bundles Only */}
+                    <div className="flex items-center justify-between bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
+                      <div className="space-y-1">
+                        <Label htmlFor="bundles-only" className="text-lg font-black tracking-tight cursor-pointer">
+                          Bundle Deals
+                        </Label>
+                        <p className="text-xs text-muted-foreground font-medium">Only show discounted sets</p>
+                      </div>
+                      <Switch
+                        id="bundles-only"
+                        checked={bundlesOnly}
+                        onCheckedChange={setBundlesOnly}
                       />
                     </div>
-                  </div>
 
-                  {/* Bundles Only */}
-                  <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
-                    <Label htmlFor="bundles-only" className="text-base font-semibold cursor-pointer">
-                      Bundle Deals Only
-                    </Label>
-                    <Switch
-                      id="bundles-only"
-                      checked={bundlesOnly}
-                      onCheckedChange={setBundlesOnly}
-                    />
+                    {/* Clear Filters */}
+                    <Button
+                      onClick={() => {
+                        clearFilters();
+                        setFiltersOpen(false);
+                      }}
+                      variant="outline"
+                      className="w-full rounded-2xl h-16 text-lg font-black border-2 border-gray-100 hover:bg-primary hover:text-white hover:border-primary transition-all"
+                    >
+                      <X size={20} className="mr-3" />
+                      Clear All Filters
+                    </Button>
                   </div>
-
-                  {/* Clear Filters */}
-                  <Button
-                    onClick={clearFilters}
-                    variant="outline"
-                    className="w-full border-2 rounded-lg h-11 text-base"
-                  >
-                    <X size={16} className="mr-2" />
-                    Clear All Filters
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
 
           {/* Active Filters Display */}
           {activeFiltersCount > 0 && (
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">Active filters:</span>
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <div className="flex flex-wrap gap-3 items-center">
+                <span className="text-sm font-black uppercase tracking-widest text-gray-400 mr-2">Filtered by:</span>
                 {searchQuery && (
-                  <Badge variant="secondary" className="gap-1 px-3 py-1 rounded-full">
-                    Search: {searchQuery}
+                  <Badge className="bg-primary/10 text-primary border-0 gap-2 px-4 py-2 rounded-xl text-xs font-bold ring-2 ring-primary/5">
+                    "{searchQuery}"
                     <X
                       size={14}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:scale-125 transition-transform"
                       onClick={() => setSearchQuery("")}
                     />
                   </Badge>
                 )}
                 {selectedCategory !== "All" && (
-                  <Badge variant="secondary" className="gap-1 px-3 py-1 rounded-full">
+                  <Badge className="bg-primary/10 text-primary border-0 gap-2 px-4 py-2 rounded-xl text-xs font-bold ring-2 ring-primary/5">
                     {selectedCategory}
                     <X
                       size={14}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:scale-125 transition-transform"
                       onClick={() => setSelectedCategory("All")}
                     />
                   </Badge>
                 )}
                 {selectedLevel !== "All" && (
-                  <Badge variant="secondary" className="gap-1 px-3 py-1 rounded-full">
+                  <Badge className="bg-primary/10 text-primary border-0 gap-2 px-4 py-2 rounded-xl text-xs font-bold ring-2 ring-primary/5">
                     {selectedLevel}
                     <X
                       size={14}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:scale-125 transition-transform"
                       onClick={() => setSelectedLevel("All")}
                     />
                   </Badge>
                 )}
                 {bundlesOnly && (
-                  <Badge variant="secondary" className="gap-1 px-3 py-1 rounded-full">
+                  <Badge className="bg-primary/10 text-primary border-0 gap-2 px-4 py-2 rounded-xl text-xs font-bold ring-2 ring-primary/5">
                     Bundle Deals
                     <X
                       size={14}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:scale-125 transition-transform"
                       onClick={() => setBundlesOnly(false)}
                     />
                   </Badge>
@@ -309,74 +325,76 @@ export default function CoursesPage() {
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="h-7 text-xs px-2"
+                  className="h-9 text-xs px-3 font-black text-gray-400 hover:text-primary transition-colors uppercase tracking-widest"
                 >
-                  Clear all
+                  Reset All
                 </Button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Results Summary */}
-        <div className="mb-8 flex justify-between items-center">
-          <p className="text-gray-600 dark:text-gray-300">
+        {/* Results Summary & Courses Grid */}
+        <div className="mb-12">
+          <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
             {loading ? (
-              "Loading courses..."
+              "Fetching excellence..."
             ) : (
               <>
-                Showing <span className="font-semibold">{indexOfFirstCourse + 1}</span> to{" "}
-                <span className="font-semibold">{Math.min(indexOfLastCourse, courses.length)}</span> of{" "}
-                <span className="font-semibold">{courses.length}</span> courses
+                Showing <span className="text-gray-900">{indexOfFirstCourse + 1}</span> - <span className="text-gray-900">{Math.min(indexOfLastCourse, courses.length)}</span> of <span className="text-gray-900">{courses.length}</span> curated courses
               </>
             )}
           </p>
         </div>
 
-        {/* Courses Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg animate-pulse">
-                <div className="h-48 bg-gray-300 dark:bg-gray-700" />
-                <div className="p-6 space-y-4">
-                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4" />
-                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded" />
-                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white/50 backdrop-blur-sm rounded-[2.5rem] overflow-hidden border border-gray-100 animate-pulse">
+                <div className="h-64 bg-gray-100" />
+                <div className="p-8 space-y-5">
+                  <div className="h-6 bg-gray-100 rounded-full w-3/4" />
+                  <div className="h-4 bg-gray-100 rounded-full" />
+                  <div className="flex gap-2">
+                    <div className="h-8 bg-gray-100 rounded-lg w-20" />
+                    <div className="h-8 bg-gray-100 rounded-lg w-20" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         ) : currentCourses.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-            <div className="inline-block p-8 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
-              <Search size={48} className="text-gray-400" />
+          <div className="text-center py-32 bg-white/50 backdrop-blur-xl rounded-[3rem] border-4 border-dashed border-gray-100 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl" />
+            
+            <div className="relative z-10">
+              <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <Search size={40} className="text-gray-400" />
+              </div>
+              <h3 className="text-3xl font-black mb-4 tracking-tight">No courses found</h3>
+              <p className="text-xl text-muted-foreground/70 mb-12 max-w-sm mx-auto leading-relaxed">
+                We couldn't find any courses matching your filters. Try adjusting your search!
+              </p>
+              <Button 
+                onClick={clearFilters} 
+                className="bg-gray-900 border-0 hover:bg-primary text-white font-black text-lg h-16 px-12 rounded-2xl shadow-xl shadow-black/10 transition-all hover:scale-105"
+              >
+                Reset All Filters
+              </Button>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              No courses found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
-              Try adjusting your filters or search query
-            </p>
-            <Button 
-              onClick={clearFilters} 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8"
-            >
-              Clear All Filters
-            </Button>
           </div>
         ) : (
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12"
             layout
           >
             {currentCourses.map((course, index) => (
               <motion.div
                 key={course.id}
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
               >
                 <CourseCard
                   id={course.id}
@@ -405,47 +423,51 @@ export default function CoursesPage() {
 
         {/* Pagination */}
         {!loading && totalPages > 1 && (
-          <div className="mt-12 flex justify-center">
-            <div className="flex gap-2 items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2">
+          <div className="mt-20 flex justify-center">
+            <div className="flex gap-3 items-center bg-white/70 backdrop-blur-xl rounded-[2rem] p-3 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-gray-100">
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => paginate(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="rounded-lg"
+                className="rounded-xl h-12 px-6 font-bold hover:bg-primary/5 hover:text-primary disabled:opacity-30"
               >
-                Previous
+                Prev
               </Button>
               
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(page => {
-                  // Show first page, last page, current page, and pages around current page
-                  return (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  );
-                })
-                .map((page, index, array) => (
-                  <div key={page} className="flex gap-2 items-center">
-                    {/* Add ellipsis if there's a gap */}
-                    {index > 0 && array[index - 1] !== page - 1 && (
-                      <span className="px-2 text-gray-500">...</span>
-                    )}
-                    <Button
-                      variant={currentPage === page ? "default" : "outline"}
-                      onClick={() => paginate(page)}
-                      className={`rounded-lg ${currentPage === page ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-gray-50 dark:hover:bg-gray-800"}`}
-                    >
-                      {page}
-                    </Button>
-                  </div>
-                ))}
+              <div className="flex items-center">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    );
+                  })
+                  .map((page, index, array) => (
+                    <div key={page} className="flex items-center">
+                      {index > 0 && array[index - 1] !== page - 1 && (
+                        <span className="px-3 text-gray-300 font-bold">...</span>
+                      )}
+                      <Button
+                        variant={currentPage === page ? "default" : "ghost"}
+                        onClick={() => paginate(page)}
+                        className={`w-12 h-12 rounded-xl text-base font-black transition-all ${
+                          currentPage === page 
+                            ? "bg-primary text-white shadow-lg shadow-primary/20 scale-110" 
+                            : "hover:bg-primary/5 hover:text-primary"
+                        }`}
+                      >
+                        {page}
+                      </Button>
+                    </div>
+                  ))}
+              </div>
               
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="rounded-lg"
+                className="rounded-xl h-12 px-6 font-bold hover:bg-primary/5 hover:text-primary disabled:opacity-30"
               >
                 Next
               </Button>
@@ -453,6 +475,8 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+      {/* Bottom Spacer */}
+      <div className="h-20" />
     </div>
   );
 }

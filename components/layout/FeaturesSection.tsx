@@ -1,118 +1,142 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
+import { 
+  Building2, 
+  ShieldCheck, 
+  MonitorPlay, 
+  BarChart3, 
+  BrainCircuit, 
+  CreditCard, 
+  Settings2, 
+  Network 
+} from "lucide-react";
 
 const features = [
   {
-    title: "Powerful Platform Architecture",
-    description: "Built on modern microservices architecture with Next.js frontend and Supabase backend for scalable performance.",
-    icon: "🏗️",
-    tech: "Next.js + Supabase"
+    title: "Next-Gen Architecture",
+    description: "Lightning-fast performance powered by Next.js & Supabase edge nodes.",
+    icon: Network,
+    tech: "Edge Runtime"
   },
   {
-    title: "Secure Authentication",
-    description: "Enterprise-grade security with JWT tokens and OAuth2 integration using Supabase Auth for safe learning.",
-    icon: "🔒",
+    title: "Secure Auth",
+    description: "Enterprise-grade JWT and OAuth2 security for your data.",
+    icon: ShieldCheck,
     tech: "Supabase Auth"
   },
   {
-    title: "Interactive Learning",
-    description: "Hands-on coding environments with video lessons, quizzes, and assignments for practical learning.",
-    icon: "💻",
-    tech: "Lesson Player"
+    title: "Immersive Learning",
+    description: "High-def video player with integrated coding sandboxes.",
+    icon: MonitorPlay,
+    tech: "Player v2"
   },
   {
-    title: "Progress Tracking",
-    description: "Real-time analytics and progress monitoring to optimize your learning journey with completion certificates.",
-    icon: "📊",
-    tech: "Analytics Dashboard"
+    title: "Deep Analytics",
+    description: "Visualize your growth with detailed competency heatmaps.",
+    icon: BarChart3,
+    tech: "Postgres Realtime"
   },
   {
-    title: "Smart Assessments",
-    description: "AI-powered quiz system with automated grading and personalized feedback for better learning outcomes.",
-    icon: "🤖",
-    tech: "Quiz Engine"
+    title: "AI Co-pilot",
+    description: "Automated grading and personalized tutoring on every lesson.",
+    icon: BrainCircuit,
+    tech: "LLM Orchestrator"
   },
   {
-    title: "Secure Payments",
-    description: "Secure payment processing with Stripe integration for course purchases and subscriptions.",
-    icon: "💳",
-    tech: "Stripe Payments"
+    title: "Global Payments",
+    description: "Start learning in seconds with Stripe integration in 135+ currencies.",
+    icon: CreditCard,
+    tech: "Stripe"
   },
   {
-    title: "Course Management",
-    description: "Comprehensive tools for instructors to create, publish, and manage courses with lesson content.",
-    icon: "⚙️",
-    tech: "Instructor Portal"
+    title: "Instructor Tools",
+    description: "Intuitive curriculum builder with real-time preview.",
+    icon: Settings2,
+    tech: "Admin Engine"
   },
   {
-    title: "Enterprise-Ready Infrastructure",
-    description: "Robust infrastructure designed for scalability, reliability, and multi-tenant B2B support.",
-    icon: "🏢",
-    tech: "Cloud Native"
+    title: "B2B Infrastructure",
+    description: "Multi-tenant support designed for scale and enterprise trust.",
+    icon: Building2,
+    tech: "Multi-tenant"
   }
 ];
 
 const techStack = [
-  "Next.js 16 (App Router)",
+  "Next.js 16",
   "React 19",
   "TypeScript",
   "Tailwind CSS",
   "shadcn/ui",
-  "Supabase (Postgres)",
-  "Supabase Auth",
-  "Stripe (Payments)"
+  "Supabase",
+  "Postgres",
+  "Stripe"
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="container mx-auto px-4 py-16">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            Features
-          </span>
-        </h2>
-        <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-          Discover what makes Soliel AI the best platform for learning and teaching
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="group relative p-8 rounded-2xl bg-card border hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+    <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-24">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest mb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-            <div className="relative z-10">
-              <div className="mb-4 inline-block p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+            Capabilities
+          </motion.div>
+          <motion.h2 
+            className="text-4xl md:text-5xl font-black mb-6 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            Built for the <span className="text-primary italic">Modern</span> Era.
+          </motion.h2>
+          <motion.p 
+            className="text-lg text-muted-foreground max-w-2xl mx-auto font-medium"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+          >
+            Our tech stack is as cutting-edge as the content we teach.
+          </motion.p>
+        </div>
 
-      <div className="text-center mt-8">
-        <h3 className="text-2xl font-bold mb-8">Technology Stack</h3>
-        <div className="flex flex-wrap justify-center gap-3">
-          {techStack.map((tech, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-32">
+          {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md"
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className="group p-10 rounded-[2.5rem] bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-500 h-full flex flex-col items-start"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
               viewport={{ once: true }}
             >
-              <span className="text-sm font-medium">{tech}</span>
+              <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 border border-gray-100">
+                <feature.icon className="w-7 h-7" />
+              </div>
+              
+              <h3 className="text-xl font-bold mb-4 text-gray-900 leading-tight">
+                {feature.title}
+              </h3>
+              
+              <p className="text-muted-foreground/90 text-sm font-medium leading-relaxed mb-6">
+                {feature.description}
+              </p>
+
+              <div className="mt-auto pt-6 border-t border-gray-100 w-full">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  {feature.tech}
+                </span>
+              </div>
             </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   );

@@ -189,37 +189,41 @@ export default function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <Card className="w-full max-w-2xl shadow-xl">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            {mode === "signup" ? "Create Account" : "Sign In"}
+    <div className="w-full max-w-xl mx-auto">
+      <Card className="w-full shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] border-white/50 bg-white/40 backdrop-blur-3xl rounded-[3rem] overflow-hidden">
+
+        <CardHeader className="space-y-2 text-center pt-12 pb-8">
+          <CardTitle className="text-4xl font-black text-gray-900 tracking-tight">
+            {mode === "signup" ? "Create " : "Sign "}
+            <span className="text-primary italic">
+              {mode === "signup" ? "Account" : "In"}
+            </span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base font-medium text-muted-foreground/80">
             {mode === "signup" 
-              ? "Enter your information to create your account" 
-              : "Enter your credentials to access your account"}
+              ? "Join the next generation of AI pioneers." 
+              : "Welcome back! Enter your credentials to continue."}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8">
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-6 rounded-2xl border-primary/20 bg-primary/5 text-primary">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertTitle className="font-bold">Error</AlertTitle>
+              <AlertDescription className="font-medium">{error}</AlertDescription>
             </Alert>
           )}
           
           {showResendLink && (
-            <Alert className="mb-4">
-              <AlertTitle>Email verification needed</AlertTitle>
-              <AlertDescription className="flex flex-col gap-2">
+            <Alert className="mb-6 rounded-2xl border-blue-200 bg-blue-50 text-blue-700">
+              <AlertTitle className="font-bold">Verification needed</AlertTitle>
+              <AlertDescription className="flex flex-col gap-3 font-medium">
                 <p>Please verify your email address to complete registration.</p>
                 <Button 
                   variant="outline" 
                   onClick={handleResendEmail}
                   disabled={loading}
-                  className="w-fit"
+                  className="w-fit rounded-xl border-blue-200 hover:bg-blue-100 font-bold"
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Resend Verification Email
@@ -228,61 +232,62 @@ export default function AuthForm({ mode }: AuthFormProps) {
             </Alert>
           )}
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {mode === "signup" && (
-              <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="fullName" className="text-sm font-bold text-gray-700 ml-1">Full Name</Label>
                   <Input
                     id="fullName"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required={mode === "signup"}
-                    placeholder="Enter your full name"
+                    placeholder="John Doe"
+                    className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all font-medium"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role" className="text-sm font-bold text-gray-700 ml-1">Role</Label>
                   <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all font-medium">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
-                      <SelectItem value={UserRole.INSTRUCTOR}>Instructor</SelectItem>
+                    <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                      <SelectItem value={UserRole.STUDENT} className="rounded-xl font-medium">Student</SelectItem>
+                      <SelectItem value={UserRole.INSTRUCTOR} className="rounded-xl font-medium">Instructor</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </>
+              </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-bold text-gray-700 ml-1">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder="name@example.com"
+                className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all font-medium"
               />
             </div>
             
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password">Password</Label>
+              <div className="flex justify-between items-center px-1">
+                <Label htmlFor="password" className="text-sm font-bold text-gray-700">Password</Label>
                 {mode === "login" && (
-                  <Button
+                  <button
                     type="button"
-                    variant="link"
-                    className="p-0 h-auto text-sm"
+                    className="text-xs font-bold text-primary hover:underline"
                     onClick={handleForgotPassword}
                     disabled={loading}
                   >
                     Forgot Password?
-                  </Button>
+                  </button>
                 )}
               </div>
               <div className="relative">
@@ -292,44 +297,49 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter your password"
+                  placeholder="••••••••"
+                  className="h-14 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 focus:border-primary transition-all font-medium pr-12"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-transparent text-gray-400 hover:text-gray-900"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-5 w-5" />
                   )}
                 </Button>
               </div>
             </div>
             
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-16 rounded-2xl bg-gray-900 hover:bg-primary text-white font-black text-lg shadow-xl shadow-black/10 transition-all hover:scale-[1.02] active:scale-95 border-0 mt-4 group" disabled={loading}>
               {loading ? (
-                <>
-                  <Loading size="sm" className="mr-2" />
-                  Processing...
-                </>
-              ) : mode === "signup" ? "Sign Up" : "Sign In"}
+                <div className="flex items-center gap-2">
+                  <Loading size="sm" className="border-white/30 border-t-white" />
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  {mode === "signup" ? "Get Started" : "Enter Dashboard"}
+                  <RotateCcw className="w-5 h-5 opacity-50 group-hover:rotate-180 transition-transform duration-500" />
+                </span>
+              )}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col">
-          <div className="text-center text-sm text-muted-foreground">
-            {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-            <Button 
-              variant="link" 
-              className="p-0 h-auto font-medium text-primary hover:text-primary/80"
+        <CardFooter className="flex flex-col pb-12">
+          <div className="text-sm font-bold text-gray-500">
+            {mode === "signup" ? "Already have an account?" : "New to Soliel AI?"}{" "}
+            <button 
+              className="text-primary hover:underline ml-1"
               onClick={() => router.push(mode === "signup" ? "/sign-in" : "/sign-up")}
             >
-              {mode === "signup" ? "Sign In" : "Sign Up"}
-            </Button>
+              {mode === "signup" ? "Sign In" : "Create Account"}
+            </button>
           </div>
         </CardFooter>
       </Card>
