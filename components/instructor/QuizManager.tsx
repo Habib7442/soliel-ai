@@ -61,6 +61,7 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
 
   const [quizFormData, setQuizFormData] = useState({
     title: "",
+    section_id: "",
     passing_score: 70,
     max_attempts: 0,
     time_limit_minutes: 0,
@@ -69,6 +70,30 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<Record<string, number>>({});
+  const [sections, setSections] = useState<any[]>([]);
+  const [loadingSections, setLoadingSections] = useState(true);
+
+  // Fetch sections
+  useEffect(() => {
+    const fetchSections = async () => {
+      setLoadingSections(true);
+      const { createServerClient } = await import('@/lib/supabase-server');
+      const supabase = await createServerClient();
+      
+      const { data, error } = await supabase
+        .from('course_sections')
+        .select('id, title, order_index')
+        .eq('course_id', courseId)
+        .order('order_index', { ascending: true });
+      
+      if (!error && data) {
+        setSections(data);
+      }
+      setLoadingSections(false);
+    };
+    
+    fetchSections();
+  }, [courseId]);
 
   // Fetch quizzes and their question counts
   useEffect(() => {
@@ -113,6 +138,11 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
       return;
     }
 
+    if (!quizFormData.section_id) {
+      toast.error("Please select a section for this quiz");
+      return;
+    }
+
     if (questions.length === 0) {
       toast.error("Please add at least one question");
       return;
@@ -120,11 +150,45 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
 
     setIsSubmitting(true);
     try {
-      // Create a placeholder lesson for the quiz
-      const lessonId = courseId; // Temporary - should create proper lesson
+      // Get the highest order_index in the selected section
+      const { createServerClient } = await import('@/lib/supabase-server');
+      const supabase = await createServerClient();
+      
+      const { data: existingLessons } = await supabase
+        .from('lessons')
+        .select('order_index')
+        .eq('section_id', quizFormData.section_id)
+        .order('order_index', { ascending: false })
+        .limit(1);
+      
+      const nextOrderIndex = existingLessons && existingLessons.length > 0 
+        ? existingLessons[0].order_index + 1 
+        : 0;
+      
+      // Create quiz lesson
+      const { data: lesson, error: lessonError } = await supabase
+        .from('lessons')
+        .insert({
+          course_id: courseId,
+          section_id: quizFormData.section_id,
+          title: quizFormData.title,
+          lesson_type: 'quiz',
+          order_index: nextOrderIndex,
+          is_preview: false,
+          video_url: '',
+          content_md: ''
+        })
+        .select()
+        .single();
+      
+      if (lessonError || !lesson) {
+        toast.error("Failed to create quiz lesson");
+        setIsSubmitting(false);
+        return;
+      }
       
       const quizResult = await createQuiz({
-        lesson_id: lessonId,
+        lesson_id: lesson.id,
         title: quizFormData.title,
         passing_score: quizFormData.passing_score,
         max_attempts: quizFormData.max_attempts || undefined,
@@ -161,6 +225,7 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
         resetQuizForm();
         setQuizFormData({
           title: "",
+          section_id: "",
           passing_score: 70,
           max_attempts: 0,
           time_limit_minutes: 0,
@@ -279,6 +344,7 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
     setCurrentQuiz(quiz);
     setQuizFormData({
       title: quiz.title,
+      section_id: "", // Not editable in settings
       passing_score: quiz.passing_score || 70,
       max_attempts: quiz.max_attempts || 0,
       time_limit_minutes: quiz.time_limit_minutes || 0,
@@ -326,6 +392,7 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
         setCurrentQuiz(quiz);
         setQuizFormData({
           title: quiz.title,
+          section_id: "", // Not editable when editing questions
           passing_score: quiz.passing_score || 70,
           max_attempts: quiz.max_attempts || 0,
           time_limit_minutes: quiz.time_limit_minutes || 0,
@@ -350,6 +417,7 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
             resetQuizForm();
             setQuizFormData({
               title: "",
+              section_id: "",
               passing_score: 70,
               max_attempts: 0,
               time_limit_minutes: 0,
@@ -363,6 +431,7 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
               resetQuizForm();
               setQuizFormData({
                 title: "",
+                section_id: "",
                 passing_score: 70,
                 max_attempts: 0,
                 time_limit_minutes: 0,
@@ -394,6 +463,28 @@ export const QuizManager = ({ courseId }: QuizManagerProps) => {
                     placeholder="Enter quiz title"
                     required
                   />
+                </div>
+
+                <div className="col-span-2 space-y-2">
+                  <Label htmlFor="section_id">Section / Module *</Label>
+                  <select
+                    id="section_id"
+                    value={quizFormData.section_id}
+                    onChange={(e) => setQuizFormData({ ...quizFormData, section_id: e.target.value })}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    required
+                    disabled={loadingSections}
+                  >
+                    <option value="">Select section where quiz will appear</option>
+                    {sections.map((section) => (
+                      <option key={section.id} value={section.id}>
+                        {section.title} (Quiz will be last lesson)
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    The quiz will automatically be placed as the last lesson in this section
+                  </p>
                 </div>
 
                 <div className="space-y-2">

@@ -12,6 +12,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { VideoPlayer } from "./VideoPlayer";
 import { ReviewForm } from "./ReviewForm";
 import { CourseFaqDisplay } from "./CourseFaqDisplay";
+import { QuizRenderer } from "./QuizRenderer";
 import { 
   CheckCircle2, 
   Circle, 
@@ -36,6 +37,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { markLessonComplete } from "@/server/actions/enrollment.actions";
+import { getQuizByLessonId, getStudentQuizAttempts, type Quiz, type QuizQuestion, type QuizAttempt } from "@/server/actions/quiz.actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -109,6 +111,11 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
   // Mobile sheet state
   const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
   
+  // Quiz state
+  const [quizData, setQuizData] = useState<{ quiz: Quiz; questions: QuizQuestion[] } | null>(null);
+  const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
+  const [loadingQuiz, setLoadingQuiz] = useState(false);
+  
   // Build ordered lesson list
   const allLessons = sections
     .sort((a, b) => a.order_index - b.order_index)
@@ -117,6 +124,10 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
         .sort((a, b) => a.order_index - b.order_index)
         .map(lesson => ({ ...lesson, sectionOrder: section.order_index }))
     );
+
+  // DEBUG: Quiz Lesson
+  console.log("All Lessons:", allLessons);
+  console.log("Quiz Lessons:", allLessons.filter(l => l.lesson_type === 'quiz'));
   
   const currentIndex = allLessons.findIndex(l => l.id === currentLesson?.id);
   const hasNext = currentIndex < allLessons.length - 1;
@@ -161,6 +172,36 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
     
     setMarkingComplete(false);
   };
+
+  // Fetch quiz data when a quiz lesson is selected
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      if (currentLesson?.lesson_type === 'quiz') {
+        setLoadingQuiz(true);
+        
+        // Fetch quiz and questions
+        const quizResult = await getQuizByLessonId(currentLesson.id);
+        if (quizResult.success && quizResult.data) {
+          setQuizData(quizResult.data);
+          
+          // Fetch student's previous attempts
+          const attemptsResult = await getStudentQuizAttempts(quizResult.data.quiz.id, userId);
+          if (attemptsResult.success && attemptsResult.data) {
+            setQuizAttempts(attemptsResult.data);
+          }
+        } else {
+          toast.error(quizResult.error || "Failed to load quiz");
+        }
+        
+        setLoadingQuiz(false);
+      } else {
+        setQuizData(null);
+        setQuizAttempts([]);
+      }
+    };
+
+    fetchQuizData();
+  }, [currentLesson?.id, currentLesson?.lesson_type, userId]);
   
   const goToNext = () => {
     if (hasNext) {
@@ -428,6 +469,29 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                </Button>
                             </div>
                          )}
+
+                          {currentLesson?.lesson_type === 'quiz' && (
+                            loadingQuiz ? (
+                              <div className="bg-white/60 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/50 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <p className="text-lg font-bold text-gray-600">Loading quiz...</p>
+                              </div>
+                            ) : quizData ? (
+                              <QuizRenderer
+                                quiz={quizData.quiz}
+                                questions={quizData.questions}
+                                userId={userId}
+                                previousAttempts={quizAttempts}
+                                onComplete={() => {
+                                  handleMarkComplete();
+                                }}
+                              />
+                            ) : (
+                              <div className="bg-red-50/50 backdrop-blur-xl p-10 rounded-[2.5rem] border border-red-100/50 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                                <p className="text-lg font-bold text-red-600">Failed to load quiz. Please try again.</p>
+                              </div>
+                            )
+                          )}
                      </div>
                      
                      {/* Footer sections - Flex Layout with Sticky Right Sidebar */}
@@ -472,6 +536,58 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                 
                                 <ReviewForm courseId={course.id} userId={userId} existingReview={userReview} />
                              </div>
+
+                             {/* Course Quizzes Card */}
+                             {allLessons.some(l => l.lesson_type === 'quiz') && (
+                               <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.1)] transition-all duration-500 mt-8">
+                                 <h3 className="font-black text-lg mb-6 flex items-center gap-2 tracking-tight">
+                                   <HelpCircle className="h-5 w-5 text-primary fill-current/20" />
+                                   Course Quizzes
+                                 </h3>
+                                 
+                                 <div className="space-y-4">
+                                   {allLessons.filter(l => l.lesson_type === 'quiz').map((quizLesson) => {
+                                      // Check if this quiz is completed
+                                      const isCompleted = quizLesson.progress?.completed;
+                                      
+                                      return (
+                                       <div key={quizLesson.id} className="group bg-white p-4 rounded-2xl border border-gray-100 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                                         <div className="flex items-center justify-between mb-3">
+                                           <div className="flex items-center gap-3">
+                                              <div className={cn(
+                                                "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                                                isCompleted ? "bg-green-100 text-green-600" : "bg-primary/10 text-primary"
+                                              )}>
+                                                {isCompleted ? <Award className="h-5 w-5" /> : <HelpCircle className="h-5 w-5" />}
+                                              </div>
+                                              <div>
+                                                <h4 className="font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">{quizLesson.title}</h4>
+                                                <p className="text-xs text-muted-foreground font-medium">Test your knowledge</p>
+                                              </div>
+                                           </div>
+                                         </div>
+                                         
+                                         <Button 
+                                           onClick={() => {
+                                             setCurrentLesson(quizLesson);
+                                             window.scrollTo({ top: 0, behavior: 'smooth' });
+                                           }}
+                                           variant={isCompleted ? "outline" : "default"}
+                                           className={cn(
+                                             "w-full rounded-xl font-bold h-10 shadow-lg transition-all",
+                                             isCompleted 
+                                               ? "border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 shadow-green-500/5" 
+                                               : "bg-gray-900 text-white hover:bg-primary shadow-gray-900/20 hover:shadow-primary/20"
+                                           )}
+                                         >
+                                           {isCompleted ? "Retake Quiz" : "Start Quiz"}
+                                         </Button>
+                                       </div>
+                                      );
+                                   })}
+                                 </div>
+                               </div>
+                             )}
                          </aside>
                      </div>
                  </div>

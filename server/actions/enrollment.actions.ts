@@ -381,11 +381,20 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
       return { success: false, error: 'Failed to load course lessons' };
     }
     
-    // Filter to only include lessons with actual content (video URL or content markdown)
+    console.log(`[DEBUG] Found ${allLessons?.length} total lessons for course ${courseId}`);
+    allLessons?.forEach(l => console.log(`[DEBUG] Raw Lesson: ${l.id} | ${l.title} | ${l.lesson_type} | Section: ${l.section_id}`));
+    
+    // Include ALL lessons - video, text, quiz, assignment, and lab
     const lessonsWithContent = (allLessons || []).filter(lesson => {
       const hasVideo = lesson.video_url && lesson.video_url.trim() !== '';
       const hasContent = lesson.content_md && lesson.content_md.trim() !== '';
-      return hasVideo || hasContent;
+      
+      const type = (lesson.lesson_type || '').toLowerCase().trim();
+      const isInteractive = ['quiz', 'assignment', 'lab'].includes(type);
+      
+      console.log(`[FILTER] Lesson ${lesson.title} (${lesson.id}) - Type: '${lesson.lesson_type}' -> '${type}' - IsInteractive: ${isInteractive} - HasVideo: ${hasVideo} - Keep: ${hasVideo || hasContent || isInteractive}`);
+      
+      return hasVideo || hasContent || isInteractive;
     });
     
     // Group lessons by section_id
@@ -398,24 +407,40 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
       duration_minutes: number | null;
       order_index: number;
       is_preview: boolean;
-      section_id: string;
+      section_id: string | null;
     }
     
     const lessonsBySection = new Map<string, LessonData[]>();
+    const lessonsWithoutSection: LessonData[] = [];
+    
     lessonsWithContent.forEach(lesson => {
       if (lesson.section_id) {
         if (!lessonsBySection.has(lesson.section_id)) {
           lessonsBySection.set(lesson.section_id, []);
         }
         lessonsBySection.get(lesson.section_id)!.push(lesson);
+      } else {
+        // Collect lessons without a section
+        lessonsWithoutSection.push(lesson);
       }
     });
     
     // Combine sections with their lessons
-    const sectionsWithLessons = (sections || []).map(section => ({
+    let sectionsWithLessons = (sections || []).map(section => ({
       ...section,
       lessons: lessonsBySection.get(section.id) || [],
     }));
+    
+    // If there are lessons without a section, create a default section for them
+    if (lessonsWithoutSection.length > 0) {
+      sectionsWithLessons.push({
+        id: 'uncategorized',
+        title: 'Course Content',
+        description: null,
+        order_index: 999, // Put at the end
+        lessons: lessonsWithoutSection,
+      });
+    }
     
     // Get lesson progress
     const { data: lessonProgress } = await supabase
@@ -437,6 +462,9 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
         })).sort((a: LessonData & { progress: unknown }, b: LessonData & { progress: unknown }) => a.order_index - b.order_index),
       }))
       .filter(section => section.lessons.length > 0); // Only include sections with lessons
+      
+      console.log(`[DEBUG] Returning ${sectionsWithProgress.length} sections`);
+      sectionsWithProgress.forEach(s => console.log(`[DEBUG] Section ${s.title}: ${s.lessons.length} lessons`));
     
     // Get overall progress
     const { data: overallProgress } = await supabase

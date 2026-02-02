@@ -29,7 +29,8 @@ import {
   updateQuiz,
   updateQuizQuestion,
   deleteQuiz,
-  addLesson
+  addLesson,
+  updateLesson
 } from "@/server/actions/instructor.actions";
 import { useInstructorStore } from "@/hooks/useInstructorStore";
 import { PlusCircle, Edit, Trash2, Plus, X, Settings } from "lucide-react";
@@ -62,7 +63,9 @@ interface QuizFromServer {
   updated_at: string;
   lessons?: {
     course_id: string;
+    section_id?: string;
   };
+  section_id?: string;
   questions?: QuizQuestion[];
 }
 
@@ -76,6 +79,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [quizFormData, setQuizFormData] = useState<{
     title: string;
+    section_id: string;
     passing_score: string;
     max_attempts: string;
     time_limit_minutes: string;
@@ -83,12 +87,16 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
     show_correct_answers: boolean;
   }>({
     title: "",
+    section_id: "",
     passing_score: "70",
     max_attempts: "0", // 0 means unlimited
     time_limit_minutes: "0", // 0 means no time limit
     randomize_questions: false,
     show_correct_answers: true,
   });
+
+  const [sections, setSections] = useState<any[]>([]);
+  const [loadingSections, setLoadingSections] = useState(true);
 
   // Track if the form has been touched to handle empty inputs correctly
   const [formTouched, setFormTouched] = useState(false);
@@ -105,6 +113,31 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
   });
   const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
   const [editingSingleQuestion, setEditingSingleQuestion] = useState<boolean>(false);
+
+  // Fetch sections
+  useEffect(() => {
+    const fetchSections = async () => {
+      setLoadingSections(true);
+      const { createBrowserClient } = await import('@supabase/ssr');
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data, error } = await supabase
+        .from('course_sections')
+        .select('id, title, order_index')
+        .eq('course_id', courseId)
+        .order('order_index', { ascending: true });
+      
+      if (!error && data) {
+        setSections(data);
+      }
+      setLoadingSections(false);
+    };
+    
+    fetchSections();
+  }, [courseId]);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -143,17 +176,42 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
       return;
     }
 
+    if (!quizFormData.section_id) {
+      toast.error("Please select a section for this quiz");
+      return;
+    }
+
     if (questions.length === 0) {
       toast.error("Please add at least one question");
       return;
     }
 
     try {
-      // First, create a quiz lesson
+      // Get the highest order_index in the selected section
+      const { createBrowserClient } = await import('@supabase/ssr');
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data: existingLessons } = await supabase
+        .from('lessons')
+        .select('order_index')
+        .eq('section_id', quizFormData.section_id)
+        .order('order_index', { ascending: false })
+        .limit(1);
+      
+      const nextOrderIndex = existingLessons && existingLessons.length > 0 
+        ? existingLessons[0].order_index + 1 
+        : 0;
+
+      // Create quiz lesson with section_id and order_index
       const lessonResult = await addLesson({
         course_id: courseId,
+        section_id: quizFormData.section_id,
         title: quizFormData.title,
         lesson_type: 'quiz',
+        order_index: nextOrderIndex,
       });
 
       if (!lessonResult.success || !lessonResult.data) {
@@ -234,6 +292,33 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
       if (!quizResult.success) {
         toast.error(quizResult.error || "Failed to update quiz");
         return;
+      }
+
+      // Check if section changed and update lesson if needed
+      const currentSectionId = selectedQuiz.section_id || selectedQuiz.lessons?.section_id;
+      if (quizFormData.section_id && quizFormData.section_id !== currentSectionId) {
+        const { createBrowserClient } = await import('@supabase/ssr');
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        
+        // Get highest order_index in new section
+        const { data: existingLessons } = await supabase
+          .from('lessons')
+          .select('order_index')
+          .eq('section_id', quizFormData.section_id)
+          .order('order_index', { ascending: false })
+          .limit(1);
+        
+        const nextOrderIndex = existingLessons && existingLessons.length > 0 
+          ? existingLessons[0].order_index + 1 
+          : 0;
+          
+        await updateLesson(selectedQuiz.lesson_id, {
+          section_id: quizFormData.section_id,
+          order_index: nextOrderIndex
+        });
       }
 
       toast.success("Quiz updated successfully!");
@@ -336,6 +421,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
     setSelectedQuiz(quiz);
     setQuizFormData({
       title: quiz.title,
+      section_id: quiz.section_id || quiz.lessons?.section_id || "",
       passing_score: quiz.passing_score !== undefined ? quiz.passing_score.toString() : "70",
       max_attempts: quiz.max_attempts !== undefined ? quiz.max_attempts.toString() : "0",
       time_limit_minutes: quiz.time_limit_minutes !== undefined ? quiz.time_limit_minutes.toString() : "0",
@@ -437,6 +523,7 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
   const resetQuizForm = () => {
     setQuizFormData({ 
       title: "",
+      section_id: "",
       passing_score: "70",
       max_attempts: "0",
       time_limit_minutes: "0",
@@ -499,6 +586,31 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                     placeholder="Enter quiz title"
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="section_id">Section / Module *</Label>
+                  <select
+                    id="section_id"
+                    value={quizFormData.section_id}
+                    onChange={(e) => {
+                      setFormTouched(true);
+                      setQuizFormData({ ...quizFormData, section_id: e.target.value });
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    required
+                    disabled={loadingSections}
+                  >
+                    <option value="">Select section where quiz will appear</option>
+                    {sections.map((section) => (
+                      <option key={section.id} value={section.id}>
+                        {section.title} (Quiz will be last lesson)
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    The quiz will automatically be placed as the last lesson in this section
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -911,6 +1023,27 @@ export const EnhancedQuizManager = ({ courseId }: QuizManagerProps) => {
                   onChange={(e) => setQuizFormData({ ...quizFormData, title: e.target.value })}
                   placeholder="Enter quiz title"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="settings-section_id">Section / Module</Label>
+                <select
+                  id="settings-section_id"
+                  value={quizFormData.section_id}
+                  onChange={(e) => setQuizFormData({ ...quizFormData, section_id: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={loadingSections}
+                >
+                  <option value="">Select section</option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Changing the section will move this quiz to the end of the new section.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

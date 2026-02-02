@@ -1147,6 +1147,7 @@ export const getCourseLessons = async (courseId: string) => {
 
 // Update lesson
 export const updateLesson = async (lessonId: string, updates: Partial<{
+  section_id: string;
   title: string;
   content_md: string;
   video_url: string;
@@ -1202,13 +1203,37 @@ export const getCourseQuizzes = async (courseId: string) => {
   try {
     const supabase = await createServerClient();
     
+    // First, get all lessons for this course
+    const { data: lessons, error: lessonsError } = await supabase
+      .from('lessons')
+      .select('id')
+      .eq('course_id', courseId);
+
+    if (lessonsError) {
+      console.error('Error fetching course lessons:', lessonsError);
+      return { success: false, error: `Failed to fetch lessons: ${lessonsError.message}` };
+    }
+
+    if (!lessons || lessons.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Extract lesson IDs
+    const lessonIds = lessons.map(l => l.id);
+
+    // Now fetch quizzes that belong to these lessons
     const { data, error } = await supabase
       .from('quizzes')
       .select(`
         *,
-        lessons (course_id)
+        lessons (
+          id,
+          title,
+          course_id,
+          section_id
+        )
       `)
-      .eq('lessons.course_id', courseId)
+      .in('lesson_id', lessonIds)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1217,9 +1242,10 @@ export const getCourseQuizzes = async (courseId: string) => {
     }
 
     // Flatten the data structure for the UI
-    const flattenedData = data.map(quiz => ({
+    const flattenedData = (data || []).map(quiz => ({
       ...quiz,
-      course_id: quiz.lessons?.course_id
+      course_id: quiz.lessons?.course_id,
+      section_id: quiz.lessons?.section_id
     }));
 
     return { success: true, data: flattenedData };
@@ -1391,13 +1417,36 @@ export const getCourseAssignments = async (courseId: string) => {
   try {
     const supabase = await createServerClient();
     
+    // First, get all lessons for this course
+    const { data: lessons, error: lessonsError } = await supabase
+      .from('lessons')
+      .select('id')
+      .eq('course_id', courseId);
+
+    if (lessonsError) {
+      console.error('Error fetching course lessons:', lessonsError);
+      return { success: false, error: `Failed to fetch lessons: ${lessonsError.message}` };
+    }
+
+    if (!lessons || lessons.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Extract lesson IDs
+    const lessonIds = lessons.map(l => l.id);
+
+    // Now fetch assignments that belong to these lessons
     const { data, error } = await supabase
       .from('assignments')
       .select(`
         *,
-        lessons (course_id, title)
+        lessons (
+          id,
+          course_id,
+          title
+        )
       `)
-      .eq('lessons.course_id', courseId)
+      .in('lesson_id', lessonIds)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -1406,7 +1455,7 @@ export const getCourseAssignments = async (courseId: string) => {
     }
 
     // Flatten the data structure for the UI
-    const flattenedData = data.map(assignment => ({
+    const flattenedData = (data || []).map(assignment => ({
       ...assignment,
       course_id: assignment.lessons?.course_id,
       lesson_title: assignment.lessons?.title

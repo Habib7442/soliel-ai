@@ -5,9 +5,9 @@ Based on the comparison between the existing codebase and the requirements defin
 ## 1. Course Player (Critical)
 The `Article`, `Video` and `Lab` components are implemented, but the interactive learning modules are placeholders.
 
-- [ ] **Quiz Renderer:** 
-  - **Current State:** Placeholder icon only.
-  - **Requirement:** Logic to fetch quiz questions (MCQs), render them interactively, handle option selection, calculate score, and submit results to the backend.
+- [x] **Quiz Renderer:** 
+  - **Status:** ✅ COMPLETED
+  - **Implementation:** Full interactive quiz system with timer, question navigation, answer selection (single/multiple choice), scoring, and results display with review functionality.
 - [ ] **Assignment Submission:**
   - **Current State:** Placeholder icon only.
   - **Requirement:** UI for students to upload files or enter text responses for assignments, and logic to submit these to the backend.

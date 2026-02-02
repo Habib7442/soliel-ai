@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { getCourseWithProgress } from "@/server/actions/enrollment.actions";
 import { getUserReview } from "@/server/actions/review.actions";
 import { CoursePlayer } from "@/components/course/player";
+import { Suspense } from "react";
 
 interface CoursePlayerPageProps {
   params: Promise<{
@@ -45,13 +46,22 @@ export default async function CoursePlayerPage({ params }: CoursePlayerPageProps
   const userReview = reviewResult.success ? reviewResult.data : null;
   
   return (
-    <CoursePlayer 
-      course={courseData}
-      sections={sections}
-      progress={progress}
-      enrollment={enrollment}
-      userId={user.id}
-      userReview={userReview}
-    />
+    <Suspense fallback={
+      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="font-medium text-gray-500">Loading your course...</p>
+        </div>
+      </div>
+    }>
+      <CoursePlayer 
+        course={courseData}
+        sections={sections as any}
+        progress={progress}
+        enrollment={enrollment}
+        userId={user.id}
+        userReview={userReview}
+      />
+    </Suspense>
   );
 }
