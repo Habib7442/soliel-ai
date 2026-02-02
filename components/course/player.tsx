@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { VideoPlayer } from "./VideoPlayer";
 import { ReviewForm } from "./ReviewForm";
 import { CourseFaqDisplay } from "./CourseFaqDisplay";
@@ -29,6 +30,7 @@ import {
   Download,
   LayoutDashboard,
   Menu,
+  Clock,
   X
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -175,24 +177,24 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
   // Render the accordion content - reused for both sidebar and mobile sheet
   const renderSyllabus = (isMobile: boolean = false) => (
     <div className={cn("pb-20", !isMobile && "h-full")}>
-      <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 sticky top-0 z-10 backdrop-blur-sm">
-          <h2 className="font-bold text-sm uppercase tracking-wider text-muted-foreground mb-1">Content</h2>
-          <div className="flex items-center justify-between text-xs">
+      <div className="p-6 border-b border-gray-100 bg-white/50 sticky top-0 z-10 backdrop-blur-sm">
+          <h2 className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2">Course Content</h2>
+          <div className="flex items-center justify-between text-xs font-bold text-gray-900">
               <span>{allLessons.length} lessons</span>
-              <span>{progress.completed_lessons} completed</span>
+              <span className="text-primary">{progress.completed_lessons} completed</span>
           </div>
       </div>
       <Accordion type="single" collapsible defaultValue={sections.find(s => s.lessons.some(l => l.id === currentLesson?.id))?.id} className="w-full">
           {sections.map((section, idx) => (
-            <AccordionItem key={section.id} value={section.id} className="border-b border-gray-100 dark:border-gray-800">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-900">
+            <AccordionItem key={section.id} value={section.id} className="border-b border-gray-50 last:border-0">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-50/50 transition-colors">
                   <div className="text-left">
-                      <p className="text-xs text-muted-foreground font-medium mb-0.5">Section {idx + 1}</p>
-                      <p className="text-sm font-semibold line-clamp-1">{section.title}</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Section {idx + 1}</p>
+                      <p className="text-sm font-bold text-gray-900 line-clamp-1">{section.title}</p>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-0">
-                  <div className="flex flex-col">
+                  <div className="flex flex-col bg-gray-50/30">
                       {section.lessons.map((lesson) => {
                         const isActive = currentLesson?.id === lesson.id;
                         const isCompleted = lesson.progress?.completed;
@@ -205,10 +207,10 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                   if(isMobile) setMobileInfoOpen(false);
                               }}
                               className={cn(
-                                  "flex items-start gap-3 px-4 py-3 text-left transition-colors border-l-2",
+                                  "flex items-start gap-4 px-6 py-3 text-left transition-all border-l-[3px]",
                                   isActive 
                                     ? "bg-primary/5 border-primary" 
-                                    : "bg-transparent border-transparent hover:bg-gray-50 dark:hover:bg-gray-900"
+                                    : "bg-transparent border-transparent hover:bg-gray-100/50"
                               )}
                             >
                               <div className="mt-0.5">
@@ -216,22 +218,22 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                     <CheckCircle2 className="h-4 w-4 text-green-500 fill-green-500/10" />
                                   ) : (
                                     <div className={cn(
-                                        "h-4 w-4 rounded-full border-2 flex items-center justify-center",
-                                        isActive ? "border-primary" : "border-gray-300 dark:border-gray-600"
+                                        "h-4 w-4 rounded-full border-2 flex items-center justify-center transition-colors",
+                                        isActive ? "border-primary" : "border-gray-300"
                                     )}>
                                         {isActive && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                     </div>
                                   )}
                               </div>
-                              <div>
+                              <div className="flex-1 min-w-0">
                                   <p className={cn(
-                                    "text-sm leading-tight mb-1",
-                                    isActive ? "font-medium text-primary" : "text-gray-700 dark:text-gray-300",
-                                    isCompleted && !isActive && "text-muted-foreground decoration-gray-400"
+                                    "text-sm leading-tight mb-1 truncate",
+                                    isActive ? "font-bold text-primary" : "font-medium text-gray-700",
+                                    isCompleted && !isActive && "text-muted-foreground line-through decoration-gray-300"
                                   )}>
                                     {lesson.title}
                                   </p>
-                                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
                                     {lesson.lesson_type === 'video' && <Play className="h-3 w-3" />}
                                     {lesson.lesson_type === 'text' && <FileText className="h-3 w-3" />}
                                     {lesson.lesson_type === 'quiz' && <HelpCircle className="h-3 w-3" />}
@@ -250,24 +252,27 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
   );
   
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
+    <div className="min-h-screen relative bg-white selection:bg-primary selection:text-white">
+       {/* Background Blobs (Subtler for focus) */}
+       <div className="fixed top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
+       
        {/* Top Navigation Bar */}
-       <header className="sticky top-0 z-40 flex items-center h-16 px-4 border-b bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 shadow-sm w-full">
+       <header className="sticky top-0 z-40 flex items-center h-16 px-4 md:px-6 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-[0_4px_30px_rgb(0,0,0,0.02)] w-full transition-all">
           <div className="flex items-center gap-4 flex-1 min-w-0">
-             <Button variant="ghost" size="icon" asChild className="mr-2 flex-shrink-0">
+             <Button variant="ghost" size="icon" asChild className="mr-2 flex-shrink-0 hover:bg-gray-100 rounded-xl w-10 h-10">
                 <Link href="/student-dashboard">
                    <ChevronLeft className="h-5 w-5" />
                    <span className="sr-only">Back</span>
                 </Link>
              </Button>
-             <div className="hidden md:block w-px h-6 bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
+             <div className="hidden md:block w-px h-6 bg-gray-200 flex-shrink-0" />
              <div className="flex flex-col min-w-0">
-                <h1 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 truncate">
+                <h1 className="text-sm font-black text-gray-900 tracking-tight line-clamp-1 truncate">
                    {course.title}
                 </h1>
-                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="hidden md:flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                    <span>{Math.round(progress.progress_percent)}% complete</span>
-                   <Progress value={progress.progress_percent} className="h-1.5 w-24" />
+                   <Progress value={progress.progress_percent} className="h-1.5 w-24 bg-gray-100" />
                 </div>
              </div>
           </div>
@@ -277,7 +282,7 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
              <Button 
                 variant="ghost" 
                 size="sm" 
-                className="hidden lg:flex"
+                className="hidden lg:flex text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl px-4"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
              >
                 <LayoutDashboard className="h-4 w-4 mr-2" />
@@ -287,50 +292,53 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
              {/* Mobile Sheet Trigger */}
              <Sheet open={mobileInfoOpen} onOpenChange={setMobileInfoOpen}>
                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="lg:hidden">
+                  <Button variant="outline" size="sm" className="lg:hidden rounded-xl border-gray-200">
                     <Menu className="h-4 w-4 mr-2" />
                     Syllabus
                   </Button>
                </SheetTrigger>
-               <SheetContent side="right" className="p-0 w-80 sm:w-96">
+               <SheetContent side="right" className="p-0 w-80 sm:w-96 rounded-l-[2rem] border-l border-gray-100 shadow-2xl">
+                  <VisuallyHidden>
+                    <SheetTitle>Course Syllabus</SheetTitle>
+                  </VisuallyHidden>
                   {renderSyllabus(true)}
                </SheetContent>
              </Sheet>
              
              {/* Mobile Progress Ring */}
-             <div className="lg:hidden text-xs font-bold ring-2 ring-gray-100 rounded-full px-2 py-1">
+             <div className="lg:hidden text-[10px] font-black ring-2 ring-gray-100 rounded-full w-8 h-8 flex items-center justify-center bg-white">
                 {Math.round(progress.progress_percent)}%
              </div>
           </div>
        </header>
 
        {/* Main Player Area - Responsive container */}
-       <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
+       <div className="container max-w-[1400px] mx-auto px-4 py-6 md:py-8 lg:px-8">
           <div className="flex flex-col lg:flex-row items-start gap-8 relative">
           
              {/* Main Content Column */}
              <main className={cn(
-                "flex-1 min-w-0 transition-all duration-300",
+                "flex-1 min-w-0 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]",
                 sidebarOpen ? "lg:mr-0" : "mr-0"
              )}>
                  <div className="space-y-6 md:space-y-8">
                      
                      {/* Video/Content Container */}
-                     <div className="bg-black rounded-xl md:rounded-2xl overflow-hidden shadow-xl md:shadow-2xl aspect-video relative flex items-center justify-center group w-full">
+                     <div className="bg-black rounded-[2rem] overflow-hidden shadow-2xl shadow-black/20 aspect-video relative flex items-center justify-center group w-full ring-1 ring-white/10">
                         {currentLesson?.lesson_type === 'video' && currentLesson.video_url ? (
                            <VideoPlayer url={currentLesson.video_url} title={currentLesson.title} />
                         ) : (
                            <div className="text-center p-4 md:p-8 bg-gray-900 w-full h-full flex flex-col items-center justify-center text-gray-300">
                               {currentLesson?.lesson_type === 'quiz' ? (
-                                 <HelpCircle className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50" />
+                                 <HelpCircle className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-purple-400" />
                               ) : currentLesson?.lesson_type === 'assignment' ? (
-                                 <Clipboard className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50" />
+                                 <Clipboard className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-blue-400" />
                               ) : currentLesson?.lesson_type === 'lab' ? (
-                                 <Code className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50" />
+                                 <Code className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-green-400" />
                               ) : (
-                                 <FileText className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50" />
+                                 <FileText className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-gray-400" />
                               )}
-                              <h3 className="text-lg md:text-xl font-medium text-white mb-2 line-clamp-2 px-4">
+                              <h3 className="text-xl md:text-2xl font-black text-white mb-2 line-clamp-2 px-4 tracking-tight">
                                  {currentLesson ? currentLesson.title : 'Select a lesson'}
                               </h3>
                            </div>
@@ -338,21 +346,21 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                      </div>
 
                      {/* Lesson Control Bar */}
-                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
                         <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
                            <Button 
-                              variant="ghost" 
+                              variant="outline" 
                               onClick={goToPrevious} 
                               disabled={!hasPrevious}
-                              className="flex-1 sm:flex-none hover:bg-gray-100 dark:hover:bg-gray-700"
+                              className="flex-1 sm:flex-none rounded-xl font-bold border-gray-200 bg-white/50 hover:bg-white"
                            >
                               <ChevronLeft className="h-4 w-4 mr-2" /> Prev
                            </Button>
                            <Button 
-                              variant="ghost" 
+                              variant="outline" 
                               onClick={goToNext} 
                               disabled={!hasNext}
-                              className="flex-1 sm:flex-none hover:bg-gray-100 dark:hover:bg-gray-700"
+                              className="flex-1 sm:flex-none rounded-xl font-bold border-gray-200 bg-white/50 hover:bg-white"
                            >
                               Next <ChevronRight className="h-4 w-4 ml-2" />
                            </Button>
@@ -362,7 +370,7 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                            <Button 
                               onClick={handleMarkComplete} 
                               disabled={markingComplete}
-                              className="w-full sm:w-auto min-w-[160px]"
+                              className="w-full sm:w-auto min-w-[180px] rounded-xl bg-gray-900 text-white hover:bg-primary font-black shadow-lg shadow-black/5 transaction-all active:scale-95"
                            >
                               {markingComplete ? "Updating..." : (
                                  <>
@@ -371,22 +379,31 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                               )}
                            </Button>
                         )}
+                         {currentLesson?.progress?.completed && (
+                           <Button 
+                              disabled
+                              variant="secondary"
+                              className="w-full sm:w-auto min-w-[180px] rounded-xl bg-green-100 text-green-700 font-black opacity-100 disabled:opacity-100 border border-green-200 shadow-sm"
+                           >
+                              <CheckCircle2 className="h-4 w-4 mr-2" /> Completed
+                           </Button>
+                         )}
                      </div>
 
                      {/* Lesson Details */}
                      <div className="flex flex-col gap-6">
-                        <div className="space-y-2">
-                           <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="space-y-3 px-2">
+                           <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tighter leading-tight">
                               {currentLesson?.title}
                            </h2>
-                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                           <div className="flex items-center gap-4 text-sm text-muted-foreground font-medium">
                               {currentLesson?.duration_minutes && (
-                                 <span className="flex items-center">
-                                    <span className="h-1 w-1 bg-gray-400 rounded-full mr-2" />
+                                 <span className="flex items-center bg-gray-100/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs border border-gray-200/50">
+                                    <Clock className="w-3 h-3 mr-2" />
                                     {currentLesson.duration_minutes} min
                                  </span>
                               )}
-                              <Badge variant="outline" className="capitalize font-normal text-xs">
+                              <Badge variant="outline" className="capitalize font-bold text-[10px] bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full uppercase tracking-wider border-gray-200/50">
                                  {currentLesson?.lesson_type}
                               </Badge>
                            </div>
@@ -394,72 +411,76 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
 
                         {/* Content Renderer */}
                          {currentLesson?.lesson_type === 'text' && currentLesson.content_md && (
-                            <div className="prose prose-gray dark:prose-invert max-w-none bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                            <div className="prose prose-gray prose-lg max-w-none bg-white/60 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
                                <ReactMarkdown>{currentLesson.content_md}</ReactMarkdown>
                             </div>
                          )}
 
                          {currentLesson?.lesson_type === 'lab' && (
-                            <div className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-2xl border border-blue-100 dark:border-blue-800 text-center">
-                               <Code className="h-12 w-12 mx-auto text-blue-600 mb-4" />
-                               <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">Interactive Lab Session</h3>
-                               <p className="text-blue-700 dark:text-blue-300 mb-6">This lesson requires you to complete a coding exercise.</p>
-                               <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto">
+                            <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-xl p-10 rounded-[2.5rem] border border-blue-100/50 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                               <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-100 text-blue-600">
+                                   <Code className="h-10 w-10" />
+                               </div>
+                               <h3 className="text-2xl font-black text-blue-900 mb-2 tracking-tight">Interactive Lab Session</h3>
+                               <p className="text-blue-700/80 mb-8 font-medium">This lesson requires you to complete a hands-on coding exercise.</p>
+                               <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto rounded-2xl h-14 px-8 font-black shadow-xl shadow-blue-500/20">
                                   <Link href={`/learn/${course.id}/labs`}>Open Lab Environment</Link>
                                </Button>
                             </div>
                          )}
                      </div>
                      
-                     {/* Footer sections (Instructor, Feedback, FAQ) */}
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-gray-200 dark:border-gray-800 pb-20">
-                         {/* Instructor Column */}
-                         <div className="space-y-8">
-                           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                              <h3 className="font-semibold text-lg mb-4">About the Instructor</h3>
-                              <div className="flex items-center gap-4">
-                                 <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden shrink-0">
+                     {/* Footer sections - Flex Layout with Sticky Right Sidebar */}
+                     <div className="flex flex-col lg:flex-row items-start gap-8 pt-8 border-t border-gray-100/50 pb-20">
+                         {/* Main Content Column - Instructor & FAQ */}
+                         <div className="flex-1 space-y-6 min-w-0">
+                           <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.1)] transition-all duration-500">
+                              <h3 className="font-black text-lg mb-6 tracking-tight flex items-center gap-2">About the Instructor</h3>
+                              <div className="flex items-center gap-5">
+                                 <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-black/5 ring-1 ring-black/5">
                                     {course.profiles?.avatar_url ? (
                                       <img src={course.profiles.avatar_url} alt="Instructor" className="h-full w-full object-cover" />
                                     ) : (
-                                      <span className="font-bold text-gray-500 text-xl">{course.profiles?.full_name?.charAt(0)}</span>
+                                      <span className="font-black text-gray-400 text-xl">{course.profiles?.full_name?.charAt(0)}</span>
                                     )}
                                  </div>
-                                 <div>
-                                    <p className="font-bold text-gray-900 dark:text-gray-100 text-lg">{course.profiles?.full_name}</p>
-                                    <p className="text-sm text-primary font-medium">Course Creator</p>
+                                 <div className="overflow-hidden">
+                                    <p className="font-black text-gray-900 text-lg leading-tight truncate">{course.profiles?.full_name}</p>
+                                    <p className="text-xs text-primary font-bold uppercase tracking-widest mt-1">Course Creator</p>
                                  </div>
                               </div>
-                              <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-                                 {course.description ? course.description.substring(0, 200) + "..." : "No bio available."}
-                              </p>
+                              <div className="mt-6 text-sm text-muted-foreground leading-relaxed font-medium prose prose-sm prose-gray max-w-none">
+                                 <ReactMarkdown>
+                                    {course.description || "No bio available."}
+                                 </ReactMarkdown>
+                              </div>
                            </div>
                            
-                           {/* FAQ in left column below instructor */}
-                           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                           {/* FAQ */}
+                           <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.1)] transition-all duration-500">
                               <CourseFaqDisplay courseId={course.id} />
                            </div>
                          </div>
                          
-                         {/* Review Column */}
-                         <div className="space-y-8">
-                             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                                  <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                         {/* Sticky Right Sidebar - Rate this Course */}
+                         <aside className="w-full lg:w-96 shrink-0">
+                             <div className="bg-white/60 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.1)] transition-all duration-500 sticky top-24">
+                                <h3 className="font-black text-lg mb-6 flex items-center gap-2 tracking-tight">
+                                  <Star className="h-5 w-5 text-amber-400 fill-current" />
                                   Rate this Course
                                 </h3>
                                 
                                 <ReviewForm courseId={course.id} userId={userId} existingReview={userReview} />
                              </div>
-                         </div>
+                         </aside>
                      </div>
                  </div>
              </main>
 
              {/* Desktop Sticky Sidebar Playlist */}
              <aside className={cn(
-                "hidden lg:block w-80 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden sticky top-24 transition-all duration-300 shadow-sm",
-                sidebarOpen ? "w-80 opacity-100" : "w-0 opacity-0 p-0 border-0 overflow-hidden"
+                "hidden lg:block w-96 bg-white/80 backdrop-blur-xl border border-gray-100 rounded-[2rem] overflow-hidden sticky top-24 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[0_8px_30px_rgb(0,0,0,0.02)]",
+                sidebarOpen ? "w-96 opacity-100 translate-x-0" : "w-0 opacity-0 translate-x-8 p-0 border-0"
              )}>
                 <div className="max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
                    {renderSyllabus(false)}
@@ -470,16 +491,16 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
            {/* Completion Banner - Fixed Bottom */}
            {progress.progress_percent === 100 && (
                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 w-full max-w-md px-4">
-                  <div className="bg-gray-900 dark:bg-white text-white dark:text-black p-4 rounded-full shadow-2xl flex items-center gap-4 pr-6 border border-white/10 ring-4 ring-black/5 dark:ring-white/10">
-                     <div className="bg-green-500 rounded-full p-2 shrink-0">
-                        <Award className="h-5 w-5 text-white" />
+                  <div className="bg-gray-900 text-white p-4 rounded-3xl shadow-2xl flex items-center gap-4 pr-6 border border-white/10 ring-4 ring-black/5 backdrop-blur-md">
+                     <div className="bg-green-500 rounded-2xl p-3 shrink-0 shadow-lg shadow-green-500/20">
+                        <Award className="h-6 w-6 text-white" />
                      </div>
                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm truncate">Course Completed!</p>
-                        <p className="text-xs opacity-80 truncate">You&apos;ve earned your certificate.</p>
+                        <p className="font-black text-base truncate">Course Completed!</p>
+                        <p className="text-xs opacity-80 truncate font-medium">You&apos;ve earned your certificate.</p>
                      </div>
-                     <Button size="sm" variant="secondary" asChild className="ml-2 rounded-full whitespace-nowrap px-4 bg-white text-black hover:bg-gray-200 dark:bg-black dark:text-white dark:hover:bg-gray-800">
-                        <Link href="/profile">View Certificate</Link>
+                     <Button size="sm" variant="secondary" asChild className="ml-2 rounded-xl whitespace-nowrap px-6 h-10 bg-white text-black hover:bg-gray-200 font-bold border-0 shadow-lg">
+                        <Link href="/profile">View</Link>
                      </Button>
                   </div>
                </div>

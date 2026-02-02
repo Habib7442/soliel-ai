@@ -26,10 +26,15 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     // Suppress specific console errors
     const originalError = console.error;
     console.error = (...args) => {
+      const errorMessage = typeof args[0] === 'string' ? args[0] : args[0]?.message || '';
+      const errorName = args[0]?.name || '';
+      
       if (
-        args[0]?.includes?.("Auth session missing!") ||
-        args[0]?.includes?.("A tree hydrated but some attributes") ||
-        args[0]?.includes?.("Hydration failed because")
+        errorMessage.includes("Auth session missing!") ||
+        errorMessage.includes("AuthSessionMissingError") ||
+        errorName === "AuthSessionMissingError" ||
+        errorMessage.includes("A tree hydrated but some attributes") ||
+        errorMessage.includes("Hydration failed because")
       ) {
         return;
       }
@@ -49,7 +54,10 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
           // Use getUser() instead of getSession() for security
           const { data: { user }, error } = await supabase.auth.getUser();
           if (error) {
-            console.error('Error fetching user:', error);
+            // Only log if it's not an auth session missing error (expected when signed out)
+            if (!error.message?.includes('Auth session missing')) {
+              console.error('Error fetching user:', error);
+            }
             setUser(null);
           } else {
             setUser(user);
@@ -58,13 +66,19 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
           // Also get session for backward compatibility
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           if (sessionError) {
-            console.error('Error fetching session:', sessionError);
+            // Only log if it's not an auth session missing error
+            if (!sessionError.message?.includes('Auth session missing')) {
+              console.error('Error fetching session:', sessionError);
+            }
             setSession(null);
           } else {
             setSession(session);
           }
-        } catch (error) {
-          console.error('Error in fetchUser:', error);
+        } catch (error: any) {
+          // Only log if it's not an auth session missing error
+          if (!error?.message?.includes('Auth session missing')) {
+            console.error('Error in fetchUser:', error);
+          }
           setUser(null);
           setSession(null);
         } finally {
@@ -90,7 +104,10 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
           // Use getUser() instead of relying on session.user for security
           const { data: { user }, error } = await supabase.auth.getUser();
           if (error) {
-            console.error('Error fetching user on auth state change:', error);
+            // Only log if it's not an auth session missing error
+            if (!error.message?.includes('Auth session missing')) {
+              console.error('Error fetching user on auth state change:', error);
+            }
             setUser(null);
           } else {
             console.log('User fetched on auth state change:', user);

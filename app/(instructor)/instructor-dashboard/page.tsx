@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DeleteCourseButton } from "@/components/instructor/DeleteCourseButton";
-import { BookOpen, Users, DollarSign, Plus, BarChart, Settings, Clock, ArrowRight } from "lucide-react";
+import { BookOpen, Users, DollarSign, Plus, BarChart, Settings, Clock, ArrowRight, Star } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
@@ -69,14 +69,28 @@ export default async function InstructorDashboardPage() {
 
             
             <div className="flex flex-wrap items-center gap-3">
-               <Button asChild variant="outline" size="lg" className="rounded-2xl border-gray-200 h-14 px-6 hover:border-primary hover:text-primary transition-all font-black tracking-tight active:scale-95 bg-white/50 backdrop-blur-sm">
-                 <Link href="/instructor/bundles" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" /> Manage Bundles
+               <Button asChild variant="outline" size="lg" className="rounded-2xl border-gray-200 h-14 px-5 hover:border-primary hover:text-primary transition-all font-black tracking-tight active:scale-95 bg-white/50 backdrop-blur-sm">
+                 <Link href="/instructor/activity" className="flex items-center gap-2">
+                    <div className="relative">
+                       <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-red-500 border border-white animate-pulse" />
+                       <BookOpen className="h-4 w-4" /> 
+                    </div>
+                    Activity
                  </Link>
                </Button>
-               <Button asChild size="lg" className="rounded-2xl bg-gray-900 hover:bg-primary text-white h-14 px-8 shadow-2xl shadow-black/10 transition-all font-black tracking-tight active:scale-95 border-0">
+               <Button asChild variant="outline" size="lg" className="rounded-2xl border-gray-200 h-14 px-5 hover:border-primary hover:text-primary transition-all font-black tracking-tight active:scale-95 bg-white/50 backdrop-blur-sm">
+                 <Link href="/instructor/reviews" className="flex items-center gap-2">
+                    <Star className="h-4 w-4" /> Reviews
+                 </Link>
+               </Button>
+               <Button asChild variant="outline" size="lg" className="rounded-2xl border-gray-200 h-14 px-5 hover:border-primary hover:text-primary transition-all font-black tracking-tight active:scale-95 bg-white/50 backdrop-blur-sm">
+                 <Link href="/instructor/bundles" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" /> Bundles
+                 </Link>
+               </Button>
+               <Button asChild size="lg" className="rounded-2xl bg-gray-900 hover:bg-primary text-white h-14 px-6 shadow-2xl shadow-black/10 transition-all font-black tracking-tight active:scale-95 border-0">
                  <Link href="/instructor/courses/create" className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" /> Create New Course
+                    <Plus className="h-5 w-5" /> New Course
                  </Link>
                </Button>
             </div>

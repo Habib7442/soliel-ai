@@ -68,6 +68,13 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     billingData = orders || [];
+    
+    // Filter out enrollments with deleted/null courses to avoid "ghost" stats
+    coursesData = (studentEnrollments || []).filter(enrollment => {
+       const c = enrollment.courses;
+       if (Array.isArray(c)) return c.length > 0;
+       return !!c;
+    });
   }
 
   // Get certificates (both roles might have them)
@@ -80,11 +87,46 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
     .eq('user_id', user.id)
     .order('issued_at', { ascending: false });
   
+  // Create a set of course IDs that have certificates (proven completion)
+  const certifiedCourseIds = new Set<string>();
+  if (certificates) {
+    certificates.forEach(c => {
+      const courseId = Array.isArray(c.courses) && c.courses.length > 0
+        ? c.courses[0].id 
+        : (c.courses as any)?.id;
+      if (courseId) certifiedCourseIds.add(courseId);
+    });
+  }
+
   // Quick stats
   const totalCourses = coursesData.length;
-  const secondaryStat = isInstructor 
-    ? coursesData.filter(c => c.status === 'approved').length 
-    : (coursesData as any[]).filter(e => e.status === 'completed').length;
+  
+  // Calculate completed courses
+  let completedCount = 0;
+  if (isInstructor) {
+    completedCount = coursesData.filter(c => c.status === 'approved').length;
+  } else {
+    const completedCourseIds = new Set<string>();
+    
+    // Add from enrollments
+    (coursesData as any[]).forEach(e => {
+        // Handle potentially array-wrapped courses
+        const courseId = Array.isArray(e.courses) && e.courses.length > 0
+            ? e.courses[0].id 
+            : (e.courses as any)?.id;
+            
+        if (e.status === 'completed' || (courseId && certifiedCourseIds.has(courseId))) {
+             if (courseId) completedCourseIds.add(courseId);
+        }
+    });
+    
+    // Ensure all certified courses are counted even if enrollment is missing (edge case)
+    certifiedCourseIds.forEach(id => completedCourseIds.add(id));
+    
+    completedCount = completedCourseIds.size;
+  }
+  
+  const secondaryStat = completedCount;
   const totalCertificates = certificates?.length || 0;
 
   const dashboardLink = isInstructor ? "/instructor-dashboard" : "/student-dashboard";
@@ -231,8 +273,17 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     {coursesData && coursesData.length > 0 ? (
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           {coursesData.map((item) => {
-                            const course = isInstructor ? item : item.courses;
+                            const course = isInstructor ? item : (
+                              Array.isArray(item.courses) && item.courses.length > 0 
+                                ? item.courses[0] 
+                                : item.courses
+                            );
                             if (!course) return null;
+                            
+                            // Determine display status
+                            const isCertified = !isInstructor && certifiedCourseIds.has(course.id);
+                            const displayStatus = isCertified ? 'Completed' : (isInstructor ? (course.status || 'Active') : item.status);
+                            const isCompletedStatus = displayStatus === 'Completed' || displayStatus === 'completed';
 
                             return (
                                <Card key={item.id} className="overflow-hidden border-0 shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white/60 backdrop-blur-xl rounded-[2.5rem] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-500 group border border-white/50">
@@ -245,8 +296,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                                         </div>
                                      )}
                                      <div className="absolute top-4 right-4">
-                                        <Badge variant={isInstructor ? 'default' : (item.status === 'completed' ? 'default' : 'secondary')} className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-0 shadow-lg ${isInstructor ? (course.status === 'approved' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white') : (item.status === 'completed' ? "bg-green-500 text-white shadow-green-500/20" : "bg-white/90 backdrop-blur-sm text-gray-900")}`}>
-                                           {isInstructor ? (course.status || 'Active') : item.status}
+                                        <Badge variant={isInstructor ? 'default' : (isCompletedStatus ? 'default' : 'secondary')} className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-widest border-0 shadow-lg ${isInstructor ? (course.status === 'approved' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white') : (isCompletedStatus ? "bg-green-500 text-white shadow-green-500/20" : "bg-white/90 backdrop-blur-sm text-gray-900")}`}>
+                                           {displayStatus}
                                         </Badge>
                                      </div>
                                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -257,7 +308,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                                         {isInstructor ? `Created • ${new Date(item.created_at).toLocaleDateString()}` : `Enrolled • ${new Date(item.created_at).toLocaleDateString()}`}
                                      </p>
                                      <Button asChild variant="outline" className="w-full rounded-2xl h-12 font-black tracking-tight border-gray-200 hover:border-primary hover:text-primary transition-all active:scale-95 text-xs bg-white/50 backdrop-blur-sm shadow-sm">
-                                        <Link href={isInstructor ? `/instructor/courses/${course.id}` : `/student-dashboard`} className="flex items-center gap-2">
+                                        <Link href={isInstructor ? `/instructor/courses/${course.id}` : (isCompletedStatus ? `/learn/${course.id}/detail` : `/learn/${course.id}/player`)} className="flex items-center gap-2">
                                            {isInstructor ? 'Edit Masterpiece' : 'Launch Session'} <ArrowRight className="h-3 w-3" />
                                         </Link>
                                      </Button>
