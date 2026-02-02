@@ -32,10 +32,10 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
     redirect("/sign-in");
   }
   
-  // Fetch course data
+  // Fetch course data with category
   const { data: course, error } = await supabase
     .from('courses')
-    .select('*')
+    .select('*, course_category_map(course_categories(name))')
     .eq('id', courseId)
     .eq('instructor_id', user.id)
     .single();
@@ -62,7 +62,11 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
           </div>
         </div>
         
-        <CourseEditWizard course={course} instructorId={user.id} />
+        {/* Extract category name from join */}
+        {(() => {
+          const categoryName = (course as any).course_category_map?.[0]?.course_categories?.name || "";
+          return <CourseEditWizard course={course as any} instructorId={user.id} existingCategory={categoryName} />;
+        })()}
       </div>
     </div>
   );

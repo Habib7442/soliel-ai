@@ -44,7 +44,7 @@ interface Lesson {
   video_url?: string;
   downloadable: boolean;
   order_index: number;
-  lesson_type?: "video" | "text" | "pdf" | "quiz" | "assignment" | "lab";
+  lesson_type?: "video" | "text" | "pdf" | "quiz" | "assignment";
   is_preview?: boolean;
 }
 
@@ -79,7 +79,7 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
     content_md: "",
     video_url: "",
     downloadable: false,
-    lesson_type: "video" as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab",
+    lesson_type: "video" as "video" | "text" | "pdf" | "quiz" | "assignment",
     is_preview: false,
   });
 
@@ -203,7 +203,7 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
         content_md: lesson.content_md || "",
         video_url: lesson.video_url || "",
         downloadable: lesson.downloadable || false,
-        lesson_type: (lesson.lesson_type as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab") || "video",
+        lesson_type: (lesson.lesson_type as "video" | "text" | "pdf" | "quiz" | "assignment") || "video",
         is_preview: lesson.is_preview || false,
       });
     }
@@ -284,7 +284,7 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
       content_md: "",
       video_url: "",
       downloadable: false,
-      lesson_type: "video" as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab",
+      lesson_type: "video" as "video" | "text" | "pdf" | "quiz" | "assignment",
       is_preview: false,
     });
   };
@@ -390,7 +390,7 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                 value={lessonFormData.lesson_type}
                 onChange={(e) => setLessonFormData(prev => ({ 
                   ...prev, 
-                  lesson_type: e.target.value as "video" | "text" | "pdf" | "quiz" | "assignment" | "lab"
+                  lesson_type: e.target.value as "video" | "text" | "pdf" | "quiz" | "assignment"
                 }))}
                 className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
               >
@@ -399,7 +399,6 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                 <option value="pdf">PDF Document</option>
                 <option value="quiz">Quiz</option>
                 <option value="assignment">Assignment</option>
-                <option value="lab">Coding Lab</option>
               </select>
             </div>
 
@@ -435,11 +434,10 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
               </div>
             )}
 
-            {(lessonFormData.lesson_type === "text" || lessonFormData.lesson_type === "assignment" || lessonFormData.lesson_type === "lab") && (
+            {(lessonFormData.lesson_type === "text" || lessonFormData.lesson_type === "assignment") && (
               <div className="space-y-2">
                 <Label htmlFor="content_md">
                   {lessonFormData.lesson_type === "assignment" ? "Assignment Instructions" : 
-                   lessonFormData.lesson_type === "lab" ? "Lab Instructions" : 
                    "Lesson Content"}
                 </Label>
                 <MDEditor
@@ -450,7 +448,6 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                 />
                 <p className="text-sm text-muted-foreground">
                   {lessonFormData.lesson_type === "assignment" ? "Describe what students need to do" :
-                   lessonFormData.lesson_type === "lab" ? "Provide lab setup and instructions" :
                    "Use markdown formatting for rich text content"}
                 </p>
               </div>
@@ -595,7 +592,6 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                               case "pdf": return <FileText className="mr-1 h-3 w-3" />;
                               case "quiz": return <FileQuestion className="mr-1 h-3 w-3" />;
                               case "assignment": return <Clipboard className="mr-1 h-3 w-3" />;
-                              case "lab": return <Code className="mr-1 h-3 w-3" />;
                               default: return <FileText className="mr-1 h-3 w-3" />;
                             }
                           };
@@ -607,7 +603,6 @@ export const CurriculumManager = ({ courseId }: CurriculumManagerProps) => {
                               case "pdf": return "Pdf";
                               case "quiz": return "Quiz";
                               case "assignment": return "Assignment";
-                              case "lab": return "Lab";
                               default: return "Lesson";
                             }
                           };

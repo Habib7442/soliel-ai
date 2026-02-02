@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LabsManager } from "@/components/instructor/LabsManager";
 import ReactMarkdown from "react-markdown";
 import { 
   ArrowLeft, 
@@ -15,7 +14,6 @@ import {
   Star, 
   Edit, 
   Layout, 
-  FlaskConical, 
   FileQuestion, 
   GraduationCap, 
   MessageCircle, 
@@ -194,9 +192,6 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
             <TabsTrigger value="curriculum" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 font-bold text-muted-foreground data-[state=active]:text-primary transition-all">
                Curriculum
             </TabsTrigger>
-            <TabsTrigger value="labs" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 font-bold text-muted-foreground data-[state=active]:text-primary transition-all">
-               Labs
-            </TabsTrigger>
             <TabsTrigger value="quizzes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 font-bold text-muted-foreground data-[state=active]:text-primary transition-all">
                Quizzes
             </TabsTrigger>
@@ -339,10 +334,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
             </Card>
           </TabsContent>
 
-          {/* Labs Tab */}
-          <TabsContent value="labs" className="animate-in fade-in-50 duration-500 slide-in-from-bottom-5">
-            <LabsManager courseId={courseId} />
-          </TabsContent>
+
 
           {/* Quizzes Tab */}
           <TabsContent value="quizzes" className="animate-in fade-in-50 duration-500 slide-in-from-bottom-5">

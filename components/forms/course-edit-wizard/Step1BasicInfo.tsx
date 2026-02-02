@@ -188,6 +188,7 @@ export function Step1BasicInfo({ courseData, updateCourseData, courseId, onNext 
         description: courseData.description.trim(),
         level: courseData.level,
         language: courseData.language,
+        category: courseData.category.trim(),
         thumbnail_url: courseData.thumbnail_url,
         prerequisites: courseData.prerequisites,
         estimated_duration_hours: courseData.estimated_duration_hours,

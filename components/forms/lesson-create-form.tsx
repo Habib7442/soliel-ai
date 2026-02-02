@@ -116,7 +116,6 @@ export function LessonCreateForm({ courseId, onLessonAdded }: LessonCreateFormPr
             <SelectItem value="pdf">PDF Lesson</SelectItem>
             <SelectItem value="quiz">Quiz</SelectItem>
             <SelectItem value="assignment">Assignment</SelectItem>
-            <SelectItem value="lab">Lab</SelectItem>
           </SelectContent>
         </Select>
       </div>

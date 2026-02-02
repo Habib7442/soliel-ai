@@ -49,7 +49,7 @@ export const getQuizByLessonId = async (lessonId: string) => {
       .from('quizzes')
       .select('*')
       .eq('lesson_id', lessonId)
-      .single();
+      .maybeSingle();
 
     if (quizError) {
       console.error('Error fetching quiz:', quizError);
@@ -57,7 +57,7 @@ export const getQuizByLessonId = async (lessonId: string) => {
     }
 
     if (!quiz) {
-      return { success: false, error: 'Quiz not found' };
+      return { success: true, data: null };
     }
 
     // Get questions

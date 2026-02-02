@@ -34,6 +34,7 @@ interface QuizRendererProps {
   userId: string;
   previousAttempts: QuizAttempt[];
   onComplete?: () => void;
+  onNextLesson?: () => void;
 }
 
 export function QuizRenderer({ 
@@ -41,7 +42,8 @@ export function QuizRenderer({
   questions, 
   userId, 
   previousAttempts,
-  onComplete 
+  onComplete,
+  onNextLesson
 }: QuizRendererProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
@@ -220,7 +222,7 @@ export function QuizRenderer({
 
             {/* Best Score */}
             {bestAttempt && (
-              <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-6 border border-primary/20">
+              <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-6 border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <Trophy className="h-8 w-8 text-primary" />
                   <div>
@@ -228,6 +230,19 @@ export function QuizRenderer({
                     <p className="text-2xl font-black text-gray-900">{bestAttempt.score?.toFixed(1)}%</p>
                   </div>
                 </div>
+                
+                {quiz.show_correct_answers && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setResults(bestAttempt);
+                      setShowResults(true);
+                    }}
+                    className="rounded-xl font-bold bg-white hover:bg-gray-50 text-gray-700 h-11 px-6 border-gray-200"
+                  >
+                    View Answers
+                  </Button>
+                )}
               </div>
             )}
 
@@ -398,6 +413,15 @@ export function QuizRenderer({
                 >
                   <RotateCcw className="mr-2 h-5 w-5" />
                   Try Again
+                </Button>
+              )}
+              {results.passed && onNextLesson && (
+                <Button
+                  onClick={onNextLesson}
+                  className="flex-1 h-14 rounded-2xl bg-gray-900 hover:bg-black text-white font-black shadow-xl shadow-black/10"
+                >
+                  Go to Next Lesson
+                  <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               )}
             </div>

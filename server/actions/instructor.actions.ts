@@ -125,6 +125,7 @@ export const updateCourse = async (courseId: string, courseData: Partial<{
   description: string;
   level: string;
   language: string;
+  category: string;
   price_cents: number;
   currency: string;
   status: string;
@@ -145,9 +146,13 @@ export const updateCourse = async (courseId: string, courseData: Partial<{
   try {
     const supabase = await createServerClient();
     
+    // Extract category if provided
+    const { category, ...courseUpdateData } = courseData;
+    
+    // Update the main course record
     const { data, error } = await supabase
       .from('courses')
-      .update(courseData)
+      .update(courseUpdateData)
       .eq('id', courseId)
       .select()
       .single();
@@ -157,8 +162,55 @@ export const updateCourse = async (courseId: string, courseData: Partial<{
       return { success: false, error: `Failed to update course: ${error.message}` };
     }
 
+    // Handle category update if provided
+    if (category !== undefined) {
+      let categoryIdToUse = null;
+
+      if (category.trim()) {
+        // Check if category already exists
+        const { data: existingCategory } = await supabase
+          .from('course_categories')
+          .select('id')
+          .eq('name', category.trim())
+          .maybeSingle();
+        
+        if (existingCategory) {
+          categoryIdToUse = existingCategory.id;
+        } else {
+          // Category doesn't exist, create it
+          const { data: newCategory, error: categoryCreateError } = await supabase
+            .from('course_categories')
+            .insert({ name: category.trim() })
+            .select('id')
+            .single();
+          
+          if (!categoryCreateError) {
+            categoryIdToUse = newCategory.id;
+          }
+        }
+      }
+
+      if (categoryIdToUse) {
+        // Upsert the category mapping
+        // First delete existing mappings for this course
+        await supabase
+          .from('course_category_map')
+          .delete()
+          .eq('course_id', courseId);
+        
+        // Then insert the new one
+        await supabase
+          .from('course_category_map')
+          .insert({
+            course_id: courseId,
+            category_id: categoryIdToUse
+          });
+      }
+    }
+
     revalidatePath('/instructor-dashboard');
     revalidatePath(`/courses/${courseId}`);
+    revalidatePath(`/instructor/courses/${courseId}/edit`);
     return { success: true, data };
   } catch (error) {
     console.error('Error in updateCourse:', error);
@@ -575,6 +627,67 @@ export const submitAssignment = async (submissionData: {
   } catch (error) {
     console.error('Error in submitAssignment:', error);
     return { success: false, error: 'Failed to submit assignment. Please try again.' };
+  }
+};
+
+export const deleteAssignmentSubmission = async (submissionId: string) => {
+  try {
+    const supabase = await createServerClient();
+    const { error } = await supabase
+      .from('assignment_submissions')
+      .delete()
+      .eq('id', submissionId);
+
+    if (error) {
+      console.error('Error deleting submission:', error);
+      return { success: false, error: `Failed to delete submission: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteAssignmentSubmission:', error);
+    return { success: false, error: 'Failed to delete submission. Please try again.' };
+  }
+};
+
+export const getAssignmentByLessonId = async (lessonId: string) => {
+  try {
+    const supabase = await createServerClient();
+    const { data: assignment, error } = await supabase
+      .from('assignments')
+      .select('*')
+      .eq('lesson_id', lessonId)
+      .maybeSingle();
+    
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: assignment };
+  } catch (error) {
+    console.error('Error in getAssignmentByLessonId:', error);
+    return { success: false, error: 'Failed to fetch assignment' };
+  }
+};
+
+export const getStudentAssignmentSubmission = async (assignmentId: string, studentId: string) => {
+  try {
+    const supabase = await createServerClient();
+    const { data: submission, error } = await supabase
+      .from('assignment_submissions')
+      .select('*')
+      .eq('assignment_id', assignmentId)
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching submission:', error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true, data: submission };
+  } catch (error) {
+     console.error('Error in getStudentAssignmentSubmission:', error);
+     return { success: false, error: 'Failed to fetch submission' };
   }
 };
 
@@ -1443,7 +1556,8 @@ export const getCourseAssignments = async (courseId: string) => {
         lessons (
           id,
           course_id,
-          title
+          title,
+          section_id
         )
       `)
       .in('lesson_id', lessonIds)
@@ -1458,7 +1572,8 @@ export const getCourseAssignments = async (courseId: string) => {
     const flattenedData = (data || []).map(assignment => ({
       ...assignment,
       course_id: assignment.lessons?.course_id,
-      lesson_title: assignment.lessons?.title
+      lesson_title: assignment.lessons?.title,
+      section_id: assignment.lessons?.section_id
     }));
 
     return { success: true, data: flattenedData };

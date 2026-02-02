@@ -32,7 +32,7 @@ export default function AboutPage() {
                 <span className="text-primary italic">AI Innovators</span>
               </h1>
               <p className="text-xl text-muted-foreground/80 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Soliel AI is bridging the gap between theoretical knowledge and practical application. We provide a cutting-edge platform where students globally can master Artificial Intelligence through hands-on labs and real-world projects.
+                Soliel AI is bridging the gap between theoretical knowledge and practical application. We provide a cutting-edge platform where students globally can master Artificial Intelligence through interactive lessons and real-world projects.
               </p>
               <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
                 <Button asChild size="xl" className="rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-10 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 border-0 font-black">

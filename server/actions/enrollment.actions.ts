@@ -319,6 +319,50 @@ export const markLessonComplete = async (userId: string, lessonId: string, cours
 };
 
 /**
+ * Mark lesson as incomplete
+ */
+export const markLessonIncomplete = async (userId: string, lessonId: string, courseId: string) => {
+  try {
+    const supabase = await createServerClient();
+    
+    const { error } = await supabase
+      .from('lesson_progress')
+      .upsert({
+        user_id: userId,
+        lesson_id: lessonId,
+        completed: false,
+        completed_at: null,
+      }, {
+        onConflict: 'user_id,lesson_id'
+      });
+    
+    if (error) {
+      console.error('Error marking lesson incomplete:', error);
+      return { success: false, error: `Failed to mark lesson incomplete: ${error.message}` };
+    }
+    
+    // Also ensure enrollment is not marked as completed if it was before
+    await supabase
+      .from('enrollments')
+      .update({ 
+        status: 'active', 
+        completed_at: null 
+      })
+      .eq('user_id', userId)
+      .eq('course_id', courseId)
+      .eq('status', 'completed');
+
+    revalidatePath('/student-dashboard');
+    revalidatePath(`/learn/${courseId}/player`);
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error in markLessonIncomplete:', error);
+    return { success: false, error: 'Failed to mark lesson incomplete' };
+  }
+};
+
+/**
  * Get course lessons with progress for enrolled student
  */
 export const getCourseWithProgress = async (userId: string, courseId: string) => {
@@ -384,18 +428,8 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
     console.log(`[DEBUG] Found ${allLessons?.length} total lessons for course ${courseId}`);
     allLessons?.forEach(l => console.log(`[DEBUG] Raw Lesson: ${l.id} | ${l.title} | ${l.lesson_type} | Section: ${l.section_id}`));
     
-    // Include ALL lessons - video, text, quiz, assignment, and lab
-    const lessonsWithContent = (allLessons || []).filter(lesson => {
-      const hasVideo = lesson.video_url && lesson.video_url.trim() !== '';
-      const hasContent = lesson.content_md && lesson.content_md.trim() !== '';
-      
-      const type = (lesson.lesson_type || '').toLowerCase().trim();
-      const isInteractive = ['quiz', 'assignment', 'lab'].includes(type);
-      
-      console.log(`[FILTER] Lesson ${lesson.title} (${lesson.id}) - Type: '${lesson.lesson_type}' -> '${type}' - IsInteractive: ${isInteractive} - HasVideo: ${hasVideo} - Keep: ${hasVideo || hasContent || isInteractive}`);
-      
-      return hasVideo || hasContent || isInteractive;
-    });
+    // Include ALL lessons - matching the dashboard progress view
+    const lessonsWithContent = allLessons || [];
     
     // Group lessons by section_id
     interface LessonData {
@@ -459,7 +493,15 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
         lessons: section.lessons.map((lesson: LessonData) => ({
           ...lesson,
           progress: progressMap.get(lesson.id) || { completed: false },
-        })).sort((a: LessonData & { progress: unknown }, b: LessonData & { progress: unknown }) => a.order_index - b.order_index),
+        })).sort((a: any, b: any) => {
+          // Sort order: Video/Text (0) -> quiz (1) -> assignment (2) -> lab (3)
+          const typeWeight: Record<string, number> = { 'video': 0, 'text': 0, 'quiz': 1, 'assignment': 2, 'lab': 3 };
+          const weightA = typeWeight[a.lesson_type] ?? 0;
+          const weightB = typeWeight[b.lesson_type] ?? 0;
+          
+          if (weightA !== weightB) return weightA - weightB;
+          return a.order_index - b.order_index;
+        }),
       }))
       .filter(section => section.lessons.length > 0); // Only include sections with lessons
       

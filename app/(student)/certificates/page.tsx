@@ -116,7 +116,7 @@ export default async function CertificatesPage() {
                  </div>
                  <h3 className="font-black text-lg mb-3">1. Complete Lessons</h3>
                  <p className="text-muted-foreground text-sm font-medium leading-relaxed">
-                   Finish all video lessons, reading materials, and labs in the course curriculum.
+                   Finish all video lessons and reading materials in the course curriculum.
                  </p>
                  <div className="hidden md:block absolute top-8 right-0 translate-x-1/2 w-12 border-t-2 border-dashed border-gray-200" />
               </div>

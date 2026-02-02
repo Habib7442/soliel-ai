@@ -17,6 +17,7 @@ import type { Course } from "@/types/db";
 interface CourseEditWizardProps {
   course: Course;
   instructorId: string;
+  existingCategory?: string;
 }
 
 export interface EditCourseData {
@@ -68,7 +69,7 @@ const STEPS = [
   { number: 5, title: "Review & Update", component: Step5ReviewPublish },
 ];
 
-export function CourseEditWizard({ course, instructorId }: CourseEditWizardProps) {
+export function CourseEditWizard({ course, instructorId, existingCategory }: CourseEditWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [courseData, setCourseData] = useState<EditCourseData>({
@@ -77,7 +78,7 @@ export function CourseEditWizard({ course, instructorId }: CourseEditWizardProps
     description: course.description || "",
     level: course.level || "beginner",
     language: course.language || "english",
-    category: "",
+    category: existingCategory || "",
     prerequisites: course.prerequisites || "",
     estimated_duration_hours: course.estimated_duration_hours || undefined,
     intro_video_url: course.intro_video_url || "",

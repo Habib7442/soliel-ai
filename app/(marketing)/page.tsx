@@ -3,7 +3,6 @@ import { Courses } from "@/components/layout/Courses";
 import { BundlesSection } from "@/components/layout/BundlesSection";
 import { EnterpriseSection } from "@/components/layout/EnterpriseSection";
 import { FeaturesSection } from "@/components/layout/FeaturesSection";
-import { LabsSection } from "@/components/layout/LabsSection";
 import { TestimonialsSection } from "@/components/layout/TestimonialsSection";
 import { HowItWorksSection } from "@/components/layout/HowItWorksSection";
 import { createServerClient } from "@/lib/supabase-server";
@@ -56,7 +55,6 @@ export default async function Home() {
       <BundlesSection />
       <HowItWorksSection />
       <EnterpriseSection />
-      <LabsSection />
       
       {/* Blog Section */}
       {blogs && blogs.length > 0 && (

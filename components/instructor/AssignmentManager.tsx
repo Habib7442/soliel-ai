@@ -31,7 +31,8 @@ import {
   gradeAssignment,
   deleteAssignment,
   updateAssignment,
-  addLesson
+  addLesson,
+  updateLesson
 } from "@/server/actions/instructor.actions";
 import {
   useInstructorStore,
@@ -46,6 +47,9 @@ import {
   Clock,
   Download,
   Eye,
+  Loader2,
+  X,
+  Upload
 } from "lucide-react";
 
 interface AssignmentManagerProps {
@@ -62,6 +66,7 @@ interface Assignment {
   created_at: string;
   course_id?: string;
   lesson_title?: string;
+  section_id?: string;
 }
 
 interface SubmissionFromServer {
@@ -116,11 +121,19 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
     useState<Assignment | null>(null);
   const [selectedSubmission, setSelectedSubmission] =
     useState<SubmissionFromServer | null>(null);
+  const [sections, setSections] = useState<any[]>([]);
+  const [loadingSections, setLoadingSections] = useState(true);
+
   const [formData, setFormData] = useState({
     title: "",
     instructions: "",
     due_date: "",
+    section_id: "",
   });
+  const [instructorFile, setInstructorFile] = useState<File | null>(null);
+  const [uploadingInstructorFile, setUploadingInstructorFile] = useState(false);
+  const [existingAttachment, setExistingAttachment] = useState<{name: string, url: string} | null>(null);
+  
   const [gradingData, setGradingData] = useState({
     grade: "",
     feedback: "",
@@ -136,7 +149,32 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
       setAssignmentsLoading(false);
     };
 
+    const fetchSections = async () => {
+      try {
+        const { createBrowserClient } = await import('@supabase/ssr');
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        
+        const { data, error } = await supabase
+          .from('course_sections')
+          .select('*')
+          .eq('course_id', courseId)
+          .order('order_index', { ascending: true });
+          
+        if (error) throw error;
+        setSections(data || []);
+      } catch (error) {
+        console.error("Error fetching sections:", error);
+        toast.error("Failed to load course sections");
+      } finally {
+        setLoadingSections(false);
+      }
+    };
+
     fetchAssignments();
+    fetchSections();
   }, [courseId, setAssignments, setAssignmentsLoading]);
 
   const handleChange = (
@@ -149,21 +187,87 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title.trim() || !formData.instructions.trim()) {
-      toast.error("Title and instructions are required");
+    if (!formData.title.trim()) {
+      toast.error("Title is required");
       return;
     }
 
+    if (!formData.instructions.trim() && !instructorFile) {
+      toast.error("Please provide instructions or attach a file");
+      return;
+    }
+
+    if (!formData.section_id) {
+      toast.error("Please select a section for this assignment");
+      return;
+    }
+
+    setUploadingInstructorFile(true);
+
     try {
+      let finalInstructions = formData.instructions;
+
+      // Handle File Upload
+      if (instructorFile) {
+         try {
+           const { createBrowserClient } = await import('@supabase/ssr');
+           const supabase = createBrowserClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+           );
+           
+           const fileExt = instructorFile.name.split('.').pop();
+           const fileName = `assignments/${courseId}/${Date.now()}_${instructorFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+           
+           const { error: uploadError } = await supabase.storage
+              .from('course-assets')
+              .upload(fileName, instructorFile);
+              
+           if (uploadError) throw new Error("Upload failed: " + uploadError.message);
+           
+           const { data: { publicUrl } } = supabase.storage
+              .from('course-assets')
+              .getPublicUrl(fileName);
+              
+           finalInstructions = `${formData.instructions ? formData.instructions + "\n\n" : ""}**Attachment:** [${instructorFile.name}](${publicUrl})`;
+         } catch (err: any) {
+            console.error(err);
+            toast.error(err.message || "Failed to upload file");
+            setUploadingInstructorFile(false);
+            return;
+         }
+      }
+
+      // Calculate order index
+      const { createBrowserClient } = await import('@supabase/ssr');
+      const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data: existingLessons } = await supabase
+        .from('lessons')
+        .select('order_index')
+        .eq('section_id', formData.section_id)
+        .order('order_index', { ascending: false })
+        .limit(1);
+
+      const nextOrderIndex = existingLessons && existingLessons.length > 0 
+        ? existingLessons[0].order_index + 1 
+        : 0;
+
       // First, create an assignment lesson
       const lessonResult = await addLesson({
         course_id: courseId,
+        section_id: formData.section_id,
         title: formData.title,
         lesson_type: 'assignment',
+        order_index: nextOrderIndex,
       });
 
       if (!lessonResult.success || !lessonResult.data) {
         toast.error(lessonResult.error || "Failed to create assignment lesson");
+        setUploadingInstructorFile(false);
         return;
       }
 
@@ -171,7 +275,7 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
       const result = await createAssignment({
         lesson_id: lessonResult.data.id,
         title: formData.title,
-        instructions: formData.instructions,
+        instructions: finalInstructions,
         due_date: formData.due_date || undefined,
       });
 
@@ -189,25 +293,97 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
     } catch (error) {
       console.error("Error creating assignment:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setUploadingInstructorFile(false);
     }
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.title.trim() ||
-      !formData.instructions.trim() ||
-      !selectedAssignment
-    ) {
-      toast.error("Title and instructions are required");
+    if (!formData.title.trim()) {
+      toast.error("Title is required");
       return;
     }
 
+    if (!formData.instructions.trim() && !instructorFile && !existingAttachment) {
+      toast.error("Please provide instructions or attach a file");
+      return;
+    }
+
+    if (!selectedAssignment) return;
+
+    setUploadingInstructorFile(true);
+
     try {
+      let finalInstructions = formData.instructions;
+      let currentFileUrl = existingAttachment?.url;
+      let currentFileName = existingAttachment?.name;
+
+      // Handle New File Upload
+      if (instructorFile) {
+         try {
+           const { createBrowserClient } = await import('@supabase/ssr');
+           const supabase = createBrowserClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+           );
+           
+           const fileExt = instructorFile.name.split('.').pop();
+           const fileName = `assignments/${courseId}/${Date.now()}_${instructorFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+           
+           const { error: uploadError } = await supabase.storage
+              .from('course-assets')
+              .upload(fileName, instructorFile);
+              
+           if (uploadError) throw new Error("Upload failed: " + uploadError.message);
+           
+           const { data: { publicUrl } } = supabase.storage
+              .from('course-assets')
+              .getPublicUrl(fileName);
+              
+           currentFileUrl = publicUrl;
+           currentFileName = instructorFile.name;
+         } catch (err: any) {
+            console.error(err);
+            toast.error(err.message || "Failed to upload file");
+            setUploadingInstructorFile(false);
+            return;
+         }
+      }
+
+      if (currentFileUrl) {
+         finalInstructions = `${formData.instructions ? formData.instructions + "\n\n" : ""}**Attachment:** [${currentFileName}](${currentFileUrl})`;
+      }
+
+      // Check if section changed
+      if (formData.section_id && formData.section_id !== selectedAssignment.section_id) {
+          const { createBrowserClient } = await import('@supabase/ssr');
+          const supabase = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          
+          const { data: existingLessons } = await supabase
+            .from('lessons')
+            .select('order_index')
+            .eq('section_id', formData.section_id)
+            .order('order_index', { ascending: false })
+            .limit(1);
+
+          const nextOrderIndex = existingLessons && existingLessons.length > 0 
+            ? existingLessons[0].order_index + 1 
+            : 0;
+            
+          await updateLesson(selectedAssignment.lesson_id, {
+             section_id: formData.section_id,
+             order_index: nextOrderIndex
+          });
+      }
+
       const result = await updateAssignment(selectedAssignment.id, {
         title: formData.title,
-        instructions: formData.instructions,
+        instructions: finalInstructions,
         due_date: formData.due_date || undefined,
       });
 
@@ -226,6 +402,8 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
     } catch (error) {
       console.error("Error updating assignment:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setUploadingInstructorFile(false);
     }
   };
 
@@ -332,10 +510,33 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
 
   const handleEdit = (assignment: Assignment) => {
     setSelectedAssignment(assignment);
+    
+    // Parse instructions for attachment
+    let instructions = assignment.instructions || "";
+    let attachment = null;
+    
+    const attachmentRegex = /\n\n\*\*Attachment:\*\* \[(.*?)]\((.*?)\)$/;
+    const match = instructions.match(attachmentRegex);
+    
+    if (match) {
+      attachment = { name: match[1], url: match[2] };
+      instructions = instructions.replace(attachmentRegex, "");
+    } else {
+      // Check if it's the only thing in the instructions
+      const fullRegex = /^\*\*Attachment:\*\* \[(.*?)]\((.*?)\)$/;
+      const fullMatch = instructions.match(fullRegex);
+      if (fullMatch) {
+        attachment = { name: fullMatch[1], url: fullMatch[2] };
+        instructions = "";
+      }
+    }
+
+    setExistingAttachment(attachment);
     setFormData({
       title: assignment.title,
-      instructions: assignment.instructions || "",
+      instructions: instructions,
       due_date: assignment.due_date ? assignment.due_date.substring(0, 16) : "",
+      section_id: assignment.section_id || "", 
     });
     setIsDialogOpen(true);
   };
@@ -345,7 +546,10 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
       title: "",
       instructions: "",
       due_date: "",
+      section_id: "",
     });
+    setInstructorFile(null);
+    setExistingAttachment(null);
   };
 
   const openGradingDialog = (submission: SubmissionFromServer) => {
@@ -391,7 +595,7 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
               Create Assignment
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedAssignment
@@ -407,7 +611,7 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
 
             <form
               onSubmit={selectedAssignment ? handleUpdate : handleSubmit}
-              className="space-y-4"
+              className="space-y-4 pb-6"
             >
               <div className="space-y-2">
                 <Label htmlFor="title">Assignment Title *</Label>
@@ -422,7 +626,27 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instructions">Instructions *</Label>
+                <Label htmlFor="section_id">Section / Module *</Label>
+                <select
+                  id="section_id"
+                  name="section_id"
+                  value={formData.section_id}
+                  onChange={(e) => setFormData({ ...formData, section_id: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                  disabled={loadingSections}
+                >
+                  <option value="">Select section where assignment will appear</option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="instructions">Instructions</Label>
                 <Textarea
                   id="instructions"
                   name="instructions"
@@ -430,8 +654,54 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
                   onChange={handleChange}
                   placeholder="Provide detailed instructions for students..."
                   rows={6}
-                  required
                 />
+              </div>
+
+              <div className="space-y-2">
+                 <Label htmlFor="instructor-file">Attach File (Optional)</Label>
+                 
+                 {existingAttachment && !instructorFile && (
+                   <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-center justify-between mb-2">
+                     <div className="flex items-center gap-2 overflow-hidden">
+                       <FileText className="h-4 w-4 text-blue-600 shrink-0" />
+                       <span className="text-sm font-medium truncate">{existingAttachment.name}</span>
+                     </div>
+                     <Button 
+                       type="button" 
+                       variant="ghost" 
+                       size="icon" 
+                       className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                       onClick={() => setExistingAttachment(null)}
+                     >
+                       <X className="h-4 w-4" />
+                     </Button>
+                   </div>
+                 )}
+
+                 <div className="flex items-center gap-2">
+                    <Input
+                       id="instructor-file"
+                       type="file"
+                       onChange={(e) => setInstructorFile(e.target.files?.[0] || null)}
+                       className="flex-1 cursor-pointer file:cursor-pointer"
+                       disabled={uploadingInstructorFile}
+                    />
+                    {instructorFile && (
+                       <Button 
+                         type="button" 
+                         variant="ghost" 
+                         size="icon"
+                         onClick={() => {
+                            setInstructorFile(null);
+                            const input = document.getElementById('instructor-file') as HTMLInputElement;
+                            if(input) input.value = '';
+                         }}
+                       >
+                          <X className="h-4 w-4" />
+                       </Button>
+                    )}
+                 </div>
+                 <p className="text-xs text-muted-foreground">Upload a PDF, document, or resource for students.</p>
               </div>
 
               <div className="space-y-2">
@@ -453,8 +723,13 @@ export const AssignmentManager = ({ courseId }: AssignmentManagerProps) => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {selectedAssignment
+                <Button type="submit" disabled={uploadingInstructorFile}>
+                  {uploadingInstructorFile ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                    </>
+                  ) : selectedAssignment
                     ? "Update Assignment"
                     : "Create Assignment"}
                 </Button>

@@ -41,6 +41,7 @@ import { getQuizByLessonId, getStudentQuizAttempts, type Quiz, type QuizQuestion
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { AssignmentRenderer } from "./AssignmentRenderer";
 
 interface CoursePlayerProps {
   course: {
@@ -115,6 +116,7 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
   const [quizData, setQuizData] = useState<{ quiz: Quiz; questions: QuizQuestion[] } | null>(null);
   const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([]);
   const [loadingQuiz, setLoadingQuiz] = useState(false);
+  const [validQuizLessonIds, setValidQuizLessonIds] = useState<Set<string>>(new Set());
   
   // Build ordered lesson list
   const allLessons = sections
@@ -124,17 +126,13 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
         .sort((a, b) => a.order_index - b.order_index)
         .map(lesson => ({ ...lesson, sectionOrder: section.order_index }))
     );
-
-  // DEBUG: Quiz Lesson
-  console.log("All Lessons:", allLessons);
-  console.log("Quiz Lessons:", allLessons.filter(l => l.lesson_type === 'quiz'));
   
   const currentIndex = allLessons.findIndex(l => l.id === currentLesson?.id);
   const hasNext = currentIndex < allLessons.length - 1;
   const hasPrevious = currentIndex > 0;
 
   // Icons helper
-  const getLessonIcon = (lesson: typeof currentLesson) => {
+  const getLessonIcon = (lesson: any) => {
     if (!lesson) return <Circle className="h-4 w-4" />;
     
     if (lesson.progress?.completed) {
@@ -146,24 +144,26 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
       case 'text': return <FileText className="h-3 w-3" />;
       case 'quiz': return <HelpCircle className="h-3 w-3" />;
       case 'assignment': return <Clipboard className="h-3 w-3" />;
-      case 'lab': return <Code className="h-3 w-3" />;
       default: return <Circle className="h-3 w-3" />;
     }
   };
   
-  const handleMarkComplete = async () => {
-    if (!currentLesson || currentLesson.progress?.completed) return;
+  const handleMarkComplete = async (explicitLessonId?: string, skipAutoAdvance: boolean = false) => {
+    const lessonToMark = explicitLessonId 
+      ? allLessons.find(l => l.id === explicitLessonId) 
+      : currentLesson;
+
+    if (!lessonToMark || lessonToMark.progress?.completed) return;
     
     setMarkingComplete(true);
-    // Optimistic update
-    const result = await markLessonComplete(userId, currentLesson.id, course.id);
+    const result = await markLessonComplete(userId, lessonToMark.id, course.id);
     
     if (result.success) {
       toast.success("Lesson marked as complete!");
       router.refresh();
       
       // Auto-advance
-      if (hasNext) {
+      if (hasNext && !skipAutoAdvance) {
         setCurrentLesson(allLessons[currentIndex + 1]);
       }
     } else {
@@ -173,6 +173,27 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
     setMarkingComplete(false);
   };
 
+  // Validate all quiz lessons on mount to determine which ones have actual content
+  useEffect(() => {
+    const validateQuizLessons = async () => {
+      const quizLessons = allLessons.filter(l => l.lesson_type === 'quiz');
+      const validIds = new Set<string>();
+      
+      for (const lesson of quizLessons) {
+        const result = await getQuizByLessonId(lesson.id);
+        if (result.success && result.data) {
+          validIds.add(lesson.id);
+        }
+      }
+      
+      setValidQuizLessonIds(validIds);
+    };
+    
+    if (allLessons.length > 0) {
+      validateQuizLessons();
+    }
+  }, [sections]); // Run when sections change
+
   // Fetch quiz data when a quiz lesson is selected
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -181,17 +202,21 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
         
         // Fetch quiz and questions
         const quizResult = await getQuizByLessonId(currentLesson.id);
-        if (quizResult.success && quizResult.data) {
-          setQuizData(quizResult.data);
-          
-          // Fetch student's previous attempts
-          const attemptsResult = await getStudentQuizAttempts(quizResult.data.quiz.id, userId);
-          if (attemptsResult.success && attemptsResult.data) {
-            setQuizAttempts(attemptsResult.data);
+          if (quizResult.success) {
+            if (quizResult.data) {
+              setQuizData(quizResult.data);
+              
+              // Fetch student's previous attempts
+              const attemptsResult = await getStudentQuizAttempts(quizResult.data.quiz.id, userId);
+              if (attemptsResult.success && attemptsResult.data) {
+                setQuizAttempts(attemptsResult.data);
+              }
+            } else {
+              setQuizData(null);
+            }
+          } else {
+            toast.error(quizResult.error || "Failed to load quiz");
           }
-        } else {
-          toast.error(quizResult.error || "Failed to load quiz");
-        }
         
         setLoadingQuiz(false);
       } else {
@@ -236,7 +261,15 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-0">
                   <div className="flex flex-col bg-gray-50/30">
-                      {section.lessons.map((lesson) => {
+                      {section.lessons
+                        .filter(lesson => {
+                          // Hide quiz lessons that don't have actual quiz content
+                          if (lesson.lesson_type === 'quiz') {
+                            return validQuizLessonIds.has(lesson.id);
+                          }
+                          return true;
+                        })
+                        .map((lesson) => {
                         const isActive = currentLesson?.id === lesson.id;
                         const isCompleted = lesson.progress?.completed;
                         
@@ -275,9 +308,13 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                     {lesson.title}
                                   </p>
                                   <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
-                                    {lesson.lesson_type === 'video' && <Play className="h-3 w-3" />}
-                                    {lesson.lesson_type === 'text' && <FileText className="h-3 w-3" />}
-                                    {lesson.lesson_type === 'quiz' && <HelpCircle className="h-3 w-3" />}
+                                    {getLessonIcon(lesson)}
+                                    {lesson.lesson_type === 'quiz' && (
+                                      <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-0 text-[8px] px-1.5 py-0 h-4 font-black">QUIZ</Badge>
+                                    )}
+                                    {lesson.lesson_type === 'assignment' && (
+                                      <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-0 text-[8px] px-1.5 py-0 h-4 font-black">ASSIGNMENT</Badge>
+                                    )}
                                     {lesson.duration_minutes && <span>{lesson.duration_minutes}m</span>}
                                   </div>
                               </div>
@@ -374,8 +411,6 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                  <HelpCircle className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-purple-400" />
                               ) : currentLesson?.lesson_type === 'assignment' ? (
                                  <Clipboard className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-blue-400" />
-                              ) : currentLesson?.lesson_type === 'lab' ? (
-                                 <Code className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-green-400" />
                               ) : (
                                  <FileText className="h-12 w-12 md:h-16 md:w-16 mb-4 opacity-50 text-gray-400" />
                               )}
@@ -409,7 +444,7 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
 
                         {!currentLesson?.progress?.completed && currentLesson?.lesson_type !== 'quiz' && (
                            <Button 
-                              onClick={handleMarkComplete} 
+                              onClick={() => handleMarkComplete()} 
                               disabled={markingComplete}
                               className="w-full sm:w-auto min-w-[180px] rounded-xl bg-gray-900 text-white hover:bg-primary font-black shadow-lg shadow-black/5 transaction-all active:scale-95"
                            >
@@ -457,17 +492,19 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                             </div>
                          )}
 
-                         {currentLesson?.lesson_type === 'lab' && (
-                            <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 backdrop-blur-xl p-10 rounded-[2.5rem] border border-blue-100/50 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                               <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-100 text-blue-600">
-                                   <Code className="h-10 w-10" />
-                               </div>
-                               <h3 className="text-2xl font-black text-blue-900 mb-2 tracking-tight">Interactive Lab Session</h3>
-                               <p className="text-blue-700/80 mb-8 font-medium">This lesson requires you to complete a hands-on coding exercise.</p>
-                               <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto rounded-2xl h-14 px-8 font-black shadow-xl shadow-blue-500/20">
-                                  <Link href={`/learn/${course.id}/labs`}>Open Lab Environment</Link>
-                               </Button>
-                            </div>
+ 
+
+
+                         {currentLesson?.lesson_type === 'assignment' && (
+                            <AssignmentRenderer
+                              lessonId={currentLesson.id}
+                              title={currentLesson.title}
+                              courseId={course.id}
+                              userId={userId}
+                              onComplete={() => {
+                                handleMarkComplete(currentLesson.id, true);
+                              }}
+                            />
                          )}
 
                           {currentLesson?.lesson_type === 'quiz' && (
@@ -483,12 +520,38 @@ export function CoursePlayer({ course, sections, progress, enrollment, userId, u
                                 userId={userId}
                                 previousAttempts={quizAttempts}
                                 onComplete={() => {
-                                  handleMarkComplete();
+                                  handleMarkComplete(currentLesson.id, true);
                                 }}
+                                onNextLesson={goToNext}
                               />
                             ) : (
-                              <div className="bg-red-50/50 backdrop-blur-xl p-10 rounded-[2.5rem] border border-red-100/50 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
-                                <p className="text-lg font-bold text-red-600">Failed to load quiz. Please try again.</p>
+                              <div className="bg-amber-50/10 backdrop-blur-xl p-12 rounded-[2.5rem] border border-amber-200/50 text-center shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col items-center justify-center min-h-[400px]">
+                                <div className="w-20 h-20 bg-amber-100 rounded-[2rem] flex items-center justify-center mb-6 text-amber-600 shadow-xl shadow-amber-500/10">
+                                  <HelpCircle className="h-10 w-10 opacity-80" />
+                                </div>
+                                <h3 className="text-2xl font-black text-amber-900 mb-2 tracking-tight">Quiz Coming Soon</h3>
+                                <p className="text-amber-800/60 max-w-md font-medium mb-8">
+                                  This quiz is currently being prepared. Check back soon for new challenges!
+                                </p>
+                                <div className="flex gap-4">
+                                  {hasPrevious && (
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={goToPrevious}
+                                      className="rounded-xl font-bold border-amber-200 text-amber-900 hover:bg-amber-100/50"
+                                    >
+                                      <ChevronLeft className="h-4 w-4 mr-2" /> Back to Previous
+                                    </Button>
+                                  )}
+                                  {hasNext && (
+                                    <Button 
+                                      onClick={goToNext}
+                                      className="rounded-xl font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20"
+                                    >
+                                      Skip to Next <ChevronRight className="h-4 w-4 ml-2" />
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
                             )
                           )}
