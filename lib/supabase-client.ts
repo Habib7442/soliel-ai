@@ -71,10 +71,8 @@ export function createClient() {
   // Wrap the signOut method to add logging
   const originalSignOut = client.auth.signOut.bind(client.auth);
   client.auth.signOut = async () => {
-    console.log('Supabase signOut method called');
     try {
       const result = await originalSignOut();
-      console.log('Supabase signOut method completed', result);
       return result;
     } catch (error) {
       console.error('Supabase signOut method error', error);

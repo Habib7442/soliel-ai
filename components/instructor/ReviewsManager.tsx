@@ -23,7 +23,7 @@ interface ReviewsManagerProps {
 }
 
 interface ReviewFormData {
-  instructor_response: string;
+  instructor_reply: string;
 }
 
 export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
@@ -32,7 +32,7 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
   const [filterRating, setFilterRating] = useState<number | 'all'>('all');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyForm, setReplyForm] = useState<ReviewFormData>({
-    instructor_response: ""
+    instructor_reply: ""
   });
 
   useEffect(() => {
@@ -62,16 +62,16 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
   };
 
   const handleReplySubmit = async (reviewId: string) => {
-    if (!replyForm.instructor_response.trim()) {
+    if (!replyForm.instructor_reply.trim()) {
       toast.error("Response cannot be empty");
       return;
     }
 
-    const result = await replyToReview(reviewId, replyForm.instructor_response);
+    const result = await replyToReview(reviewId, replyForm.instructor_reply);
     if (result.success) {
       toast.success("Response sent successfully!");
       setReplyingTo(null);
-      setReplyForm({ instructor_response: "" });
+      setReplyForm({ instructor_reply: "" });
       const updatedReviews = await getCourseReviews(courseId);
       if (updatedReviews.success && updatedReviews.data) {
         setReviews(updatedReviews.data);
@@ -249,15 +249,15 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
                       )}
 
                       {/* Instructor Response */}
-                      {review.instructor_response && (
+                      {review.instructor_reply && (
                         <div className="mt-3 p-3 bg-muted rounded-lg">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm font-medium">Your Response:</span>
                           </div>
-                          <p className="text-sm">{review.instructor_response}</p>
-                          {review.responded_at && (
+                          <p className="text-sm">{review.instructor_reply}</p>
+                          {review.replied_at && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              Responded on {new Date(review.responded_at).toLocaleDateString()}
+                              Responded on {new Date(review.replied_at).toLocaleDateString()}
                             </p>
                           )}
                         </div>
@@ -269,8 +269,8 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
                           <Label htmlFor={`reply-${review.id}`} className="mb-2 block">Your Response</Label>
                           <Textarea
                             id={`reply-${review.id}`}
-                            value={replyForm.instructor_response}
-                            onChange={(e) => setReplyForm({ ...replyForm, instructor_response: e.target.value })}
+                            value={replyForm.instructor_reply}
+                            onChange={(e) => setReplyForm({ ...replyForm, instructor_reply: e.target.value })}
                             placeholder="Write your response to this review..."
                             rows={3}
                           />
@@ -319,13 +319,13 @@ export const ReviewsManager = ({ courseId }: ReviewsManagerProps) => {
                         <Flag className="h-4 w-4" />
                       </Button>
                     )}
-                    {!review.instructor_response && (
+                    {!review.instructor_reply && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => {
                           setReplyingTo(review.id);
-                          setReplyForm({ instructor_response: "" });
+                          setReplyForm({ instructor_reply: "" });
                         }}
                         title="Reply to review"
                       >

@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import ReactMarkdown from "react-markdown";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -35,6 +34,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
   const { courseId } = await params;
   
   const supabase = await createServerClient();
+
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -60,7 +60,7 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
     .single();
   
   if (error || !course) {
-    console.error('Error fetching course:', error);
+    console.error('❌ [CourseManagePage] Error fetching course:', error);
     redirect("/instructor-dashboard");
   }
   
@@ -82,14 +82,17 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
     .select('*', { count: 'exact', head: true })
     .eq('course_id', courseId);
   
-  // Fetch average rating
-  const { data: courseStats } = await supabase
-    .from('course_stats')
-    .select('average_rating, total_reviews')
-    .eq('course_id', courseId)
-    .single();
+  // Fetch live average rating and reviews count
+  const { data: reviewsData } = await supabase
+    .from('reviews')
+    .select('rating')
+    .eq('course_id', courseId);
+    // Removed visibility filter to avoid hiding stats for instructor
   
-  const averageRating = courseStats?.average_rating || 0;
+  const totalReviews = reviewsData?.length || 0;
+  const averageRating = totalReviews > 0 
+    ? reviewsData!.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews 
+    : 0;
   
   return (
     <div className="min-h-screen relative overflow-hidden bg-white selection:bg-primary selection:text-white pb-20">
@@ -220,9 +223,9 @@ export default async function CourseManagePage({ params }: CourseManagePageProps
                     <CardHeader className="p-8 pb-4">
                        <CardTitle className="text-xl font-black">About Course</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 pt-2">
-                       <div className="prose prose-sm md:prose-base max-w-none text-muted-foreground leading-relaxed font-medium">
-                          <ReactMarkdown>{course.description || "No description provided."}</ReactMarkdown>
+                  <CardContent className="p-8 pt-2">
+                       <div className="prose prose-sm md:prose-base max-w-none text-muted-foreground leading-relaxed font-medium whitespace-pre-wrap">
+                          {course.description || "No description provided."}
                        </div>
                     </CardContent>
                  </Card>

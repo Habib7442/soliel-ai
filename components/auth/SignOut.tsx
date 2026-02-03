@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import * as Sentry from "@sentry/nextjs";
 
 interface SignOutProps {
   children: React.ReactNode;
@@ -33,53 +34,62 @@ const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
   // Prevent dialog from closing immediately
   e.preventDefault();
   
-  console.log('Signout initiated');
-  setLoading(true);
-  
-  try {
-    // Aggressively clear client-side storage to remove any stuck tokens
-    if (typeof window !== 'undefined') {
-      try {
-        window.localStorage.clear();
-        window.sessionStorage.clear();
-      } catch (e) {
-        console.error("Error clearing storage", e);
-      }
+  return Sentry.startSpan(
+    {
+      op: "ui.click",
+      name: "Sign Out Button Click",
+    },
+    async (span) => {
+      setLoading(true);
       
-      // Attempt to clear Supabase specific cookies if reachable via script
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
+      try {
+        // Aggressively clear client-side storage to remove any stuck tokens
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.clear();
+            window.sessionStorage.clear();
+          } catch (storageError) {
+            Sentry.captureException(storageError);
+            console.error("Error clearing storage", storageError);
+          }
+          
+          // Attempt to clear Supabase specific cookies if reachable via script
+          document.cookie.split(";").forEach((c) => {
+            document.cookie = c
+              .replace(/^ +/, "")
+              .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+          });
+        }
+        
+        // Create a timeout promise to prevent hanging
+        const timeoutPromise = new Promise((resolve) => {
+          setTimeout(() => resolve({ error: { message: "Sign out timed out" } }), 3000);
+        });
+        
+        // Race between actual sign out and timeout
+        const { error } = await Promise.race([
+          supabase.auth.signOut({ scope: 'global' }),
+          timeoutPromise
+        ]) as { error: any };
+        
+        if (error) {
+          Sentry.captureException(error);
+          console.warn("Supabase signOut error or timeout (ignoring and forcing disconnect):", error);
+        }
+        
+        const { logger } = Sentry;
+        logger.info("User signed out successfully");
+        toast.success('You have been signed out.');
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error('Sign out critical error:', error);
+      } finally {
+        // ALWAYS redirect, even if errors occurred
+        // Use window.location for hard redirect to clear all state with cache buster
+        window.location.href = `/?refresh=${Date.now()}`;
+      }
     }
-
-    console.log('Calling supabase.auth.signOut()');
-    
-    // Create a timeout promise to prevent hanging
-    const timeoutPromise = new Promise((resolve) => {
-      setTimeout(() => resolve({ error: { message: "Sign out timed out" } }), 3000);
-    });
-    
-    // Race between actual sign out and timeout
-    const { error } = await Promise.race([
-      supabase.auth.signOut({ scope: 'global' }),
-      timeoutPromise
-    ]) as { error: any };
-    
-    if (error) {
-       console.warn("Supabase signOut error or timeout (ignoring and forcing disconnect):", error);
-    }
-    
-    console.log('Signout successful/completed, redirecting to home page');
-    toast.success('You have been signed out.');
-  } catch (error) {
-    console.error('Sign out critical error:', error);
-  } finally {
-    // ALWAYS redirect, even if errors occurred
-    // Use window.location for hard redirect to clear all state with cache buster
-    window.location.href = `/?refresh=${Date.now()}`;
-  }
+  );
 };
 
   return (

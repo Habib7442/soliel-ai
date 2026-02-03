@@ -32,9 +32,9 @@ export const getInstructorReviews = async (instructorId: string, limit = 20) => 
         rating,
         comment,
         created_at,
-        instructor_response,
-        responded_at,
-        profiles!inner (
+        instructor_reply,
+        replied_at,
+        profiles (
           full_name,
           avatar_url
         ),

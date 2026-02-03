@@ -3,6 +3,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 import { checkAndGenerateCertificate } from "./certificate.actions";
+import * as Sentry from "@sentry/nextjs";
 
 interface CreateEnrollmentParams {
   userId: string;
@@ -19,153 +20,169 @@ interface CreateEnrollmentParams {
  * This mimics the exact flow Stripe would trigger
  */
 export const createEnrollment = async (params: CreateEnrollmentParams) => {
-  try {
-    const supabase = await createServerClient();
-    const {
-      userId,
-      courseId,
-      purchaseType,
-      paymentProvider,
-      amountCents,
-      stripePaymentIntentId,
-      receiptUrl,
-    } = params;
-    
-    // Validate required fields
-    if (!userId || !courseId) {
-      return { success: false, error: "User ID and Course ID are required" };
-    }
-    
-    // Check if already enrolled
-    const { data: existingEnrollment } = await supabase
-      .from('enrollments')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('course_id', courseId)
-      .single();
-    
-    if (existingEnrollment) {
-      return { success: false, error: "Already enrolled in this course" };
-    }
-    
-    // Step 1: Create Order
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: userId,
-        purchase_type: purchaseType,
-        subtotal_cents: amountCents,
-        discount_cents: 0,
-        tax_cents: 0,
-        total_cents: amountCents,
-        currency: 'USD',
-        status: paymentProvider === 'free' ? 'completed' : 'pending',
-      })
-      .select()
-      .single();
-    
-    if (orderError || !order) {
-      console.error('Error creating order:', orderError);
-      return { success: false, error: `Failed to create order: ${orderError?.message}` };
-    }
-    
-    // Step 2: Create Order Item
-    const { error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        course_id: courseId,
-        quantity: 1,
-        unit_price_cents: amountCents,
-      });
-    
-    if (orderItemError) {
-      console.error('Error creating order item:', orderItemError);
-      return { success: false, error: `Failed to create order item: ${orderItemError.message}` };
-    }
-    
-    // Step 3: Create Payment Record (simulating Stripe webhook)
-    const { data: payment, error: paymentError } = await supabase
-      .from('payments')
-      .insert({
-        order_id: order.id,
-        provider: paymentProvider,
-        provider_payment_id: stripePaymentIntentId || null,
-        status: paymentProvider === 'free' ? 'succeeded' : 'succeeded', // Always succeeded in this demo
-        amount_cents: amountCents,
-        currency: 'USD',
-        receipt_url: receiptUrl || null,
-        metadata: {
-          course_id: courseId,
-          user_id: userId,
-          demo_mode: true,
-        },
-      })
-      .select()
-      .single();
-    
-    if (paymentError || !payment) {
-      console.error('Error creating payment:', paymentError);
-      return { success: false, error: `Failed to create payment: ${paymentError?.message}` };
-    }
-    
-    // Step 4: Update Order Status
-    const { error: orderUpdateError } = await supabase
-      .from('orders')
-      .update({ status: 'completed', updated_at: new Date().toISOString() })
-      .eq('id', order.id);
-    
-    if (orderUpdateError) {
-      console.error('Error updating order:', orderUpdateError);
-    }
-    
-    // Step 5: Create Enrollment (this is what Stripe webhook would do)
-    const { data: enrollment, error: enrollmentError } = await supabase
-      .from('enrollments')
-      .insert({
-        user_id: userId,
-        course_id: courseId,
-        purchased_as: purchaseType,
-        order_id: order.id,
-        status: 'active',
-        started_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-    
-    if (enrollmentError || !enrollment) {
-      console.error('Error creating enrollment:', enrollmentError);
-      return { success: false, error: `Failed to create enrollment: ${enrollmentError?.message}` };
-    }
-    
-    // Step 6: Update course stats
-    const { error: statsError } = await supabase.rpc('increment_course_enrollments', {
-      p_course_id: courseId,
-    });
-    
-    if (statsError) {
-      console.error('Error updating course stats:', statsError);
-      // Don't fail enrollment if stats update fails
-    }
-    
-    // Revalidate paths
-    revalidatePath('/student-dashboard');
-    revalidatePath(`/learn/${courseId}/player`);
-    revalidatePath(`/courses/${courseId}`);
-    
-    return { 
-      success: true, 
-      data: {
-        enrollment,
-        order,
-        payment,
+  return Sentry.startSpan(
+    {
+      op: "function.server",
+      name: "createEnrollment",
+    },
+    async (span) => {
+      try {
+        const supabase = await createServerClient();
+        const {
+          userId,
+          courseId,
+          purchaseType,
+          paymentProvider,
+          amountCents,
+          stripePaymentIntentId,
+          receiptUrl,
+        } = params;
+
+        span?.setAttribute("userId", userId);
+        span?.setAttribute("courseId", courseId);
+        span?.setAttribute("purchaseType", purchaseType);
+
+        // Validate required fields
+        if (!userId || !courseId) {
+          return { success: false, error: "User ID and Course ID are required" };
+        }
+
+        // Check if already enrolled
+        const { data: existingEnrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('course_id', courseId)
+          .single();
+
+        if (existingEnrollment) {
+          return { success: false, error: "Already enrolled in this course" };
+        }
+
+        // Step 1: Create Order
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            user_id: userId,
+            purchase_type: purchaseType,
+            subtotal_cents: amountCents,
+            discount_cents: 0,
+            tax_cents: 0,
+            total_cents: amountCents,
+            currency: 'USD',
+            status: paymentProvider === 'free' ? 'completed' : 'pending',
+          })
+          .select()
+          .single();
+
+        if (orderError || !order) {
+          Sentry.captureException(orderError);
+          console.error('Error creating order:', orderError);
+          return { success: false, error: `Failed to create order: ${orderError?.message}` };
+        }
+
+        // Step 2: Create Order Item
+        const { error: orderItemError } = await supabase
+          .from('order_items')
+          .insert({
+            order_id: order.id,
+            course_id: courseId,
+            quantity: 1,
+            unit_price_cents: amountCents,
+          });
+
+        if (orderItemError) {
+          Sentry.captureException(orderItemError);
+          console.error('Error creating order item:', orderItemError);
+          return { success: false, error: `Failed to create order item: ${orderItemError.message}` };
+        }
+
+        // Step 3: Create Payment Record
+        const { data: payment, error: paymentError } = await supabase
+          .from('payments')
+          .insert({
+            order_id: order.id,
+            provider: paymentProvider,
+            provider_payment_id: stripePaymentIntentId || null,
+            status: 'succeeded',
+            amount_cents: amountCents,
+            currency: 'USD',
+            receipt_url: receiptUrl || null,
+          })
+          .select()
+          .single();
+
+        if (paymentError || !payment) {
+          Sentry.captureException(paymentError);
+          console.error('Error creating payment:', paymentError);
+          return { success: false, error: `Failed to create payment: ${paymentError?.message}` };
+        }
+
+        // Step 4: Update Order Status
+        if (paymentProvider !== 'free') {
+          const { error: orderUpdateError } = await supabase
+            .from('orders')
+            .update({ status: 'completed', updated_at: new Date().toISOString() })
+            .eq('id', order.id);
+
+          if (orderUpdateError) {
+            Sentry.captureException(orderUpdateError);
+            console.error('Error updating order:', orderUpdateError);
+          }
+        }
+
+        // Step 5: Create Enrollment
+        const { data: enrollment, error: enrollmentError } = await supabase
+          .from('enrollments')
+          .insert({
+            user_id: userId,
+            course_id: courseId,
+            purchased_as: purchaseType,
+            order_id: order.id,
+            status: 'active',
+            started_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+
+        if (enrollmentError || !enrollment) {
+          Sentry.captureException(enrollmentError);
+          console.error('Error creating enrollment:', enrollmentError);
+          return { success: false, error: `Failed to create enrollment: ${enrollmentError?.message}` };
+        }
+
+        // Step 6: Update course stats
+        const { error: statsError } = await supabase.rpc('increment_course_enrollments', {
+          p_course_id: courseId,
+        });
+
+        if (statsError) {
+          Sentry.captureException(statsError);
+          console.error('Error updating course stats:', statsError);
+        }
+
+        const { logger } = Sentry;
+        logger.info(logger.fmt`Successfully enrolled user ${userId} in course ${courseId}`);
+
+        revalidatePath('/student-dashboard');
+        revalidatePath(`/learn/${courseId}/player`);
+        revalidatePath(`/courses/${courseId}`);
+
+        return {
+          success: true,
+          data: {
+            enrollment,
+            order,
+            payment,
+          }
+        };
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error('Error in createEnrollment:', error);
+        return { success: false, error: 'Failed to create enrollment. Please try again.' };
       }
-    };
-  } catch (error) {
-    console.error('Error in createEnrollment:', error);
-    return { success: false, error: 'Failed to create enrollment. Please try again.' };
-  }
+    }
+  );
 };
 
 /**
@@ -247,75 +264,94 @@ export const getStudentEnrolledCourses = async (userId: string) => {
  * Mark lesson as complete and update progress
  */
 export const markLessonComplete = async (userId: string, lessonId: string, courseId: string) => {
-  try {
-    const supabase = await createServerClient();
-    
-    // Check if user is enrolled
-    const { data: enrollment } = await supabase
-      .from('enrollments')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('course_id', courseId)
-      .single();
-    
-    if (!enrollment) {
-      return { success: false, error: 'Not enrolled in this course' };
-    }
-    
-    // Mark lesson as complete
-    const { data, error } = await supabase
-      .from('lesson_progress')
-      .upsert({
-        user_id: userId,
-        lesson_id: lessonId,
-        completed: true,
-        completed_at: new Date().toISOString(),
-      }, {
-        onConflict: 'user_id,lesson_id'
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Error marking lesson complete:', error);
-      return { success: false, error: `Failed to mark lesson complete: ${error.message}` };
-    }
-    
-    // Check if course is now 100% complete
-    const { data: progressData } = await supabase
-      .from('v_course_progress')
-      .select('progress_percent')
-      .eq('user_id', userId)
-      .eq('course_id', courseId)
-      .single();
-    
-    if (progressData && progressData.progress_percent === 100) {
-      // Update enrollment status to completed
-      await supabase
-        .from('enrollments')
-        .update({ 
-          status: 'completed', 
-          completed_at: new Date().toISOString() 
-        })
-        .eq('user_id', userId)
-        .eq('course_id', courseId);
-      
-      // Auto-generate certificate using proper certificate generation
-      const certResult = await checkAndGenerateCertificate(userId, courseId);
-      
-      if (!certResult.success) {
-        console.log('Certificate generation note:', certResult.error);
+  return Sentry.startSpan(
+    {
+      op: "function.server",
+      name: "markLessonComplete",
+    },
+    async (span) => {
+      try {
+        const supabase = await createServerClient();
+        
+        span?.setAttribute("userId", userId);
+        span?.setAttribute("lessonId", lessonId);
+        span?.setAttribute("courseId", courseId);
+
+        // Check if user is enrolled
+        const { data: enrollment } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('course_id', courseId)
+          .single();
+        
+        if (!enrollment) {
+          return { success: false, error: 'Not enrolled in this course' };
+        }
+        
+        // Mark lesson as complete
+        const { data, error } = await supabase
+          .from('lesson_progress')
+          .upsert({
+            user_id: userId,
+            lesson_id: lessonId,
+            completed: true,
+            completed_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,lesson_id'
+          })
+          .select()
+          .single();
+        
+        if (error) {
+          Sentry.captureException(error);
+          console.error('Error marking lesson complete:', error);
+          return { success: false, error: `Failed to mark lesson complete: ${error.message}` };
+        }
+        
+        // Check if course is now 100% complete
+        const { data: progressData } = await supabase
+          .from('v_course_progress')
+          .select('progress_percent')
+          .eq('user_id', userId)
+          .eq('course_id', courseId)
+          .single();
+        
+        if (progressData && progressData.progress_percent === 100) {
+          // Update enrollment status to completed
+          await supabase
+            .from('enrollments')
+            .update({ 
+              status: 'completed', 
+              completed_at: new Date().toISOString() 
+            })
+            .eq('user_id', userId)
+            .eq('course_id', courseId);
+          
+          // Auto-generate certificate using proper certificate generation
+          const certResult = await checkAndGenerateCertificate(userId, courseId);
+          
+          if (!certResult.success) {
+            Sentry.captureException(new Error(`Certificate generation failed: ${certResult.error}`));
+            const { logger } = Sentry;
+            logger.warn(logger.fmt`Certificate generation note for user ${userId}: ${certResult.error}`);
+          } else {
+            const { logger } = Sentry;
+            logger.info(logger.fmt`Course completed and certificate generated for user ${userId} in course ${courseId}`);
+          }
+        }
+        
+        revalidatePath('/student-dashboard');
+        revalidatePath(`/learn/${courseId}/player`);
+        
+        return { success: true, data };
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error('Error in markLessonComplete:', error);
+        return { success: false, error: 'Failed to mark lesson complete' };
       }
     }
-    
-    revalidatePath('/student-dashboard');
-    revalidatePath(`/learn/${courseId}/player`);
-    
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error in markLessonComplete:', error);
-    return { success: false, error: 'Failed to mark lesson complete' };
-  }
+  );
 };
 
 /**
@@ -425,8 +461,6 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
       return { success: false, error: 'Failed to load course lessons' };
     }
     
-    console.log(`[DEBUG] Found ${allLessons?.length} total lessons for course ${courseId}`);
-    allLessons?.forEach(l => console.log(`[DEBUG] Raw Lesson: ${l.id} | ${l.title} | ${l.lesson_type} | Section: ${l.section_id}`));
     
     // Include ALL lessons - matching the dashboard progress view
     const lessonsWithContent = allLessons || [];
@@ -504,9 +538,6 @@ export const getCourseWithProgress = async (userId: string, courseId: string) =>
         }),
       }))
       .filter(section => section.lessons.length > 0); // Only include sections with lessons
-      
-      console.log(`[DEBUG] Returning ${sectionsWithProgress.length} sections`);
-      sectionsWithProgress.forEach(s => console.log(`[DEBUG] Section ${s.title}: ${s.lessons.length} lessons`));
     
     // Get overall progress
     const { data: overallProgress } = await supabase

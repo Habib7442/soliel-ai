@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "project": "Comprehensive LMS Platform",
+    "date": "2026-02-03",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "A robust, scalable Learning Management System designed to empower students, instructors, companies, and administrators with comprehensive tools for education delivery, engagement, and monetization.",
+  "core_goals": [
+    "Provide an intuitive and engaging platform for students to discover, enroll in, and complete courses.",
+    "Enable instructors to easily create, manage, and track courses and student progress.",
+    "Support company administrators in bulk enrollment and employee learning management with detailed reporting.",
+    "Facilitate secure, flexible payment and billing options including individual, bundle, and corporate purchases.",
+    "Offer administrators full platform control including user, content, payment management, and analytics."
+  ],
+  "key_features": [
+    "Homepage with dynamic showcases such as featured courses, bundles, reviews, blog highlights, and expandable FAQs.",
+    "Course Catalog with advanced filtering, search, and special badges to facilitate course discovery.",
+    "Detailed Course Pages including intro video, syllabus preview, instructor bios, FAQs, reviews, and bundle integration.",
+    "Secure Payment Page supporting individual courses, bundles, corporate bulk purchases, and multiple payment methods with coupons and discount application.",
+    "Personalized Student Dashboard displaying enrolled courses, progress tracking, certificates, and recommendations.",
+    "Interactive Course Player integrating lessons, labs, assignments, quizzes, notes/Q&A, reviews, and course-specific FAQs.",
+    "Certificates section allowing viewing, downloading, and sharing earned achievements.",
+    "Bundles Catalog highlighting curated course bundles with discount rules and purchase options.",
+    "Dedicated Company Packages landing page and Company Dashboard for employee and learning management with billing and reporting.",
+    "Comprehensive Blog with SEO-optimized posts, categories, search, commenting, and sharing capabilities.",
+    "Global and Course-specific FAQ management accessible to all user roles.",
+    "Instructor Dashboard for course creation, content management, student activity monitoring, and earnings tracking.",
+    "Admin Dashboard offering full control over user management, courses, bundles, content, payments, analytics, and system configuration."
+  ],
+  "user_flow_summary": [
+    "Students browse courses from homepage or catalog, filter/search, view details, and proceed to secure payment.",
+    "Upon purchase, students access the dashboard to track progress and continue learning in the course player.",
+    "Instructors log in to manage courses, upload content, interact with students, and review earnings and feedback.",
+    "Company admins bulk enroll employees, assign courses, monitor progress, and manage billing through the company dashboard.",
+    "Admins oversee platform-wide operations, manage users, approve courses, control content, and analyze revenue and engagement through the admin dashboard."
+  ],
+  "validation_criteria": [
+    "All user roles (Student, Instructor, Company Admin, Super Admin) successfully authenticate with role-based access controls enforced.",
+    "Course creation, update, deletion, and content uploads function correctly in instructor and admin dashboards.",
+    "Payment processing completes securely across all supported methods with correct application of discounts and bulk purchases.",
+    "Student progress accurately tracked and reflected in dashboards, with certificates auto-generated upon course completion.",
+    "Company dashboards reflect real-time employee enrollment, course assignments, progress, and billing information.",
+    "Blog and FAQ management tools allow content creation, editing, publishing, and search/filtering.",
+    "Reviews submitted by students are visible to instructors and managed by admins.",
+    "Bundles and discount rules apply correctly throughout course catalogs, bundle views, and payment flows.",
+    "Admin dashboard provides comprehensive analytics and control over all major platform functions without errors."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "Next.js",
+      "Supabase",
+      "Tailwind CSS",
+      "Shadcn UI"
+    ],
+    "features": [
+      {
+        "name": "getInstructorAnalytics",
+        "description": "Calculates global metrics for an instructor including total students, revenue (from succeeded payments), and average ratings.",
+        "files": [
+          "server/actions/instructor.actions.ts"
+        ]
+      },
+      {
+        "name": "getCourseStudents",
+        "description": "Retrieves real-time progress and profile data for all students enrolled in a specific course.",
+        "files": [
+          "server/actions/instructor.actions.ts"
+        ]
+      },
+      {
+        "name": "getInstructorCourses",
+        "description": "Lists all courses created by a specific instructor.",
+        "files": [
+          "server/actions/instructor.actions.ts"
+        ]
+      },
+      {
+        "name": "getCourseEarnings",
+        "description": "Fetches detailed earning records for an instructor's courses.",
+        "files": [
+          "server/actions/instructor.actions.ts"
+        ]
+      },
+      {
+        "name": "getStudentEnrollments",
+        "description": "Fetches the 10 most recent student enrollments for an instructor's courses.",
+        "files": [
+          "server/actions/instructor.actions.ts"
+        ]
+      }
+    ]
+  }
+}

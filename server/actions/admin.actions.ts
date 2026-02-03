@@ -145,7 +145,6 @@ export const unpublishCourse = async (courseId: string) => {
       return { success: false, error: 'Course not found' };
     }
 
-    console.log('Before unpublish:', existingCourse);
     
     // Update the course - using direct update
     const { error, count } = await supabase
@@ -162,7 +161,6 @@ export const unpublishCourse = async (courseId: string) => {
       return { success: false, error: `Failed to unpublish course: ${error.message}` };
     }
 
-    console.log('Update affected rows:', count);
 
     // Fetch the updated course data
     const { data: updatedCourse } = await supabase
@@ -171,7 +169,6 @@ export const unpublishCourse = async (courseId: string) => {
       .eq('id', courseId)
       .single();
 
-    console.log('After unpublish:', updatedCourse);
 
     revalidatePath('/admin-courses');
     revalidatePath('/courses');

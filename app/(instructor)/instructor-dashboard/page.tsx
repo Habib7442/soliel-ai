@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
-import { getInstructorCourses, getCourseEarnings, getStudentEnrollments } from "@/server/actions/instructor.actions";
+import { getInstructorCourses, getCourseEarnings, getStudentEnrollments, getInstructorAnalytics } from "@/server/actions/instructor.actions";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -29,18 +29,20 @@ export default async function InstructorDashboardPage() {
     redirect("/sign-in");
   }
   
-  const [coursesResult, earningsResult, enrollmentsResult] = await Promise.all([
+  const [coursesResult, earningsResult, enrollmentsResult, analyticsResult] = await Promise.all([
     getInstructorCourses(user.id),
     getCourseEarnings(user.id),
-    getStudentEnrollments(user.id)
+    getStudentEnrollments(user.id),
+    getInstructorAnalytics(user.id)
   ]);
   
   const courses = coursesResult.success ? coursesResult.data : [];
   const earnings = earningsResult.success ? earningsResult.data : [];
   const enrollments = enrollmentsResult.success ? enrollmentsResult.data : [];
+  const analytics = analyticsResult.success ? analyticsResult.data : { totalStudents: 0, totalRevenue: 0, averageRating: 0 };
   
-  const totalRevenue = earnings?.reduce((acc, earning) => acc + (earning.amount || 0), 0) || 0;
-  const totalStudents = enrollments?.length || 0;
+  const totalRevenue = analytics.totalRevenue;
+  const totalStudents = analytics.totalStudents;
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-white selection:bg-primary selection:text-white">

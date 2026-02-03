@@ -105,7 +105,6 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
       if (user) {
         const supabase = createClient();
         
-        console.log('🚀 Fetching role for user:', user.id);
         
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -113,26 +112,14 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
           .eq('id', user.id)
           .single();
         
-        console.log('🔍 NavItems Debug:', {
-          userId: user.id,
-          profileData: profile,
-          fetchedRole: profile?.role,
-          roleType: typeof profile?.role,
-          error: error?.message,
-          currentUserRole: userRole,
-        });
-        
         if (!error && profile) {
           const newRole = profile.role as UserRole || UserRole.STUDENT;
           setUserRole(newRole);
-          console.log('✅ Setting userRole to:', newRole, '| UserRole.COMPANY_ADMIN =', UserRole.COMPANY_ADMIN, '| Match:', newRole === UserRole.COMPANY_ADMIN);
         } else {
           setUserRole(UserRole.STUDENT);
-          console.log('⚠️ Error or no profile, defaulting to STUDENT. Error:', error);
         }
       } else {
         setUserRole(null);
-        console.log('❌ No user, setting userRole to null');
       }
     };
     
@@ -146,11 +133,6 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
   const filteredNavItems = useMemo(() => {
     let items: NavItem[] = [];
     
-    console.log('🎯 Building navigation for:', {
-      hasUser: !!user,
-      userRole,
-      isInstructorDashboard,
-    });
     
     if (!user) {
       // Public user
@@ -159,14 +141,12 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
       if (!isInstructorDashboard) {
         items.push(...additionalPublicNavItems);
       }
-      console.log('👤 Public user navigation:', items.map(i => i.name));
     } else if (userRole) {
       // Authenticated user with role loaded
       switch (userRole) {
         case UserRole.SUPER_ADMIN:
           // Admin only sees Dashboard and Users (no public items)
           items.push(...adminNavItems);
-          console.log('🔧 Super Admin navigation:', items.map(i => i.name));
           break;
         case UserRole.STUDENT:
           items = [...publicNavItems];
@@ -174,7 +154,6 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
             items.push(...additionalPublicNavItems);
           }
           items.push(...studentNavItems);
-          console.log('🎓 Student navigation:', items.map(i => i.name));
           break;
         case UserRole.INSTRUCTOR:
           items = [...publicNavItems];
@@ -182,12 +161,10 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
             items.push(...additionalPublicNavItems);
           }
           items.push(...instructorNavItems);
-          console.log('👨‍🏫 Instructor navigation:', items.map(i => i.name));
           break;
         case UserRole.COMPANY_ADMIN:
           // Company admins only see essential navigation (no public items)
           items.push(...companyNavItems);
-          console.log('🏢 Company Admin navigation:', items.map(i => i.name));
           break;
         default:
           items = [...publicNavItems];
@@ -195,10 +172,8 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
             items.push(...additionalPublicNavItems);
           }
           items.push(...studentNavItems);
-          console.log('❓ Default (student) navigation:', items.map(i => i.name));
       }
     } else {
-      console.log('⏳ User exists but role not loaded yet, showing empty nav');
     }
     // If user exists but role not loaded yet, return empty array (loading)
     

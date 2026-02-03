@@ -123,10 +123,8 @@ async function isAdmin(): Promise<boolean> {
       data: { user },
     } = await supabase.auth.getUser();
 
-    console.log('🔐 isAdmin check - user:', user?.id, user?.email);
 
     if (!user) {
-      console.log('❌ isAdmin: No user found');
       return false;
     }
 
@@ -136,8 +134,6 @@ async function isAdmin(): Promise<boolean> {
       .eq("id", user.id)
       .single();
 
-    console.log('👤 isAdmin check - profile:', profile, 'error:', error);
-    console.log('🎯 isAdmin check - role:', profile?.role, '=== super_admin?', profile?.role === "super_admin");
 
     return profile?.role === "super_admin";
   } catch (error) {

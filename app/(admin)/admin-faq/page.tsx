@@ -70,11 +70,8 @@ export default function AdminFAQClient() {
 
   const loadFAQs = async () => {
     setLoading(true);
-    console.log('🔍 Loading FAQs...');
     const result = await getAllFAQs();
-    console.log('📊 getAllFAQs result:', result);
     if (result.success && result.data) {
-      console.log('✅ FAQs loaded successfully:', result.data.length, 'FAQs');
       setFaqs(result.data);
     } else {
       console.error('❌ Failed to load FAQs:', result.error);

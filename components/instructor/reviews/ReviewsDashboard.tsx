@@ -19,8 +19,8 @@ interface ReviewItem {
   rating: number;
   comment: string;
   created_at: string;
-  instructor_response?: string;
-  responded_at?: string;
+  instructor_reply?: string;
+  replied_at?: string;
   user: {
     full_name: string;
     avatar_url: string;
@@ -137,18 +137,18 @@ export default function ReviewsDashboard({ instructorId }: { instructorId: strin
                 </p>
 
                 {/* Instructor Response */}
-                {review.instructor_response ? (
+                {review.instructor_reply ? (
                   <div className="mt-8 pl-6 border-l-4 border-primary/20">
                      <div className="flex items-center gap-2 mb-2">
                         <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md">
                            Your Response
                         </Badge>
                         <span className="text-[10px] text-muted-foreground font-bold">
-                           {review.responded_at && new Date(review.responded_at).toLocaleDateString()}
+                           {review.replied_at && new Date(review.replied_at).toLocaleDateString()}
                         </span>
                      </div>
                      <p className="text-gray-600 italic">
-                        {review.instructor_response}
+                        {review.instructor_reply}
                      </p>
                   </div>
                 ) : (

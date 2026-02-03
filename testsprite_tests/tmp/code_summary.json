@@ -1,0 +1,46 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Next.js",
+    "Supabase",
+    "Tailwind CSS",
+    "Shadcn UI"
+  ],
+  "features": [
+    {
+      "name": "getInstructorAnalytics",
+      "description": "Calculates global metrics for an instructor including total students, revenue (from succeeded payments), and average ratings.",
+      "files": [
+        "server/actions/instructor.actions.ts"
+      ]
+    },
+    {
+      "name": "getCourseStudents",
+      "description": "Retrieves real-time progress and profile data for all students enrolled in a specific course.",
+      "files": [
+        "server/actions/instructor.actions.ts"
+      ]
+    },
+    {
+      "name": "getInstructorCourses",
+      "description": "Lists all courses created by a specific instructor.",
+      "files": [
+        "server/actions/instructor.actions.ts"
+      ]
+    },
+    {
+      "name": "getCourseEarnings",
+      "description": "Fetches detailed earning records for an instructor's courses.",
+      "files": [
+        "server/actions/instructor.actions.ts"
+      ]
+    },
+    {
+      "name": "getStudentEnrollments",
+      "description": "Fetches the 10 most recent student enrollments for an instructor's courses.",
+      "files": [
+        "server/actions/instructor.actions.ts"
+      ]
+    }
+  ]
+}

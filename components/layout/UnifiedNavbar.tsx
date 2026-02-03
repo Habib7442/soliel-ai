@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, ArrowRight } from "lucide-react";
-import { ModeToggle } from "@/components/mode-toggle";
+
 import { useSupabase } from "@/providers/supabase-provider";
 import { publicNavItems, additionalPublicNavItems, studentNavItems, instructorNavItems, companyNavItems, adminNavItems, NavItem } from "./NavItems";
 import { UserRole } from "@/types/enums";
@@ -21,8 +21,10 @@ interface UnifiedNavbarProps {
 export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }: UnifiedNavbarProps) {
   const { user, loading } = useSupabase();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -97,13 +99,15 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:block">
-              <ModeToggle />
-            </div>
 
-            {loading ? (
-              <div className="w-20 h-10 bg-gray-100 animate-pulse rounded-2xl" />
-            ) : user ? (
+
+            {!mounted ? (
+              <div className="w-20 h-10" />
+            ) : loading && !userRole ? (
+              <div className="w-20 h-10 bg-gray-50 animate-pulse rounded-2xl flex items-center justify-center">
+                 <div className="w-4 h-4 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+              </div>
+            ) : (user || userRole) ? (
               <div className="flex items-center gap-3">
                 <Link href="/profile" className="hidden sm:block text-sm font-bold text-gray-500 hover:text-gray-900 px-3 py-2">Account</Link>
                 <SignOut 

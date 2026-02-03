@@ -2,6 +2,7 @@
 
 import { createServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import * as Sentry from "@sentry/nextjs";
 import { Review, ReviewWithProfilesArray } from "@/hooks/useInstructorStore";
 
 // Course-related actions
@@ -291,7 +292,8 @@ export const getInstructorCourses = async (instructorId: string) => {
         is_published,
         thumbnail_url,
         created_at,
-        updated_at
+        updated_at,
+        reviews(rating)
       `)
       .eq('instructor_id', instructorId)
       .order('created_at', { ascending: false });
@@ -775,10 +777,10 @@ export const getCourseReviews = async (courseId: string) => {
         rating,
         comment,
         status,
-        instructor_response,
-        responded_at,
+        instructor_reply,
+        replied_at,
         created_at,
-        profiles!inner (
+        profiles (
           id,
           full_name,
           avatar_url
@@ -821,10 +823,10 @@ export const updateReviewStatus = async (reviewId: string, status: 'visible' | '
         rating,
         comment,
         status,
-        instructor_response,
-        responded_at,
+        instructor_reply,
+        replied_at,
         created_at,
-        profiles!inner (
+        profiles (
           id,
           full_name,
           avatar_url
@@ -1678,48 +1680,79 @@ export const uploadThumbnail = async (file: File) => {
 };
 
 export const getInstructorAnalytics = async (instructorId: string) => {
-  try {
-    const supabase = await createServerClient();
-    
-    // Get total students across all courses
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from('enrollments')
-      .select('id, courses!inner(instructor_id)')
-      .eq('courses.instructor_id', instructorId);
+  return Sentry.startSpan(
+    {
+      op: "function.server",
+      name: "getInstructorAnalytics",
+    },
+    async (span) => {
+      try {
+        const supabase = await createServerClient();
+        
+        // Get all enrollments for this instructor's courses
+        const { data: enrollments, error: enrollmentsError } = await supabase
+          .from('enrollments')
+          .select(`
+            id,
+            course_id,
+            courses!inner(
+              instructor_id,
+              price_cents,
+              title
+            )
+          `)
+          .eq('courses.instructor_id', instructorId);
 
-    // Get total revenue
-    const { data: payments, error: paymentsError } = await supabase
-      .from('payments')
-      .select('amount_cents, orders!inner(order_items!inner(courses!inner(instructor_id)))')
-      .eq('status', 'paid')
-      .eq('orders.order_items.courses.instructor_id', instructorId);
+        if (enrollmentsError) {
+          Sentry.captureException(enrollmentsError);
+          console.error('❌ [Analytics] Enrollments error:', enrollmentsError);
+        }
 
-    // Get average rating across all courses
-    const { data: reviews, error: reviewsError } = await supabase
-      .from('reviews')
-      .select('rating, courses!inner(instructor_id)')
-      .eq('courses.instructor_id', instructorId)
-      .eq('status', 'visible');
+        // Get average rating (visible reviews)
+        const { data: reviews, error: reviewsError } = await supabase
+          .from('reviews')
+          .select('rating, courses!inner(instructor_id)')
+          .eq('courses.instructor_id', instructorId)
+          .eq('status', 'visible');
 
-    const totalStudents = enrollments?.length || 0;
-    const totalRevenue = (payments?.reduce((sum, p) => sum + (p.amount_cents || 0), 0) || 0) / 100;
-    const averageRating = reviews && reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
+        if (reviewsError) {
+          Sentry.captureException(reviewsError);
+        }
 
-    return {
-      success: true,
-      data: {
-        totalStudents,
-        totalRevenue,
-        averageRating: Math.round(averageRating * 10) / 10,
-        totalReviews: reviews?.length || 0
+        const totalStudents = enrollments?.length || 0;
+        
+        // Calculate total revenue from enrollment values (consistent with sidebar)
+        const totalRevenue = (enrollments?.reduce((sum, enrollment) => {
+          const course = Array.isArray(enrollment.courses) ? enrollment.courses[0] : enrollment.courses;
+          return sum + (course?.price_cents || 0);
+        }, 0) || 0) / 100;
+
+        const averageRating = reviews && reviews.length > 0
+          ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          : 0;
+
+        span?.setAttribute("instructorId", instructorId);
+        span?.setAttribute("totalStudents", totalStudents);
+        span?.setAttribute("totalRevenue", totalRevenue);
+
+        return {
+          success: true,
+          data: {
+            totalStudents,
+            totalRevenue,
+            averageRating: Math.round(averageRating * 10) / 10,
+            totalReviews: reviews?.length || 0
+          }
+        };
+      } catch (error) {
+        Sentry.captureException(error);
+        const { logger } = Sentry;
+        logger.error(logger.fmt`Failed to fetch analytics for instructor: ${instructorId}`, { error });
+        console.error('Error in getInstructorAnalytics:', error);
+        return { success: false, error: 'Failed to fetch analytics. Please try again.' };
       }
-    };
-  } catch (error) {
-    console.error('Error in getInstructorAnalytics:', error);
-    return { success: false, error: 'Failed to fetch analytics. Please try again.' };
-  }
+    }
+  );
 };
 
 // Get enrolled students for a course with progress information
@@ -1727,13 +1760,18 @@ export const getCourseStudents = async (courseId: string) => {
   try {
     const supabase = await createServerClient();
     
-    // Get all enrollments for this course with student profiles and progress
+    // Get all enrollments for this course with student profiles
     const { data, error } = await supabase
       .from('enrollments')
       .select(`
         id,
         user_id,
-        created_at
+        created_at,
+        profiles (
+          full_name,
+          email,
+          avatar_url
+        )
       `)
       .eq('course_id', courseId)
       .order('created_at', { ascending: false });
@@ -1744,30 +1782,34 @@ export const getCourseStudents = async (courseId: string) => {
     }
 
     // Get progress information for each student
-    const studentsWithProgress = await Promise.all((data || []).map(async (enrollment, index) => {
+    const studentsWithProgress = await Promise.all((data || []).map(async (enrollment) => {
       // Get progress percentage from the v_course_progress view
       const { data: progressData } = await supabase
         .from('v_course_progress')
         .select('progress_percent, total_lessons, completed_lessons')
         .eq('user_id', enrollment.user_id)
         .eq('course_id', courseId)
-        .single();
+        .maybeSingle();
 
-      // Get last activity from lesson_progress table
+      // Get last activity from lesson_progress table (filtered to this course's lessons)
       const { data: activityData } = await supabase
         .from('lesson_progress')
-        .select('completed_at')
+        .select('completed_at, lessons!inner(course_id)')
         .eq('user_id', enrollment.user_id)
+        .eq('lessons.course_id', courseId)
         .order('completed_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      
+      const profiles = enrollment.profiles as any;
+      const profile = Array.isArray(profiles) ? profiles[0] : profiles;
 
-      // Anonymize student identity for privacy
       return {
         id: enrollment.user_id,
         enrollment_id: enrollment.id,
-        full_name: `Student ${index + 1}`, // Anonymized
-        email: '***@***.***', // Hidden for privacy
+        full_name: profile?.full_name || 'Scholar',
+        email: profile?.email || '***@***.***',
+        avatar_url: profile?.avatar_url,
         enrollment_date: enrollment.created_at,
         progress_percent: progressData?.progress_percent || 0,
         total_lessons: progressData?.total_lessons || 0,
@@ -1973,8 +2015,8 @@ export const replyToReview = async (reviewId: string, instructorResponse: string
     const { data, error } = await supabase
       .from('reviews')
       .update({ 
-        instructor_response: instructorResponse, 
-        responded_at: new Date().toISOString() 
+        instructor_reply: instructorResponse, 
+        replied_at: new Date().toISOString() 
       })
       .eq('id', reviewId)
       .select(`
@@ -1984,10 +2026,10 @@ export const replyToReview = async (reviewId: string, instructorResponse: string
         rating,
         comment,
         status,
-        instructor_response,
-        responded_at,
+        instructor_reply,
+        replied_at,
         created_at,
-        profiles!inner (
+        profiles (
           id,
           full_name,
           avatar_url

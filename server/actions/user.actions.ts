@@ -3,6 +3,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { revalidatePath } from "next/cache";
+import * as Sentry from "@sentry/nextjs";
 
 export interface CreateUserParams {
   id: string;
@@ -25,88 +26,123 @@ export interface UpdateUserParams {
 }
 
 export const createUserProfile = async (params: CreateUserParams) => {
-  try {
-    const supabase = await createServerClient();
-    
-    // Check if profile already exists
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', params.id)
-      .single();
+  return Sentry.startSpan(
+    {
+      op: "function.server",
+      name: "createUserProfile",
+    },
+    async (span) => {
+      try {
+        const supabase = await createServerClient();
+        
+        span?.setAttribute("userId", params.id);
+        span?.setAttribute("userEmail", params.email);
+        span?.setAttribute("role", params.role || "student");
 
-    if (existingProfile) {
-      // Profile already exists, update it instead
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({
-          email: params.email,
-          full_name: params.fullName,
-          avatar_url: params.avatarUrl,
-          role: params.role,
-          bio: params.bio,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', params.id)
-        .select()
-        .single();
+        // Check if profile already exists
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', params.id)
+          .single();
 
-      if (error) {
-        console.error('Error updating profile:', error);
-        return { success: false, error: `Failed to update profile: ${error.message}` };
+        if (existingProfile) {
+          // Profile already exists, update it instead
+          const { data, error } = await supabase
+            .from('profiles')
+            .update({
+              email: params.email,
+              full_name: params.fullName,
+              avatar_url: params.avatarUrl,
+              role: params.role,
+              bio: params.bio,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', params.id)
+            .select()
+            .single();
+
+          if (error) {
+            Sentry.captureException(error);
+            console.error('Error updating profile:', error);
+            return { success: false, error: `Failed to update profile: ${error.message}` };
+          }
+
+          return { success: true, data };
+        }
+
+        // Create new profile
+        const { data, error } = await supabase
+          .from('profiles')
+          .insert({
+            id: params.id,
+            email: params.email,
+            full_name: params.fullName,
+            avatar_url: params.avatarUrl,
+            role: params.role || UserRole.STUDENT,
+            bio: params.bio
+          })
+          .select()
+          .single();
+
+        if (error) {
+          Sentry.captureException(error);
+          console.error('Error creating profile:', error);
+          return { success: false, error: `Failed to create profile: ${error.message}` };
+        }
+
+        const { logger } = Sentry;
+        logger.info(logger.fmt`Profile created for user ${params.id}`);
+
+        return { success: true, data };
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error('Error in createUserProfile:', error);
+        return { success: false, error: 'Failed to create profile' };
       }
-
-      return { success: true, data };
     }
-
-    // Create new profile
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert({
-        id: params.id,
-        email: params.email,
-        full_name: params.fullName,
-        avatar_url: params.avatarUrl,
-        role: params.role || UserRole.STUDENT,
-        bio: params.bio
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating profile:', error);
-      return { success: false, error: `Failed to create profile: ${error.message}` };
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error in createUserProfile:', error);
-    return { success: false, error: 'Failed to create profile' };
-  }
+  );
 };
 
 export const updateUserRole = async ({ userId, role }: UpdateUserRoleParams) => {
-  try {
-    const supabase = await createServerClient();
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ role })
-      .eq('id', userId)
-      .select()
-      .single();
+  return Sentry.startSpan(
+    {
+      op: "function.server",
+      name: "updateUserRole",
+    },
+    async (span) => {
+      try {
+        const supabase = await createServerClient();
+        
+        span?.setAttribute("userId", userId);
+        span?.setAttribute("role", role);
 
-    if (error) {
-      console.error('Error updating user role:', error);
-      return { success: false, error: `Failed to update user role: ${error.message}` };
+        const { data, error } = await supabase
+          .from('profiles')
+          .update({ role })
+          .eq('id', userId)
+          .select()
+          .single();
+
+        if (error) {
+          Sentry.captureException(error);
+          console.error('Error updating user role:', error);
+          return { success: false, error: error.message };
+        }
+
+        const { logger } = Sentry;
+        logger.info(logger.fmt`User ${userId} role updated to ${role}`);
+
+        revalidatePath('/admin/users');
+        revalidatePath(`/admin/users/${userId}`);
+        return { success: true, data };
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error('Error in updateUserRole:', error);
+        return { success: false, error: 'Failed to update user role' };
+      }
     }
-
-    revalidatePath('/admin/users');
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error in updateUserRole:', error);
-    return { success: false, error: 'Failed to update user role' };
-  }
+  );
 };
 
 export const getAllUsers = async () => {
@@ -125,7 +161,6 @@ export const getAllUsers = async () => {
         }, {} as Record<string, string>);
       }
     } catch (authError) {
-      console.log('Could not fetch auth users (service role may be required):', authError);
       // Continue without auth data
     }
     

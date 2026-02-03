@@ -463,8 +463,6 @@ export async function inviteEmployee(
       // Note: Supabase doesn't automatically send emails for invitations
       // You would need to implement email sending using a service like Resend, SendGrid, etc.
       // For now, we'll return the invitation link in the success response
-      console.log("Invitation link generated:", invitationLink);
-      console.log("Send this link to:", email);
     } catch (emailError) {
       console.error("Error generating invitation link:", emailError);
     }

@@ -94,8 +94,6 @@ export const AssignmentRenderer = ({ lessonId, courseId, title, userId, onComple
       const fileName = `assignments/${assignment.id}/${userId}_${Date.now()}_${sanitizedName}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      console.log("[DEBUG] Current User:", session.user.id);
-      console.log("[DEBUG] Target Path:", filePath);
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-assets')
@@ -109,7 +107,6 @@ export const AssignmentRenderer = ({ lessonId, courseId, title, userId, onComple
         throw new Error(`Upload failed: ${uploadError.message}. Check your internet connection or file name.`);
       }
 
-      console.log("[DEBUG] Upload successful:", uploadData);
       setUploading(false); // Finished storage upload
 
       // Get public URL
@@ -118,7 +115,6 @@ export const AssignmentRenderer = ({ lessonId, courseId, title, userId, onComple
         .getPublicUrl(filePath);
 
       // Submit assignment record to DB
-      console.log("[DEBUG] Submitting DB record...");
       const submissionData = {
         assignment_id: assignment.id,
         student_id: userId,

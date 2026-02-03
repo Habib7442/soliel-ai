@@ -208,7 +208,6 @@ export default function AdminBlogPage() {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      console.log('📤 Uploading to blog-images bucket:', filePath);
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("blog-images")
@@ -222,13 +221,11 @@ export default function AdminBlogPage() {
         throw uploadError;
       }
 
-      console.log('✅ Upload successful:', uploadData);
 
       const { data: { publicUrl } } = supabase.storage
         .from("blog-images")
         .getPublicUrl(filePath);
 
-      console.log('🔗 Public URL:', publicUrl);
 
       setFormData(prev => ({ ...prev, featured_image_url: publicUrl }));
       toast.success("Image uploaded successfully");

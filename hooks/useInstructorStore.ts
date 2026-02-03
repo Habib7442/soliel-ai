@@ -94,8 +94,8 @@ export interface Review {
   rating: number;
   comment?: string;
   status: 'visible' | 'hidden' | 'flagged';
-  instructor_response?: string;
-  responded_at?: string;
+  instructor_reply?: string;
+  replied_at?: string;
   created_at: string;
   student_name?: string;
   profiles: {

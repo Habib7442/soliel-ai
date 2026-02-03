@@ -1,0 +1,27 @@
+[
+  {
+    "id": "TC001",
+    "title": "verify_getinstructoranalytics_returns_correct_metrics",
+    "description": "Test the getInstructorAnalytics API to ensure it correctly calculates and returns the total number of students, total revenue from succeeded payments, and average ratings for a given instructor."
+  },
+  {
+    "id": "TC002",
+    "title": "validate_getcoursestudents_returns_realtime_progress_and_profile",
+    "description": "Test the getCourseStudents API to verify it retrieves real-time progress data and profile information for all students enrolled in a specified course."
+  },
+  {
+    "id": "TC003",
+    "title": "check_getinstructorcourses_lists_all_courses_by_instructor",
+    "description": "Test the getInstructorCourses API to confirm it returns a complete list of all courses created by a specific instructor."
+  },
+  {
+    "id": "TC004",
+    "title": "validate_getcourseearnings_fetches_detailed_earning_records",
+    "description": "Test the getCourseEarnings API to ensure it fetches detailed earning records accurately for all courses associated with an instructor."
+  },
+  {
+    "id": "TC005",
+    "title": "verify_getstudentenrollments_returns_recent_enrollments",
+    "description": "Test the getStudentEnrollments API to check it returns the 10 most recent student enrollments for the courses of a given instructor."
+  }
+]

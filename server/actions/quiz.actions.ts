@@ -2,6 +2,7 @@
 
 import { createServerClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
+import * as Sentry from "@sentry/nextjs";
 
 export interface QuizQuestion {
   id: string;
@@ -158,89 +159,102 @@ export const submitQuizAttempt = async (
   quizId: string,
   timeTakenSeconds: number
 ) => {
-  try {
-    const supabase = await createServerClient();
-    
-    // Get quiz questions to calculate score
-    const { data: questions, error: questionsError } = await supabase
-      .from('quiz_questions')
-      .select('*')
-      .eq('quiz_id', quizId);
+  return Sentry.startSpan(
+    {
+      op: "function.server",
+      name: "submitQuizAttempt",
+    },
+    async (span) => {
+      try {
+        const supabase = await createServerClient();
+        
+        // Get quiz questions to calculate score
+        const { data: questions, error: questionsError } = await supabase
+          .from('quiz_questions')
+          .select('*')
+          .eq('quiz_id', quizId);
 
-    if (questionsError) {
-      console.error('Error fetching questions for grading:', questionsError);
-      return { success: false, error: questionsError.message };
-    }
+        if (questionsError) {
+          Sentry.captureException(questionsError);
+          console.error('Error fetching questions for grading:', questionsError);
+          return { success: false, error: questionsError.message };
+        }
 
-    // Get quiz settings
-    const { data: quiz, error: quizError } = await supabase
-      .from('quizzes')
-      .select('passing_score')
-      .eq('id', quizId)
-      .single();
+        // Get quiz settings
+        const { data: quiz, error: quizError } = await supabase
+          .from('quizzes')
+          .select('passing_score')
+          .eq('id', quizId)
+          .single();
 
-    if (quizError) {
-      console.error('Error fetching quiz:', quizError);
-      return { success: false, error: quizError.message };
-    }
+        if (quizError) {
+          Sentry.captureException(quizError);
+          console.error('Error fetching quiz:', quizError);
+          return { success: false, error: quizError.message };
+        }
 
-    // Calculate score
-    let correctCount = 0;
-    const totalQuestions = questions?.length || 0;
+        // Calculate score
+        let correctCount = 0;
+        const totalQuestions = questions?.length || 0;
 
-    questions?.forEach((question: any) => {
-      const studentAnswer = answers[question.id] || [];
-      
-      // Convert correct_answers indices to actual option text
-      const correctAnswerIndices = question.correct_answers || [];
-      const correctAnswerText = correctAnswerIndices.map((idx: number) => question.options[idx]);
+        questions?.forEach((question: any) => {
+          const studentAnswer = answers[question.id] || [];
+          
+          // Convert correct_answers indices to actual option text
+          const correctAnswerIndices = question.correct_answers || [];
+          const correctAnswerText = correctAnswerIndices.map((idx: number) => question.options[idx]);
 
-      // Sort both arrays for comparison
-      const sortedStudentAnswer = [...studentAnswer].sort();
-      const sortedCorrectAnswer = [...correctAnswerText].sort();
+          // Sort both arrays for comparison
+          const sortedStudentAnswer = [...studentAnswer].sort();
+          const sortedCorrectAnswer = [...correctAnswerText].sort();
 
-      console.log(`[GRADING] Question: ${question.question_text}`);
-      console.log(`[GRADING] Student Answer:`, sortedStudentAnswer);
-      console.log(`[GRADING] Correct Answer:`, sortedCorrectAnswer);
+          // Check if arrays are equal
+          if (
+            sortedStudentAnswer.length === sortedCorrectAnswer.length &&
+            sortedStudentAnswer.every((val, idx) => val === sortedCorrectAnswer[idx])
+          ) {
+            correctCount++;
+          }
+        });
 
-      // Check if arrays are equal
-      if (
-        sortedStudentAnswer.length === sortedCorrectAnswer.length &&
-        sortedStudentAnswer.every((val, idx) => val === sortedCorrectAnswer[idx])
-      ) {
-        correctCount++;
-        console.log(`[GRADING] ✅ Correct!`);
-      } else {
-        console.log(`[GRADING] ❌ Incorrect`);
+        const score = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+        const passed = score >= (quiz?.passing_score || 70);
+
+        span?.setAttribute("quizId", quizId);
+        span?.setAttribute("attemptId", attemptId);
+        span?.setAttribute("score", score);
+        span?.setAttribute("passed", passed);
+
+        // Update attempt
+        const { data, error } = await supabase
+          .from('student_quiz_attempts')
+          .update({
+            answers,
+            score,
+            passed,
+            completed_at: new Date().toISOString(),
+            time_taken_seconds: timeTakenSeconds
+          })
+          .eq('id', attemptId)
+          .select()
+          .single();
+
+        if (error) {
+          Sentry.captureException(error);
+          console.error('Error submitting quiz attempt:', error);
+          return { success: false, error: error.message };
+        }
+
+        const { logger } = Sentry;
+        logger.info(logger.fmt`Quiz submitted: ${quizId} - Score: ${score}% - Passed: ${passed}`);
+
+        revalidatePath('/learn/[courseId]/player');
+        return { success: true, data: data as QuizAttempt };
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error('Error in submitQuizAttempt:', error);
+        return { success: false, error: 'Failed to submit quiz attempt' };
       }
-    });
-
-    const score = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
-    const passed = score >= (quiz?.passing_score || 70);
-
-    // Update attempt
-    const { data, error } = await supabase
-      .from('student_quiz_attempts')
-      .update({
-        answers,
-        score,
-        passed,
-        completed_at: new Date().toISOString(),
-        time_taken_seconds: timeTakenSeconds
-      })
-      .eq('id', attemptId)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error submitting quiz attempt:', error);
-      return { success: false, error: error.message };
     }
-
-    revalidatePath('/learn/[courseId]/player');
-    return { success: true, data: data as QuizAttempt };
-  } catch (error) {
-    console.error('Error in submitQuizAttempt:', error);
-    return { success: false, error: 'Failed to submit quiz attempt' };
-  }
+  );
 };

@@ -51,34 +51,17 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined' && supabase) {
       const fetchUser = async () => {
         try {
-          // Use getUser() instead of getSession() for security
           const { data: { user }, error } = await supabase.auth.getUser();
           if (error) {
-            // Only log if it's not an auth session missing error (expected when signed out)
-            if (!error.message?.includes('Auth session missing')) {
-              console.error('Error fetching user:', error);
-            }
             setUser(null);
           } else {
             setUser(user);
           }
           
-          // Also get session for backward compatibility
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          if (sessionError) {
-            // Only log if it's not an auth session missing error
-            if (!sessionError.message?.includes('Auth session missing')) {
-              console.error('Error fetching session:', sessionError);
-            }
-            setSession(null);
-          } else {
-            setSession(session);
-          }
+          setSession(session);
         } catch (error: any) {
-          // Only log if it's not an auth session missing error
-          if (!error?.message?.includes('Auth session missing')) {
-            console.error('Error in fetchUser:', error);
-          }
+          console.error('❌ [SupabaseProvider] Critical error in fetchUser:', error);
           setUser(null);
           setSession(null);
         } finally {
@@ -89,11 +72,9 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
       fetchUser();
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-        console.log('Auth state change event:', _event, session);
         try {
           // Handle SIGNED_OUT event immediately
           if (_event === 'SIGNED_OUT') {
-            console.log('User signed out, clearing user state');
             setUser(null);
             setSession(null);
             // Refresh the router to update UI
@@ -110,7 +91,6 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
             }
             setUser(null);
           } else {
-            console.log('User fetched on auth state change:', user);
             setUser(user);
           }
           setSession(session);
@@ -123,19 +103,27 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
         }
         
         // Refresh the page when auth state changes to ensure components update
-        console.log('Refreshing router after auth state change');
         router.refresh();
       });
 
       return () => {
-        console.log('Unsubscribing from auth state change');
         subscription.unsubscribe();
       };
     } else {
-      // Set loading to false immediately if not on client side
       setLoading(false);
     }
   }, [router, supabase]);
+
+  // Safety net: Force loading to false after a timeout to prevent stuck UI
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn("Auth check timed out, forcing loading to false");
+        setLoading(false);
+      }
+    }, 5000); // 5 seconds safety timeout
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   return (
     <SupabaseContext.Provider value={{ user, session, loading }}>
