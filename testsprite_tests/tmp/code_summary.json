@@ -1,46 +1,45 @@
 {
-  "tech_stack": [
-    "TypeScript",
-    "Next.js",
-    "Supabase",
-    "Tailwind CSS",
-    "Shadcn UI"
-  ],
+  "tech_stack": ["TypeScript", "Next.js", "Supabase", "Tailwind CSS", "Sentry"],
   "features": [
     {
-      "name": "getInstructorAnalytics",
-      "description": "Calculates global metrics for an instructor including total students, revenue (from succeeded payments), and average ratings.",
-      "files": [
-        "server/actions/instructor.actions.ts"
-      ]
+      "name": "Admin Dashboard",
+      "description": "High-level overview of platform statistics including users, instructors, students, and companies.",
+      "files": ["app/(admin)/admin-dashboard/page.tsx", "server/actions/user.actions.ts"]
     },
     {
-      "name": "getCourseStudents",
-      "description": "Retrieves real-time progress and profile data for all students enrolled in a specific course.",
-      "files": [
-        "server/actions/instructor.actions.ts"
-      ]
+      "name": "Admin Analytics & Reports",
+      "description": "Comprehensive platform insights and performance metrics including revenue, student growth, and course performance.",
+      "files": ["app/(admin)/admin-reports/page.tsx", "server/actions/admin-analytics.actions.ts"]
     },
     {
-      "name": "getInstructorCourses",
-      "description": "Lists all courses created by a specific instructor.",
-      "files": [
-        "server/actions/instructor.actions.ts"
-      ]
+      "name": "Course Management",
+      "description": "Ability for admins to review, approve, reject, unpublish, and delete courses.",
+      "files": ["app/(admin)/admin-courses/page.tsx", "server/actions/admin.actions.ts"]
     },
     {
-      "name": "getCourseEarnings",
-      "description": "Fetches detailed earning records for an instructor's courses.",
-      "files": [
-        "server/actions/instructor.actions.ts"
-      ]
+      "name": "Payment Management",
+      "description": "Admin interface for monitoring transactions, processing refunds, and viewing financial statistics.",
+      "files": ["app/(admin)/admin-payments/page.tsx", "server/actions/admin-payments.actions.ts"]
     },
     {
-      "name": "getStudentEnrollments",
-      "description": "Fetches the 10 most recent student enrollments for an instructor's courses.",
-      "files": [
-        "server/actions/instructor.actions.ts"
-      ]
+      "name": "User Management",
+      "description": "Admin control over user roles, permissions, and profiles.",
+      "files": ["app/(admin)/admin-users/page.tsx", "server/actions/user.actions.ts"]
+    },
+    {
+      "name": "Bundle Management",
+      "description": "Creating and managing course bundles with special pricing and discounts.",
+      "files": ["app/(admin)/admin-bundles/page.tsx", "server/actions/bundle.actions.ts"]
+    },
+    {
+      "name": "Company Management",
+      "description": "Managing corporate accounts and B2B learning packages.",
+      "files": ["app/(admin)/admin-companies/page.tsx", "server/actions/company.actions.ts"]
+    },
+    {
+      "name": "FAQ & Blog Management",
+      "description": "Admin interfaces for managing platform-wide FAQs and blog content.",
+      "files": ["app/(admin)/admin-faq/page.tsx", "app/(admin)/admin-blog/page.tsx", "server/actions/faq.actions.ts", "server/actions/blog.actions.ts"]
     }
   ]
 }

@@ -1,17 +1,21 @@
 {
   "status": "commited",
-  "type": "backend",
+  "type": "frontend",
   "scope": "codebase",
   "localEndpoint": "http://localhost:3000",
-  "backendAuthType": "public",
   "executionArgs": {
     "projectName": "soliel-ai",
     "projectPath": "e:\\soliel-ai",
-    "testIds": [],
-    "additionalInstruction": "Verify that getInstructorAnalytics and getCourseStudents return correct data. Specifically check that getCourseStudents returns real profile data (full_name, email) and progress, and handles cases where progress might be missing gracefully.",
+    "testIds": [
+      "TC012",
+      "TC013",
+      "TC014"
+    ],
+    "additionalInstruction": "Use the following admin credentials for testing the Admin Dashboard and reports: Email: guest74427@gmail.com, Password: Guest7442@. Focus on verifying the Admin Dashboard (TC012), Admin Course Approval (TC013), and Admin Analytics Reports (TC014). For TC012, TC013, and TC014, please first log in at '/sign-in' with these credentials. Note that 'single_course' is the correct database Enum for individual purchases.",
     "envs": {
       "API_KEY": "sk-user-z25J-3nT1BRgT_ON-qg1-8R04MuHFZjDKRTS1qgjcmN6x7S7cxoYcyjE9GlJ1P5Vx-SuV3BrJjQMk9G2PwGxOrQF56nC4ZWBaqNAhxEilmAdVsHMxIPGSeGICAmpVdh3I_0"
     }
   },
-  "proxy": "http://1fe014dd-3aa7-4941-9f66-9fb7d1385357:q5l1ERGTJpbyzEoKZv372Us33A3XzMMl@tun.testsprite.com:8080"
+  "serverPort": 53176,
+  "proxy": "http://09bc5dcf-6f8e-483c-b7c6-1f1603d07793:03dtFrVccGlnhQfTBHOOeYBC5AYKS8Aj@tun.testsprite.com:8080"
 }

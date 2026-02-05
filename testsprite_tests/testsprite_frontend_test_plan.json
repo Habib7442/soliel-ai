@@ -1,624 +1,626 @@
 [
   {
     "id": "TC001",
-    "title": "User Registration with Valid Data",
-    "description": "Verify that a new user (Student, Instructor, Company Admin, Super Admin) can register successfully with valid data.",
+    "title": "Homepage Loads Correctly with Featured Courses and Bundles",
+    "description": "Verify the Homepage displays featured courses, bundles, testimonials, blog highlights, and FAQ previews correctly on desktop and mobile devices.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the registration page"
-      },
-      {
-        "type": "action",
-        "description": "Input valid registration details for each user role"
-      },
-      {
-        "type": "action",
-        "description": "Submit the registration form"
+        "description": "Navigate to the Homepage."
       },
       {
         "type": "assertion",
-        "description": "Verify registration success and email verification prompt (if applicable)"
+        "description": "Check featured courses are displayed with correct titles, images, and links."
       },
       {
         "type": "assertion",
-        "description": "Verify the new user is created with the correct role and profile data in the system"
+        "description": "Verify course bundles appear with correct discount information and CTAs."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm testimonials, blog highlights, and FAQ preview sections load and display content."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate responsive design and accessibility compliance of all elements."
       }
     ]
   },
   {
     "id": "TC002",
-    "title": "User Login with Correct Credentials",
-    "description": "Ensure users can login successfully with valid credentials according to role.",
+    "title": "Course Catalog Filtering and Navigation",
+    "description": "Ensure advanced filtering options on Course Catalog work correctly and users can navigate to individual course or bundle pages.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to login page"
+        "description": "Open the Course Catalog page."
       },
       {
         "type": "action",
-        "description": "Input valid username/email and password for each role"
-      },
-      {
-        "type": "action",
-        "description": "Click login button"
+        "description": "Apply filters such as category, price range, difficulty, and rating."
       },
       {
         "type": "assertion",
-        "description": "Confirm successful login and redirection to respective dashboards based on role"
+        "description": "Verify the course list updates dynamically according to applied filters."
+      },
+      {
+        "type": "action",
+        "description": "Click on an individual course to open its Course Details page."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate navigation to the correct course details with full content loaded."
+      },
+      {
+        "type": "action",
+        "description": "Return to catalog and click on a course bundle."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify navigation to bundle details page with all relevant information."
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "Role-Based Access Control Enforcement",
-    "description": "Verify that users can only access features and pages permitted by their assigned roles.",
-    "category": "security",
+    "title": "Course Details Rendering and Interaction",
+    "description": "Verify Course Details page loads intro video, syllabus, instructor bio, reviews, FAQs, and bundle integration correctly.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as each user role (Student, Instructor, Company Admin, Super Admin)"
-      },
-      {
-        "type": "action",
-        "description": "Attempt to access unauthorized dashboard or management pages"
+        "description": "Access a Course Details page from the catalog."
       },
       {
         "type": "assertion",
-        "description": "Confirm access is denied with proper error messages or redirection"
-      },
-      {
-        "type": "action",
-        "description": "Access allowed sections and verify all permitted features and UI elements are functional"
+        "description": "Check the intro video loads and plays correctly."
       },
       {
         "type": "assertion",
-        "description": "Confirm users can perform role-appropriate actions successfully"
+        "description": "Validate the syllabus sections appear correctly and expand/collapse as expected."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the instructor bio section is shown with accurate details."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify student reviews and ratings are displayed and pagination or loading more works."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure course-specific FAQs are visible and expandable."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm any linked bundles include the current course and pricing details."
       }
     ]
   },
   {
     "id": "TC004",
-    "title": "Course Creation by Instructor",
-    "description": "Test that an instructor can create a course with all required fields and publish it.",
+    "title": "Payment Processing for Single Course Purchase",
+    "description": "Test the payment page processes a single course purchase securely via supported payment methods with coupon application.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as an Instructor"
-      },
-      {
-        "type": "action",
-        "description": "Navigate to the course creation interface"
-      },
-      {
-        "type": "action",
-        "description": "Input valid course details including title, description, lessons, labs, assignments, quizzes"
-      },
-      {
-        "type": "action",
-        "description": "Upload all course content files (notes, FAQs) except excluded types"
-      },
-      {
-        "type": "action",
-        "description": "Publish the course"
+        "description": "From a course details page, click Enroll Now."
       },
       {
         "type": "assertion",
-        "description": "Confirm course is created, visible in public course catalog, and editable by instructor"
+        "description": "Check navigation to the Payment Page with correct course and price details."
+      },
+      {
+        "type": "action",
+        "description": "Enter valid payment information using Stripe payment method."
+      },
+      {
+        "type": "action",
+        "description": "Apply a valid coupon code and verify discount is applied."
+      },
+      {
+        "type": "action",
+        "description": "Submit the payment."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify payment success confirmation and redirection to Student Dashboard."
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "Course Bundling by Instructor",
-    "description": "Verify that instructors can bundle multiple courses into a single package and manage it.",
+    "title": "Payment Page Bulk Purchase with Corporate Package",
+    "description": "Validate corporate bulk purchases including bulk enrollment, various payment options, and coupon application.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as an Instructor"
+        "description": "Navigate to Company Packages page."
       },
       {
         "type": "action",
-        "description": "Navigate to bundle creation functionality"
-      },
-      {
-        "type": "action",
-        "description": "Select multiple existing courses and define bundle details"
-      },
-      {
-        "type": "action",
-        "description": "Publish bundle"
+        "description": "Select a corporate learning package and begin checkout process."
       },
       {
         "type": "assertion",
-        "description": "Verify bundle appears in public bundle catalog and is purchasable"
+        "description": "Confirm bulk user enrollment inputs are accepted with validation for number of employees."
       },
       {
         "type": "action",
-        "description": "Edit the bundle to modify courses or pricing"
+        "description": "Choose PayPal as payment method."
+      },
+      {
+        "type": "action",
+        "description": "Apply a valid corporate coupon code."
+      },
+      {
+        "type": "action",
+        "description": "Submit payment."
       },
       {
         "type": "assertion",
-        "description": "Confirm bundle updates persist and are accurately reflected"
+        "description": "Verify payment success notification and enrollment confirmation emails are sent."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that enrolled employees appear in Company Dashboard with assigned courses."
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "Browsing and Filtering Courses in Catalog",
-    "description": "Check that users can browse the course catalog and filter courses by various criteria.",
+    "title": "Student Dashboard Displays Enrolled Courses and Progress",
+    "description": "Verify that after purchase, students access their dashboard displaying course overview, progress bars, certificates, and personalized recommendations.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the course catalog page"
-      },
-      {
-        "type": "action",
-        "description": "Use filters such as category, level, instructor, price range, rating"
+        "description": "Log in as a student who has successfully enrolled in courses."
       },
       {
         "type": "assertion",
-        "description": "Verify catalog results update correctly reflecting filters"
-      },
-      {
-        "type": "action",
-        "description": "Select a course to view detailed course page"
+        "description": "Confirm list of enrolled courses shows accurate titles and progress percentages."
       },
       {
         "type": "assertion",
-        "description": "Confirm course details, lessons summary, and related bundles are displayed"
+        "description": "Verify access to earned certificates and options for viewing and downloading."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate personalized course recommendations based on enrolled courses."
       }
     ]
   },
   {
     "id": "TC007",
-    "title": "Successful Payment Process for Single Course",
-    "description": "Ensure that students can enroll by paying via Stripe and PayPal with valid payment details, and enrollment is recorded.",
+    "title": "Course Player Loads and Functions Correctly",
+    "description": "Test the immersive course player loads all content types including lessons, labs, assignments, quizzes, notes, Q&A, reviews, and FAQs correctly.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as Student"
-      },
-      {
-        "type": "action",
-        "description": "Navigate to a course enrollment payment page"
-      },
-      {
-        "type": "action",
-        "description": "Enter valid payment details for Stripe"
-      },
-      {
-        "type": "action",
-        "description": "Complete payment and confirm transaction"
+        "description": "Access a course player as a student enrolled in the course."
       },
       {
         "type": "assertion",
-        "description": "Verify payment success message, enrollment record created, and access granted to course"
-      },
-      {
-        "type": "action",
-        "description": "Repeat payment with valid PayPal account"
+        "description": "Verify lesson content loads properly including text and embedded media."
       },
       {
         "type": "assertion",
-        "description": "Confirm enrollment and access as above"
+        "description": "Interact with labs and assignments for input and submission."
+      },
+      {
+        "type": "assertion",
+        "description": "Complete quizzes and verify scoring functionality."
+      },
+      {
+        "type": "assertion",
+        "description": "Add notes and check persistence."
+      },
+      {
+        "type": "action",
+        "description": "Post a question in the student Q&A section."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the question appears and instructor responses are visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Check accessibility and responsiveness of the player."
       }
     ]
   },
   {
     "id": "TC008",
-    "title": "Applying Coupons and Discounts at Payment",
-    "description": "Verify that valid coupons and discounts are accepted and applied correctly to reduce payment amount.",
+    "title": "Certificate Generation and Download after Course Completion",
+    "description": "Ensure certificates are automatically generated upon course completion and available for viewing, downloading as PDFs, and social sharing.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as Student"
-      },
-      {
-        "type": "action",
-        "description": "Go to course or bundle payment page"
-      },
-      {
-        "type": "action",
-        "description": "Enter valid coupon code"
+        "description": "Complete all required sections of a course."
       },
       {
         "type": "assertion",
-        "description": "Confirm discount amount is correctly calculated and displayed"
+        "description": "Verify certificate is generated and appears in the Student Dashboard Certificates section."
       },
       {
         "type": "action",
-        "description": "Proceed to payment with discounted amount via Stripe or PayPal"
+        "description": "Open the certificate detail view."
       },
       {
         "type": "assertion",
-        "description": "Verify payment success and enrollment with applied discount"
+        "description": "Check the certificate can be downloaded as a PDF without errors."
       },
       {
         "type": "action",
-        "description": "Enter invalid or expired coupon"
+        "description": "Use the social sharing feature to share the certificate."
       },
       {
         "type": "assertion",
-        "description": "Verify error message and discount is not applied"
+        "description": "Confirm successful sharing to LinkedIn or other supported social platforms."
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Bulk Enrollment and Discount for Corporate Package",
-    "description": "Test corporate clients purchasing bulk packages with discounts, enrolling multiple employees at once.",
+    "title": "Bundles Catalog Display and Checkout",
+    "description": "Verify the Bundles Catalog lists curated course bundles correctly with dynamic discount rules and enables smooth checkout.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as Company Admin"
-      },
-      {
-        "type": "action",
-        "description": "Browse corporate packages and select bulk purchase"
-      },
-      {
-        "type": "action",
-        "description": "Add multiple employees to enroll"
-      },
-      {
-        "type": "action",
-        "description": "Apply corporate discounts as per rules"
-      },
-      {
-        "type": "action",
-        "description": "Complete payment via supported gateways"
+        "description": "Navigate to Bundles Catalog page."
       },
       {
         "type": "assertion",
-        "description": "Verify payment success, enrollment of all employees, and discount applied"
+        "description": "Check bundles display with correct course listings and discount information."
       },
       {
         "type": "action",
-        "description": "View employee progress and billing information in company dashboard"
+        "description": "Select a bundle and initiate checkout."
       },
       {
         "type": "assertion",
-        "description": "Confirm progress reports and billing data accuracy"
+        "description": "Verify the checkout page reflects the bundle pricing and discount rules."
+      },
+      {
+        "type": "action",
+        "description": "Complete payment with a valid payment method."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm success and enrollment in all courses in the bundle."
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "Course Player Content Consumption and Progress Tracking",
-    "description": "Verify students can navigate lessons, labs, assignments, quizzes and progress is tracked correctly.",
+    "title": "Company Dashboard Employee Management and Progress Tracking",
+    "description": "Test that company admins can manage employees, assign courses/bundles, and monitor detailed learning progress analytics.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as Student with active enrollment in a course"
+        "description": "Log in as a company admin user."
       },
       {
         "type": "action",
-        "description": "Open course player and navigate through lessons, labs, and assignments"
+        "description": "Access the Company Dashboard and employee management section."
       },
       {
         "type": "action",
-        "description": "Complete quizzes with valid answers"
+        "description": "Add a new employee to the company account."
+      },
+      {
+        "type": "action",
+        "description": "Assign one or more courses or bundles to the employee."
       },
       {
         "type": "assertion",
-        "description": "Verify progress updates in dashboard and course player accurately reflect completion"
+        "description": "Verify assignments reflect in employee’s progress overview."
       },
       {
         "type": "action",
-        "description": "Leave notes and view course specific FAQs"
+        "description": "View corporate learning analytics reports."
       },
       {
         "type": "assertion",
-        "description": "Confirm notes save correctly and FAQs are accessible"
+        "description": "Confirm detailed reports accurately reflect enrollments, completions, and progress statistics."
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "Automated Certificate Generation and Download",
-    "description": "Ensure certificates are automatically issued upon course completion and can be downloaded as PDFs and shared.",
+    "title": "Instructor Dashboard Content Creation and Management",
+    "description": "Validate that instructors can create, edit, and manage courses including uploading course content and responding to student reviews.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Complete all course requirements as a Student"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm automated certificate generation triggers successfully"
+        "description": "Log in as an instructor."
       },
       {
         "type": "action",
-        "description": "Navigate to certificates section in student dashboard"
+        "description": "Access the Instructor Dashboard and create a new course."
       },
       {
         "type": "action",
-        "description": "Download the certificate PDF"
+        "description": "Upload detailed course content including syllabus, lessons, and assignments."
       },
       {
         "type": "assertion",
-        "description": "Check PDF is correctly formatted and includes relevant certificate details"
+        "description": "Verify content is saved and visible for preview."
       },
       {
         "type": "action",
-        "description": "Share certificate to social media using platform option"
+        "description": "Respond to a student review posted on the course."
       },
       {
         "type": "assertion",
-        "description": "Verify sharing completes without errors"
+        "description": "Confirm instructor response is visible to students."
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "Student Review Submission and Moderation",
-    "description": "Test students can submit reviews and ratings on courses, which are displayed after moderation.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Login as Student enrolled in a course"
-      },
-      {
-        "type": "action",
-        "description": "Submit a review with rating and comments for the course"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify review is recorded and pending moderation"
-      },
-      {
-        "type": "action",
-        "description": "Login as Admin"
-      },
-      {
-        "type": "action",
-        "description": "Access review moderation panel and approve/reject submitted reviews"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm approved reviews are displayed publicly for the course"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify rejected reviews do not appear in course pages"
-      }
-    ]
-  },
-  {
-    "id": "TC013",
-    "title": "Instructor Dashboard Course and Earnings Management",
-    "description": "Verify instructors can monitor course enrollments, student progress, and view earnings report accurately.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Login as Instructor"
-      },
-      {
-        "type": "action",
-        "description": "Navigate to Instructor Dashboard"
-      },
-      {
-        "type": "action",
-        "description": "View list of created courses and enrollment stats"
-      },
-      {
-        "type": "action",
-        "description": "Access individual student progress reports"
-      },
-      {
-        "type": "action",
-        "description": "Open earnings report section and verify earnings data for courses and bundles"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm accuracy and consistency of displayed data"
-      }
-    ]
-  },
-  {
-    "id": "TC014",
-    "title": "Admin Dashboard User and Content Management",
-    "description": "Test that admins can manage users, approve/reject content, and view platform analytics.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Login as Super Admin"
-      },
-      {
-        "type": "action",
-        "description": "Manage user accounts: search, edit roles, deactivate/reactivate users"
-      },
-      {
-        "type": "action",
-        "description": "Approve or reject instructor uploaded courses, bundles, and content"
-      },
-      {
-        "type": "action",
-        "description": "Manage payment transactions and refund requests"
-      },
-      {
-        "type": "action",
-        "description": "Generate and analyze revenue and usage analytics reports"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify all management actions persist and analytics reflect accurate data"
-      }
-    ]
-  },
-  {
-    "id": "TC015",
-    "title": "Error Handling for Invalid Payment Information",
-    "description": "Verify proper error messages are shown for invalid payment details or payment failures.",
-    "category": "error handling",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Proceed to course payment page"
-      },
-      {
-        "type": "action",
-        "description": "Enter invalid credit card number or PayPal credentials"
-      },
-      {
-        "type": "action",
-        "description": "Attempt to submit payment"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify payment is declined with meaningful error message"
-      },
-      {
-        "type": "action",
-        "description": "Enter expired or insufficient funds card details"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm payment failure and clear error feedback to user"
-      }
-    ]
-  },
-  {
-    "id": "TC016",
-    "title": "Student Dashboard Course Progress and Continuation",
-    "description": "Check that students can view progress, access ongoing courses, and resume where left off.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Login as Student with multiple course enrollments"
-      },
-      {
-        "type": "action",
-        "description": "Open student dashboard and check progress indicators for each course"
-      },
-      {
-        "type": "action",
-        "description": "Select a course and verify player resumes from last accessed lesson/quiz"
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm progress updates on course completion and reflected on dashboard"
-      }
-    ]
-  },
-  {
-    "id": "TC017",
-    "title": "Company Dashboard Employee Management",
-    "description": "Verify Company Admins can add, remove, and assign courses to employees and monitor progress.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Login as Company Admin"
-      },
-      {
-        "type": "action",
-        "description": "Access company dashboard employee management section"
-      },
-      {
-        "type": "action",
-        "description": "Add new employee accounts and assign courses or bundles"
-      },
-      {
-        "type": "action",
-        "description": "Remove employees or modify course assignments"
-      },
-      {
-        "type": "action",
-        "description": "View aggregated and per-employee progress reports"
-      },
-      {
-        "type": "assertion",
-        "description": "Validate all updates persist and progress data reflects real-time usage"
-      }
-    ]
-  },
-  {
-    "id": "TC018",
-    "title": "Security: Data Protection and 2FA Enforcement",
-    "description": "Verify platform encryption, data privacy measures, and enforce Two-Factor Authentication for users.",
+    "title": "Admin Dashboard and Role-Based Access Control",
+    "description": "Ensure role-based access properly restricts or permits access to dashboards and features for students, instructors, company admins, and super admins.",
     "category": "security",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Attempt login with 2FA-enabled account"
+        "description": "Log in as a student user."
       },
       {
         "type": "assertion",
-        "description": "Confirm 2FA challenge prompt appears after valid password entry"
+        "description": "Confirm Student Dashboard is accessible, and instructor/company/admin features are restricted."
       },
       {
         "type": "action",
-        "description": "Enter correct 2FA code"
+        "description": "Log in as an instructor."
       },
       {
         "type": "assertion",
-        "description": "Verify successful login and access"
+        "description": "Verify access to Instructor Dashboard and denial of admin or company features."
       },
       {
         "type": "action",
-        "description": "Attempt access to user data as unauthorized user"
+        "description": "Log in as a company admin."
       },
       {
         "type": "assertion",
-        "description": "Verify access denied and error logged"
+        "description": "Confirm access to Company Dashboard and no access to instructor or super admin features."
+      },
+      {
+        "type": "action",
+        "description": "Log in as a super admin."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify full access to Admin Dashboard and management features."
       }
     ]
   },
   {
-    "id": "TC019",
-    "title": "UI Responsiveness and Navigation Smoothness",
-    "description": "Test all major UI flows operate smoothly and responsively on different devices and screen sizes.",
-    "category": "ui",
+    "id": "TC013",
+    "title": "Admin Course Approval Workflow",
+    "description": "Test the workflow for admins to review, approve, reject, unpublish, and delete courses through the Admin Dashboard.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a super admin and navigate to Admin Courses management."
+      },
+      {
+        "type": "action",
+        "description": "Select a pending course submission."
+      },
+      {
+        "type": "assertion",
+        "description": "Review course details and content."
+      },
+      {
+        "type": "action",
+        "description": "Approve the course."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify course status updates to Approved and becomes live."
+      },
+      {
+        "type": "action",
+        "description": "Reject a different pending course with reason."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm status is Rejected and instructor is notified."
+      },
+      {
+        "type": "action",
+        "description": "Unpublish a live course."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure course is no longer visible in catalog but remains in admin view."
+      },
+      {
+        "type": "action",
+        "description": "Delete a course."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm course is removed from the platform and database."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Admin Analytics Reports Accuracy",
+    "description": "Verify that admin analytics and reporting components display accurate aggregated data for revenue, user growth, course performance, and employee learning statistics.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a super admin."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Admin Reports Dashboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Check total revenue figures for the current period match payment records."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate user growth charts reflect accurate registrations and active users."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm course performance metrics such as completion rates and ratings are correct."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify employee learning analytics for corporate accounts show up-to-date progress."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Admin Management of Bundles and Pricing",
+    "description": "Ensure admins can create, edit, and delete course bundles with special pricing and dynamic discount rules through the Admin Dashboard.",
+    "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Access homepage, course catalog, course details, dashboards, and player on desktop and mobile"
-      },
-      {
-        "type": "assertion",
-        "description": "Verify all UI elements render properly and navigation between pages is smooth without errors"
+        "description": "Log in as a super admin."
       },
       {
         "type": "action",
-        "description": "Perform interactions like filter application, content playback, and form submissions"
+        "description": "Navigate to Bundle Management."
+      },
+      {
+        "type": "action",
+        "description": "Create a new bundle by selecting courses and applying discount rules."
       },
       {
         "type": "assertion",
-        "description": "Confirm UI responsiveness, feedback animations, and load times meet performance standards"
+        "description": "Verify bundle appears in Bundles Catalog with correct courses and pricing."
+      },
+      {
+        "type": "action",
+        "description": "Edit the bundle to update pricing and included courses."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that edits are saved and reflected across the platform."
+      },
+      {
+        "type": "action",
+        "description": "Delete a bundle."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm removal from catalog and no longer available for purchase."
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Admin FAQ and Blog Content Management",
+    "description": "Validate the ability for admins to manage FAQs and blog posts including creation, editing, deletion, and correct display on public-facing pages.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as a super admin."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to FAQ Management and create a new FAQ entry."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify new FAQ appears on public FAQ section."
+      },
+      {
+        "type": "action",
+        "description": "Edit an existing FAQ and save changes."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm updated FAQ content is reflected immediately."
+      },
+      {
+        "type": "action",
+        "description": "Delete a FAQ item."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure the FAQ is removed from public view."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Blog Management and create a new post with images and text."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify blog post displays correctly on the blog listing and detail pages."
+      },
+      {
+        "type": "action",
+        "description": "Edit and delete blog posts and verify changes."
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "UI Accessibility and Responsive Design Verification",
+    "description": "Verify that UI components across the platform adhere to accessibility standards and render correctly on desktop and mobile devices.",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access various pages (Homepage, Course Catalog, Dashboard, Payment Page) on desktop."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure UI elements are keyboard navigable and screen-reader friendly."
+      },
+      {
+        "type": "assertion",
+        "description": "Check color contrast and font sizes meet accessibility guidelines."
+      },
+      {
+        "type": "action",
+        "description": "Repeat verification of all above pages on mobile viewport and different screen sizes."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm complete responsiveness and proper layout adaptation."
       }
     ]
   }

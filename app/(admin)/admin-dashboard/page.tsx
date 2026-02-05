@@ -6,7 +6,7 @@ import { getAllUsers } from "@/server/actions/user.actions";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Users, GraduationCap, Building2, ShieldCheck, BookOpen, Package, MessageSquare, Plus, ArrowRight } from "lucide-react";
+import { Users, GraduationCap, Building2, ShieldCheck, BookOpen, Package, MessageSquare, Plus, ArrowRight, BarChart3, CreditCard } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
@@ -132,7 +132,7 @@ export default async function AdminDashboardPage() {
         {/* Quick Management Section */}
         <div className="mb-10">
            <h2 className="font-bold text-lg mb-4">Quick Management</h2>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
               <Link href="/admin-users" className="block group">
                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
                     <CardContent className="p-4 flex flex-col items-center text-center gap-3">
@@ -198,6 +198,34 @@ export default async function AdminDashboardPage() {
                        <div>
                           <h3 className="font-semibold text-gray-900 dark:text-gray-100">FAQs</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">Support content</p>
+                       </div>
+                    </CardContent>
+                 </Card>
+              </Link>
+
+              <Link href="/admin-reports" className="block group">
+                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
+                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                       <div className="h-10 w-10 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 flex items-center justify-center shrink-0 group-hover:bg-cyan-100 transition-colors">
+                          <BarChart3 className="h-5 w-5" />
+                       </div>
+                       <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Reports</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">Analytics & insights</p>
+                       </div>
+                    </CardContent>
+                 </Card>
+              </Link>
+
+              <Link href="/admin-payments" className="block group">
+                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
+                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                       <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+                          <CreditCard className="h-5 w-5" />
+                       </div>
+                       <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Payments</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">Transactions & refunds</p>
                        </div>
                     </CardContent>
                  </Card>
