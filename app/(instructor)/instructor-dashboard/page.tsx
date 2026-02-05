@@ -41,8 +41,8 @@ export default async function InstructorDashboardPage() {
   const enrollments = enrollmentsResult.success ? enrollmentsResult.data : [];
   const analytics = analyticsResult.success ? analyticsResult.data : { totalStudents: 0, totalRevenue: 0, averageRating: 0 };
   
-  const totalRevenue = analytics.totalRevenue;
-  const totalStudents = analytics.totalStudents;
+  const totalRevenue = analytics?.totalRevenue || 0;
+  const totalStudents = analytics?.totalStudents || 0;
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-white selection:bg-primary selection:text-white">
@@ -90,6 +90,11 @@ export default async function InstructorDashboardPage() {
                     <Settings className="h-4 w-4" /> Bundles
                  </Link>
                </Button>
+               <Button asChild variant="outline" size="lg" className="rounded-2xl border-gray-200 h-14 px-5 hover:border-primary hover:text-primary transition-all font-black tracking-tight active:scale-95 bg-white/50 backdrop-blur-sm">
+                 <Link href="/earnings" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" /> Earnings
+                 </Link>
+               </Button>
                <Button asChild size="lg" className="rounded-2xl bg-gray-900 hover:bg-primary text-white h-14 px-6 shadow-2xl shadow-black/10 transition-all font-black tracking-tight active:scale-95 border-0">
                  <Link href="/instructor/courses/create" className="flex items-center gap-2">
                     <Plus className="h-5 w-5" /> New Course
@@ -131,19 +136,22 @@ export default async function InstructorDashboardPage() {
             </Card>
           </div>
           
-          <div>
-            <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-purple-50/40 backdrop-blur-3xl rounded-[2.5rem] overflow-hidden group hover:shadow-[0_32px_64px_-16px_rgba(168,85,247,0.1)] transition-all duration-500">
+          <Link href="/earnings" className="block">
+            <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-purple-50/40 backdrop-blur-3xl rounded-[2.5rem] overflow-hidden group hover:shadow-[0_32px_64px_-16px_rgba(168,85,247,0.1)] transition-all duration-500 border-2 border-transparent hover:border-purple-200 cursor-pointer">
                <CardContent className="p-8 flex items-center gap-6">
                   <div className="h-14 w-14 rounded-[1.25rem] bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg shadow-purple-500/10">
                      <DollarSign className="h-7 w-7" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-purple-600/60 uppercase tracking-[0.2em] mb-1">Total Earnings</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] font-black text-purple-600/60 uppercase tracking-[0.2em] mb-1">Total Earnings</p>
+                      <ArrowRight className="h-3 w-3 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                     <h3 className="text-3xl font-black text-gray-900 tracking-tighter">${totalRevenue.toFixed(0)}</h3>
                   </div>
                </CardContent>
             </Card>
-          </div>
+          </Link>
         </div>
 
 
@@ -281,14 +289,19 @@ export default async function InstructorDashboardPage() {
 
               {/* Earnings Table */}
               <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white/70 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-                 <CardHeader className="p-8 pb-4">
+                  <CardHeader className="p-8 pb-4">
                     <div className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-600 text-[9px] font-black uppercase tracking-[0.2em] mb-4 w-fit">
                       Revenue Pulse
                     </div>
-                    <CardTitle className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-                       <BarChart className="h-5 w-5 text-gray-400" /> Recent Earnings
-                    </CardTitle>
-                 </CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                         <BarChart className="h-5 w-5 text-gray-400" /> Recent Earnings
+                      </CardTitle>
+                      <Link href="/earnings" className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                        Details
+                      </Link>
+                    </div>
+                  </CardHeader>
                  <CardContent className="p-4 pt-0">
                     {earnings && earnings.length > 0 ? (
                        <div className="space-y-2">

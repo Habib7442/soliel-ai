@@ -54,7 +54,18 @@ export const additionalPublicNavItems: NavItem[] = [
 
 export const studentNavItems: NavItem[] = [];
 
-export const instructorNavItems: NavItem[] = [];
+export const instructorNavItems: NavItem[] = [
+  {
+    name: "Dashboard",
+    href: "/instructor-dashboard",
+    icon: <Home className="h-5 w-5" />,
+  },
+  {
+    name: "Earnings",
+    href: "/earnings",
+    icon: <DollarSign className="h-5 w-5" />,
+  },
+];
 
 export const companyNavItems: NavItem[] = [
   {
