@@ -407,7 +407,7 @@ export default function CoursesPage() {
                   rating={course.stats.average_rating || 0}
                   price={course.price_cents / 100}
                   originalPrice={course.bundle_discount_percent ? (course.price_cents / 100) * (1 + course.bundle_discount_percent / 100) : undefined}
-                  thumbnail={course.thumbnail_url || "/images/courses/default-thumbnail.png"}
+                  thumbnail={course.thumbnail_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60"}
                   category={course.category || "General"}
                   instructor={{
                     name: course.instructor?.full_name || "Anonymous Instructor",

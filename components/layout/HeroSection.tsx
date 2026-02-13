@@ -4,54 +4,92 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useSupabase } from "@/providers/supabase-provider";
+import { UserRole } from "@/types/enums";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase-client";
 
 export function HeroSection() {
+  const { user } = useSupabase();
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (user) {
+        const supabase = createClient();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserRole(profile.role as UserRole);
+        }
+      }
+    };
+    fetchUserRole();
+  }, [user]);
+
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case UserRole.INSTRUCTOR: return "/instructor-dashboard";
+      case UserRole.COMPANY_ADMIN: return "/company-dashboard";
+      case UserRole.SUPER_ADMIN: return "/admin-dashboard";
+      default: return "/student-dashboard";
+    }
+  };
+
+  const ctaLink = user ? getDashboardLink() : "/sign-up";
+  const ctaText = user ? "Go to Dashboard" : "Get Started Now";
+
   return (
-    <section className="relative overflow-hidden pt-20 pb-20 md:pt-32 md:pb-32 px-4 sm:px-6 lg:px-8 selection:bg-primary selection:text-white">
+    <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-32 px-4 sm:px-6 lg:px-8 selection:bg-primary selection:text-white">
       {/* Abstract Background Blobs */}
       <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -z-10" />
       <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl -z-10" />
 
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+        {/* Social Proof Badge - Moved above the split to allow H1 and Image to align perfectly */}
+        <div className="flex justify-center lg:justify-start">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-8 z-10"
+          >
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
+                  <Image 
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} 
+                    alt="User avatar" 
+                    width={24} 
+                    height={24} 
+                  />
+                </div>
+              ))}
+            </div>
+            <span className="text-sm font-medium text-primary">Trusted by 10k+ learners</span>
+            <div className="flex items-center ml-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <svg key={s} className="w-3 h-3 text-yellow-500 fill-current" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row items-start gap-16 lg:gap-24">
           <motion.div 
             className="flex-1 text-center lg:text-left z-10"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Social Proof Badge */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-8"
-            >
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
-                    <Image 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} 
-                      alt="User avatar" 
-                      width={24} 
-                      height={24} 
-                    />
-                  </div>
-                ))}
-              </div>
-              <span className="text-sm font-medium text-primary">Trusted by 10k+ learners</span>
-              <div className="flex items-center ml-1">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <svg key={s} className="w-3 h-3 text-yellow-500 fill-current" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-            </motion.div>
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1] mb-8">
-              Master <span className="text-primary italic">AI</span> & <br />
-              Technology with <br />
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.2] mb-8 lg:max-w-[20ch]">
+              Master <span className="text-primary italic">AI</span> & Technology with <br />
               <span className="relative">
                 Interactive Learning
                 <svg className="absolute -bottom-2 left-0 w-full h-3 text-primary/20 fill-current" viewBox="0 0 100 10" preserveAspectRatio="none">
@@ -61,18 +99,13 @@ export function HeroSection() {
             </h1>
 
             <p className="text-xl text-muted-foreground/80 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Step into the future with Soliel AI. We bridge the gap between theory and practice with immersive courses designed for the next generation of tech leaders.
+              Step into the future with Soliel AI Academy. We bridge the gap between theory and practice with immersive courses designed for the next generation of tech leaders.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
               <Button asChild size="xl" className="rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-10 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 border-0">
-                <Link href="/courses">
-                  Get Started Now
-                </Link>
-              </Button>
-              <Button asChild size="xl" variant="outline" className="rounded-2xl text-lg px-10 transition-all hover:bg-gray-50 border-gray-200">
-                <Link href="/sign-in">
-                  Watch Demo
+                <Link href={ctaLink}>
+                  {ctaText}
                 </Link>
               </Button>
             </div>

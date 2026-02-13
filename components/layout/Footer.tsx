@@ -19,8 +19,8 @@ export function Footer() {
                   className="object-cover"
                 />
               </div>
-              <span className="text-xl font-black text-white tracking-tighter">
-                Soliel <span className="text-primary italic">AI</span>
+              <span className="text-xl font-black text-primary tracking-tighter">
+                Soliel AI <span className="italic">Academy</span>
               </span>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed text-center lg:text-left">
@@ -48,7 +48,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 sm:gap-4">
           <p className="text-center text-xs font-bold text-gray-600 uppercase tracking-[0.2em]">
-            &copy; {currentYear} Soliel AI. All rights Reserved.
+            &copy; {currentYear} Soliel AI Academy. All rights Reserved.
           </p>
           
           <div className="flex items-center gap-6">

@@ -39,8 +39,16 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
       if (!isInstructorDashboard) items.push(...additionalPublicNavItems);
     } else {
       switch (userRole) {
-        case UserRole.SUPER_ADMIN: items.push(...adminNavItems); break;
-        case UserRole.COMPANY_ADMIN: items.push(...companyNavItems); break;
+        case UserRole.SUPER_ADMIN:
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) items.push(...additionalPublicNavItems);
+          items.push(...adminNavItems);
+          break;
+        case UserRole.COMPANY_ADMIN:
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) items.push(...additionalPublicNavItems);
+          items.push(...companyNavItems);
+          break;
         case UserRole.STUDENT:
           items = [...publicNavItems];
           if (!isInstructorDashboard) items.push(...additionalPublicNavItems);
@@ -79,8 +87,8 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
             <div className="relative w-10 h-10 rounded-2xl overflow-hidden shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-3">
               <Image src="/images/logo.png" alt="Soliel AI" fill className="object-cover" />
             </div>
-            <span className="text-xl font-black tracking-tighter text-gray-900 group-hover:text-primary transition-colors">
-              Soliel <span className="text-primary italic">AI</span>
+            <span className="text-xl font-black tracking-tighter text-primary group-hover:text-primary/90 transition-colors">
+              Soliel AI <span className="italic">Academy</span>
             </span>
           </Link>
 
@@ -136,7 +144,7 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
               </SheetTrigger>
               <SheetContent side="right" className="w-full sm:w-[400px] rounded-none lg:rounded-l-[3rem] border-l-0 bg-white/95 backdrop-blur-2xl">
                 <SheetHeader className="text-left mb-10 pt-4">
-                  <SheetTitle className="text-2xl font-black">Menu</SheetTitle>
+                <SheetTitle className="text-2xl font-black text-primary">Soliel AI Academy</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-2">
                   {navItems.map((item) => (

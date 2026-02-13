@@ -21,28 +21,6 @@ export default async function Home() {
   // Use getUser() instead of getSession() for security
   const { data: { user } } = await supabase.auth.getUser();
   
-  // If user is logged in, redirect to appropriate dashboard
-  if (user) {
-    // Get user profile to determine role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    
-    const userRole = profile?.role || UserRole.STUDENT;
-    
-    switch (userRole) {
-      case UserRole.INSTRUCTOR:
-        redirect("/instructor-dashboard");
-      case UserRole.COMPANY_ADMIN:
-        redirect("/company-dashboard");
-      case UserRole.SUPER_ADMIN:
-        redirect("/admin-dashboard");
-      default:
-        redirect("/student-dashboard");
-    }
-  }
   
   // Fetch latest published blogs
   const blogsResult = await getAllBlogs({ status: "published", limit: 3 });

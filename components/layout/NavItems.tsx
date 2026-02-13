@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, BookOpen, DollarSign, Info, HelpCircle, GraduationCap, Users, FileText, User, Package, Newspaper } from "lucide-react";
+import { Home, BookOpen, DollarSign, Info, HelpCircle, GraduationCap, Users, FileText, User, Package, Newspaper, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSupabase } from "@/providers/supabase-provider";
@@ -52,13 +52,19 @@ export const additionalPublicNavItems: NavItem[] = [
   },
 ];
 
-export const studentNavItems: NavItem[] = [];
+export const studentNavItems: NavItem[] = [
+  {
+    name: "Dashboard",
+    href: "/student-dashboard",
+    icon: <LayoutDashboard className="h-5 w-5" />,
+  },
+];
 
 export const instructorNavItems: NavItem[] = [
   {
     name: "Dashboard",
     href: "/instructor-dashboard",
-    icon: <Home className="h-5 w-5" />,
+    icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
     name: "Earnings",
@@ -71,7 +77,7 @@ export const companyNavItems: NavItem[] = [
   {
     name: "Dashboard",
     href: "/company-dashboard",
-    icon: <Home className="h-5 w-5" />,
+    icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
     name: "Employees",
@@ -89,7 +95,7 @@ export const adminNavItems: NavItem[] = [
   {
     name: "Dashboard",
     href: "/admin-dashboard",
-    icon: <Home className="h-5 w-5" />,
+    icon: <LayoutDashboard className="h-5 w-5" />,
     role: [UserRole.SUPER_ADMIN],
   },
   {
@@ -156,7 +162,10 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
       // Authenticated user with role loaded
       switch (userRole) {
         case UserRole.SUPER_ADMIN:
-          // Admin only sees Dashboard and Users (no public items)
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...adminNavItems);
           break;
         case UserRole.STUDENT:
@@ -174,7 +183,10 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
           items.push(...instructorNavItems);
           break;
         case UserRole.COMPANY_ADMIN:
-          // Company admins only see essential navigation (no public items)
+          items = [...publicNavItems];
+          if (!isInstructorDashboard) {
+            items.push(...additionalPublicNavItems);
+          }
           items.push(...companyNavItems);
           break;
         default:

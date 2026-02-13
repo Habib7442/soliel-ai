@@ -100,7 +100,7 @@ export function CourseCard({
         <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50/50 rounded-2xl border border-gray-100/50">
           <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm">
             <Image
-              src={instructor.avatar || "/images/instructors/sarah.png"}
+              src={instructor.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${instructor.name}`}
               alt={instructor.name}
               fill
               className="object-cover"
