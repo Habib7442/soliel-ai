@@ -84,11 +84,16 @@ export function UnifiedNavbar({ userRole = null, isInstructorDashboard = false }
         <div className="container mx-auto flex items-center justify-between px-6 lg:px-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-2xl overflow-hidden shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-3">
-              <Image src="/images/logo.png" alt="Soliel AI" fill className="object-cover" />
+            <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-lg transition-transform group-hover:scale-110">
+              <Image 
+                src="/images/logo.png" 
+                alt="Soliel AI" 
+                fill 
+                className="object-cover scale-[1.9] mt-2" 
+              />
             </div>
             <span className="text-xl font-black tracking-tighter text-primary group-hover:text-primary/90 transition-colors">
-              Soliel AI <span className="italic">Academy</span>
+              Soliel AI <span>Academy</span>
             </span>
           </Link>
 

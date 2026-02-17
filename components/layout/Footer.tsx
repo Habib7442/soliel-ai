@@ -11,16 +11,16 @@ export function Footer() {
           {/* Brand Column */}
           <div className="flex flex-col items-center lg:items-start max-w-sm">
             <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="relative w-10 h-10 rounded-2xl overflow-hidden shadow-lg transition-transform group-hover:scale-110">
+              <div className="relative w-14 h-14 rounded-full overflow-hidden shadow-lg transition-transform group-hover:scale-110">
                 <Image
                   src="/images/logo.png"
                   alt="Soliel AI"
                   fill
-                  className="object-cover"
+                  className="object-cover scale-[1.9] mt-2"
                 />
               </div>
               <span className="text-xl font-black text-primary tracking-tighter">
-                Soliel AI <span className="italic">Academy</span>
+                Soliel AI <span>Academy</span>
               </span>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed text-center lg:text-left">

@@ -11,8 +11,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff, RotateCcw } from "lucide-react";
 import { UnifiedNavbar } from "@/components/layout/UnifiedNavbar";
 import { Footer } from "@/components/layout/Footer";
+import { useSupabase } from "@/providers/supabase-provider";
 
 export default function ResetPasswordPage() {
+  const { loading: authLoading, user: authUser } = useSupabase();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -94,7 +96,12 @@ export default function ResetPasswordPage() {
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[80px] -z-10" />
 
         <div className="w-full max-w-xl px-4">
-          {linkExpired || showRequestNewLink ? (
+          {authLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-primary/20 border-t-primary animate-spin rounded-full mb-4" />
+              <p className="text-gray-500 font-bold">Checking security certificate...</p>
+            </div>
+          ) : linkExpired || showRequestNewLink ? (
             <Card className="shadow-2xl border-gray-100 bg-white/70 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden">
               <CardHeader className="space-y-2 text-center pt-12 pb-8">
                 <CardTitle className="text-4xl font-black text-gray-900 tracking-tight">

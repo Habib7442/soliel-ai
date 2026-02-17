@@ -159,29 +159,29 @@ export default function CoursesPage() {
 
       <div className="container mx-auto px-4 max-w-7xl -mt-20 relative z-20 pb-32">
         {/* Search and Filters Bar */}
-        <div className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-white/50 p-8 mb-16">
-          <div className="flex flex-col lg:flex-row gap-5">
+        <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-[0_20px_40px_-12px_rgba(0,0,0,0.05)] border border-white/50 p-4 mb-16">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative group">
-              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={22} />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
               <Input
                 type="text"
-                placeholder="Search for courses, skills, or topics..."
+                placeholder="Search courses..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-14 h-16 border-gray-100 bg-gray-50/50 focus:bg-white rounded-2xl focus:ring-primary/20 focus:border-primary transition-all text-lg font-medium"
+                className="pl-11 h-12 border-gray-100 bg-gray-50/50 focus:bg-white rounded-xl focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               {/* Category Filter */}
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-52 h-16 border-gray-100 bg-gray-50/50 rounded-2xl focus:ring-primary/20 focus:border-primary text-base font-bold">
+                <SelectTrigger className="w-full sm:w-44 h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-primary/20 focus:border-primary text-sm font-bold">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
+                <SelectContent className="rounded-xl border-gray-100 shadow-xl">
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">
+                    <SelectItem key={category} value={category} className="rounded-lg text-sm font-medium focus:bg-primary/5 focus:text-primary">
                       {category}
                     </SelectItem>
                   ))}
@@ -190,25 +190,25 @@ export default function CoursesPage() {
 
               {/* Level Filter */}
               <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger className="w-full sm:w-52 h-16 border-gray-100 bg-gray-50/50 rounded-2xl focus:ring-primary/20 focus:border-primary text-base font-bold">
+                <SelectTrigger className="w-full sm:w-44 h-12 border-gray-100 bg-gray-50/50 rounded-xl focus:ring-primary/20 focus:border-primary text-sm font-bold">
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-gray-100 shadow-xl">
-                  <SelectItem value="All" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">All Levels</SelectItem>
-                  <SelectItem value="Beginner" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">Beginner</SelectItem>
-                  <SelectItem value="Intermediate" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">Intermediate</SelectItem>
-                  <SelectItem value="Advanced" className="rounded-xl font-medium focus:bg-primary/5 focus:text-primary">Advanced</SelectItem>
+                <SelectContent className="rounded-xl border-gray-100 shadow-xl">
+                  <SelectItem value="All" className="rounded-lg text-sm font-medium focus:bg-primary/5 focus:text-primary">All Levels</SelectItem>
+                  <SelectItem value="Beginner" className="rounded-lg text-sm font-medium focus:bg-primary/5 focus:text-primary">Beginner</SelectItem>
+                  <SelectItem value="Intermediate" className="rounded-lg text-sm font-medium focus:bg-primary/5 focus:text-primary">Intermediate</SelectItem>
+                  <SelectItem value="Advanced" className="rounded-lg text-sm font-medium focus:bg-primary/5 focus:text-primary">Advanced</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* More Filters */}
               <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="h-16 border-gray-100 bg-gray-50/50 rounded-2xl px-6 text-base font-black hover:bg-white hover:text-primary hover:border-primary/20 shadow-sm transition-all group">
-                    <Filter size={20} className="mr-3 group-hover:rotate-12 transition-transform" />
+                  <Button variant="outline" className="h-12 border-gray-100 bg-gray-50/50 rounded-xl px-5 text-sm font-black hover:bg-white hover:text-primary hover:border-primary/20 shadow-sm transition-all group">
+                    <Filter size={16} className="mr-2 group-hover:rotate-12 transition-transform" />
                     Filters
                     {activeFiltersCount > 0 && (
-                      <Badge className="ml-3 bg-primary text-white rounded-full h-6 px-2 text-xs font-black ring-4 ring-primary/10">
+                      <Badge className="ml-2 bg-primary text-white rounded-full h-5 px-1.5 text-[10px] font-black ring-4 ring-primary/10">
                         {activeFiltersCount}
                       </Badge>
                     )}
@@ -348,16 +348,16 @@ export default function CoursesPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-white/50 backdrop-blur-sm rounded-[2.5rem] overflow-hidden border border-gray-100 animate-pulse">
-                <div className="h-64 bg-gray-100" />
-                <div className="p-8 space-y-5">
-                  <div className="h-6 bg-gray-100 rounded-full w-3/4" />
-                  <div className="h-4 bg-gray-100 rounded-full" />
-                  <div className="flex gap-2">
-                    <div className="h-8 bg-gray-100 rounded-lg w-20" />
-                    <div className="h-8 bg-gray-100 rounded-lg w-20" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <div key={i} className="bg-white/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-100 animate-pulse h-[250px]">
+                <div className="h-32 bg-gray-100" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-gray-100 rounded-full w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded-full w-1/2" />
+                  <div className="flex justify-between items-center pt-4">
+                    <div className="h-4 bg-gray-100 rounded-full w-12" />
+                    <div className="h-8 bg-gray-100 rounded-lg w-16" />
                   </div>
                 </div>
               </div>
@@ -385,7 +385,7 @@ export default function CoursesPage() {
           </div>
         ) : (
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
             layout
           >
             {currentCourses.map((course, index) => (

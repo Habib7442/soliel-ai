@@ -118,10 +118,10 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (loading) {
-        console.warn("Auth check timed out, forcing loading to false");
+        console.warn("⚠️ [SupabaseProvider] Auth check timed out (10s), forcing loading to false. This may happen on slow connections.");
         setLoading(false);
       }
-    }, 5000); // 5 seconds safety timeout
+    }, 10000); // 10 seconds safety timeout
     return () => clearTimeout(timer);
   }, [loading]);
 

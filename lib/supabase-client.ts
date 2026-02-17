@@ -1,6 +1,8 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+let browserClient: SupabaseClient | null = null;
+
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -63,6 +65,11 @@ export function createClient() {
     } as unknown as SupabaseClient;
   }
   
+  // Return existing client if on browser
+  if (typeof window !== 'undefined' && browserClient) {
+    return browserClient;
+  }
+
   const client = createBrowserClient(
     supabaseUrl,
     supabaseAnonKey
@@ -80,5 +87,10 @@ export function createClient() {
     }
   };
   
+  // Save as singleton if on browser
+  if (typeof window !== 'undefined') {
+    browserClient = client;
+  }
+
   return client;
 }

@@ -57,7 +57,7 @@ export function Courses() {
           </h2>
           
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-medium mb-12">
-            Build incredible skills with our most popular courses, taught by industry experts.
+            Build incredible skills with our most popular courses.
           </p>
 
           {/* Filter Tabs - Modern Pills */}
@@ -79,9 +79,9 @@ export function Courses() {
         </div>
         
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-gray-50 rounded-[2.5rem] overflow-hidden h-[450px] animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="bg-gray-50 rounded-[2rem] overflow-hidden h-[380px] animate-pulse" />
             ))}
           </div>
         ) : courses.length === 0 ? (
@@ -91,7 +91,7 @@ export function Courses() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-20">
             {courses.map((course, index) => (
               <CourseCard
                 key={course.id}
