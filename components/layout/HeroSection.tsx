@@ -12,10 +12,12 @@ import { createClient } from "@/lib/supabase-client";
 export function HeroSection() {
   const { user } = useSupabase();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [roleLoading, setRoleLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserRole = async () => {
       if (user) {
+        setRoleLoading(true);
         const supabase = createClient();
         const { data: profile } = await supabase
           .from('profiles')
@@ -26,6 +28,10 @@ export function HeroSection() {
         if (profile) {
           setUserRole(profile.role as UserRole);
         }
+        setRoleLoading(false);
+      } else {
+        setUserRole(null);
+        setRoleLoading(false);
       }
     };
     fetchUserRole();
@@ -40,8 +46,9 @@ export function HeroSection() {
     }
   };
 
-  const ctaLink = user ? getDashboardLink() : "/sign-up";
-  const ctaText = user ? "Go to Dashboard" : "Get Started Now";
+  // Only resolve the link once the role is known
+  const ctaLink = !user ? "/sign-up" : (roleLoading || !userRole) ? "#" : getDashboardLink();
+  const ctaText = !user ? "Get Started Now" : (roleLoading ? "Loading..." : "Go to Dashboard");
 
   return (
     <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-32 px-4 sm:px-6 lg:px-8 selection:bg-primary selection:text-white">
@@ -135,20 +142,20 @@ export function HeroSection() {
 
               {/* Stats Cards overlay */}
               <motion.div 
-                className="absolute -bottom-6 -right-6 lg:-right-12 bg-white p-5 rounded-3xl shadow-2xl border border-gray-100 z-20 hidden md:block"
+                className="absolute -bottom-6 -right-6 lg:-right-12 bg-white p-3 rounded-2xl shadow-xl border border-gray-100 z-20 hidden md:block"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-600">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Placement Rate</p>
-                    <p className="text-2xl font-black text-gray-900 leading-none">94.8%</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Placement Rate</p>
+                    <p className="text-lg font-black text-gray-900 leading-none">94.8%</p>
                   </div>
                 </div>
               </motion.div>

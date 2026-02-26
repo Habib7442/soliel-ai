@@ -39,9 +39,9 @@ export function Courses() {
   }, [activeCategory]);
   
   return (
-    <section className="relative py-24 px-4 sm:px-6 lg:px-8">
+    <section className="relative py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -61,7 +61,7 @@ export function Courses() {
           </p>
 
           {/* Filter Tabs - Modern Pills */}
-          <div className="flex flex-wrap justify-center gap-3 mb-16">
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
             {categories.map((category) => (
               <button
                 key={category}

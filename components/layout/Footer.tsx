@@ -10,18 +10,23 @@ export function Footer() {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 border-b border-white/5 pb-12 mb-12">
           {/* Brand Column */}
           <div className="flex flex-col items-center lg:items-start max-w-sm">
-            <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="relative w-14 h-14 rounded-full overflow-hidden shadow-lg transition-transform group-hover:scale-110">
+            <Link href="/" className="flex items-center gap-2 mb-6 group">
+              <div className="relative w-12 h-12 transition-transform group-hover:scale-110">
                 <Image
-                  src="/images/logo.png"
+                  src="/images/v2-logo.png"
                   alt="Soliel AI"
                   fill
-                  className="object-cover scale-[1.9] mt-2"
+                  className="object-contain"
                 />
               </div>
-              <span className="text-xl font-black text-primary tracking-tighter">
-                Soliel AI <span>Academy</span>
-              </span>
+              <div className="flex flex-col leading-[0.85]">
+                <span className="text-xl font-black tracking-tighter text-primary">
+                  Soliel AI
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-primary/60 ml-0.5">
+                  Academy
+                </span>
+              </div>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed text-center lg:text-left">
               Bridging the gap between theory and industry-scale practice. Join the next generation of AI pioneers.

@@ -105,7 +105,7 @@ export const adminNavItems: NavItem[] = [
     role: [UserRole.SUPER_ADMIN],
   },
   {
-    name: "Blog",
+    name: "Admin Blog",
     href: "/admin-blog",
     icon: <Newspaper className="h-5 w-5" />,
     role: [UserRole.SUPER_ADMIN],
@@ -240,7 +240,7 @@ export function NavItems({ mobile = false }: { mobile?: boolean }) {
     <div className={mobile ? "flex flex-col space-y-4" : "hidden md:flex items-center space-x-8"}>
       {filteredNavItems.map((item: NavItem) => (
         <Link
-          key={item.name}
+          key={item.href}
           href={item.href}
           className={`flex items-center space-x-2 text-sm font-medium transition-colors ${
             mobile ? "text-lg py-2" : ""

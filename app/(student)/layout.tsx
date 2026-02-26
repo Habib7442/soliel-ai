@@ -8,8 +8,8 @@ export default function StudentLayout({
 }) {
   return (
     <>
-      <UnifiedNavbar userRole={UserRole.STUDENT} />
-      <main className="w-full pt-16">
+      <UnifiedNavbar userRole={UserRole.STUDENT} isDashboard={true} />
+      <main className="w-full pt-28">
         {children}
       </main>
     </>

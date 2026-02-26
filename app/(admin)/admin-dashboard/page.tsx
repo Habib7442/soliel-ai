@@ -43,7 +43,7 @@ export default async function AdminDashboardPage() {
         <div className="container mx-auto px-4 py-8 lg:py-12 max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4 w-full md:w-auto">
-               <div className="h-16 w-16 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden shrink-0">
+               <div className="h-16 w-16 rounded-full bg-primary/5 dark:bg-primary/10 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden shrink-0">
                   {profile?.avatar_url ? (
                     <Image 
                       src={profile.avatar_url} 
@@ -79,51 +79,51 @@ export default async function AdminDashboardPage() {
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-           <Card className="border-none shadow-sm bg-white dark:bg-gray-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
              <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+               <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
                  <Users className="h-6 w-6" />
                </div>
                <div>
-                 <p className="text-sm text-muted-foreground font-medium">Total Users</p>
-                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{totalUsers}</h3>
+                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Users</p>
+                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{totalUsers}</h3>
                </div>
              </CardContent>
            </Card>
            
-           <Card className="border-none shadow-sm bg-white dark:bg-gray-800">
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
              <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+               <div className="h-12 w-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
                  <GraduationCap className="h-6 w-6" />
                </div>
                <div>
-                 <p className="text-sm text-muted-foreground font-medium">Instructors</p>
-                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{instructors}</h3>
+                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Instructors</p>
+                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{instructors}</h3>
                </div>
              </CardContent>
            </Card>
-
-           <Card className="border-none shadow-sm bg-white dark:bg-gray-800">
+           
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
              <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+               <div className="h-12 w-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
                  <BookOpen className="h-6 w-6" />
                </div>
                <div>
-                 <p className="text-sm text-muted-foreground font-medium">Students</p>
-                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{students}</h3>
+                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Students</p>
+                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{students}</h3>
                </div>
              </CardContent>
            </Card>
-
-           <Card className="border-none shadow-sm bg-white dark:bg-gray-800">
+           
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
              <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
+               <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
                  <Building2 className="h-6 w-6" />
                </div>
                <div>
-                 <p className="text-sm text-muted-foreground font-medium">Companies</p>
-                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{companyAdmins}</h3>
+                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Companies</p>
+                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{companyAdmins}</h3>
                </div>
              </CardContent>
            </Card>
@@ -147,19 +147,19 @@ export default async function AdminDashboardPage() {
                  </Card>
               </Link>
 
-              <Link href="/admin-courses" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
-                          <BookOpen className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Courses</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Content & reviews</p>
-                       </div>
-                    </CardContent>
-                 </Card>
-              </Link>
+               <Link href="/admin-courses" className="block group">
+                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
+                     <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/5 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                           <BookOpen className="h-5 w-5" />
+                        </div>
+                        <div>
+                           <h3 className="font-semibold text-gray-900 dark:text-gray-100">Courses</h3>
+                           <p className="text-xs text-muted-foreground mt-0.5">Content & reviews</p>
+                        </div>
+                     </CardContent>
+                  </Card>
+               </Link>
               
               <Link href="/admin-bundles" className="block group">
                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">

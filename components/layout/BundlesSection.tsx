@@ -15,12 +15,12 @@ export async function BundlesSection() {
   }
 
   return (
-    <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Decorative Gradient Background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest mb-6">
             <Sparkles className="w-4 h-4" />
             <span>Value Bundles</span>
@@ -35,14 +35,10 @@ export async function BundlesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16">
           {bundles.map((bundle) => {
             const courses = bundle.bundle_courses || [];
             const courseCount = courses.length;
-            const totalDuration = courses.reduce((sum: number, bc: any) => {
-              const course = Array.isArray(bc.courses) ? bc.courses[0] : bc.courses;
-              return sum + (course?.estimated_duration_hours || 0);
-            }, 0);
             
             const originalPrice = courses.reduce((sum: number, bc: any) => {
               const course = Array.isArray(bc.courses) ? bc.courses[0] : bc.courses;
@@ -52,67 +48,63 @@ export async function BundlesSection() {
             return (
               <div 
                 key={bundle.id} 
-                className="group relative flex flex-col bg-white rounded-[2.5rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.12)] transition-all duration-500"
+                className="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100/50 hover:shadow-md transition-all duration-300 h-full"
               >
                 {/* Bundle Cover Image */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-32 overflow-hidden flex-shrink-0">
                   {bundle.cover_url ? (
                     <Image
                       src={bundle.cover_url}
                       alt={bundle.name}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                      <Package className="w-24 h-24 text-primary opacity-30" />
+                    <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
+                      <Package className="w-12 h-12 text-primary opacity-20" />
                     </div>
                   )}
                   
                   {/* Floating Discount Badge */}
-                  <div className="absolute top-6 right-6 backdrop-blur-md bg-primary/90 text-white font-black text-xs px-4 py-2 rounded-2xl shadow-xl shadow-primary/20">
-                    -{bundle.discount_percent}% OFF
+                  <div className="absolute top-2 right-2 backdrop-blur-md bg-primary/90 text-white font-black text-[8px] px-2 py-1 rounded-full shadow-lg">
+                    -{bundle.discount_percent}%
                   </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
-                    <div className="flex gap-4">
-                       <div className="flex items-center gap-2 text-white/90 text-xs font-bold uppercase tracking-widest">
-                        <BookOpen className="w-4 h-4" />
-                        <span>{courseCount} Courses</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-white/90 text-xs font-bold uppercase tracking-widest">
-                        <Clock className="w-4 h-4" />
-                        <span>{totalDuration}h Total</span>
-                      </div>
+                  <div className="absolute bottom-2 left-2 flex gap-1">
+                    <div className="backdrop-blur-md bg-black/30 border border-white/10 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider">
+                      {courseCount} Courses
                     </div>
                   </div>
                 </div>
 
-                <div className="p-8 flex flex-col flex-1">
-                  <h3 className="text-2xl font-bold mb-3 tracking-tight group-hover:text-primary transition-colors">
+                <div className="p-3 flex flex-col flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                      <Package className="w-2.5 h-2.5" />
+                      Bundle
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm font-bold mb-3 leading-tight group-hover:text-primary transition-colors line-clamp-1">
                     {bundle.name}
                   </h3>
                   
-                  <p className="text-muted-foreground/80 text-sm leading-relaxed mb-8 flex-1">
-                    {bundle.description || `${courseCount} courses handpicked to help you master ${bundle.name} from scratch.`}
-                  </p>
-
-                  <div className="flex flex-col gap-5 pt-6 border-t border-gray-100">
+                  <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between gap-2">
                     <div className="flex flex-col">
                       {originalPrice > bundle.price_cents && (
-                        <span className="text-sm text-muted-foreground line-through opacity-50 mb-1">
-                          ${(originalPrice / 100).toFixed(2)}
+                        <span className="text-[10px] text-gray-400 line-through leading-none">
+                          ${(originalPrice / 100).toFixed(0)}
                         </span>
                       )}
-                      <span className="text-4xl font-black text-gray-900 leading-none tracking-tighter">
-                        ${(bundle.price_cents / 100).toFixed(2)}
+                      <span className="text-lg font-black text-gray-900 leading-none">
+                        ${(bundle.price_cents / 100).toFixed(0)}
                       </span>
                     </div>
                     
-                    <Button asChild size="xl" className="w-full rounded-2xl bg-gray-900 hover:bg-primary text-white font-bold h-16 shadow-xl shadow-black/5 transition-all hover:scale-[1.02] active:scale-95 border-0">
-                      <Link href={`/bundles/${bundle.id}`} className="flex items-center justify-center gap-2">
-                        Enroll Path
-                        <ArrowRight className="w-5 h-5 mt-0.5" />
+                    <Button asChild size="sm" className="h-8 px-3 rounded-lg text-[10px] font-bold border-0 bg-gray-900 hover:bg-primary text-white transition-all">
+                      <Link href={`/bundles/${bundle.id}`} className="flex items-center justify-center gap-1">
+                        Enroll
+                        <ArrowRight className="w-3 h-3" />
                       </Link>
                     </Button>
                   </div>

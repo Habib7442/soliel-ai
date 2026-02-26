@@ -129,7 +129,15 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
   const secondaryStat = completedCount;
   const totalCertificates = certificates?.length || 0;
 
-  const dashboardLink = isInstructor ? "/instructor-dashboard" : "/student-dashboard";
+  const getDashboardLink = () => {
+    switch (profile?.role) {
+      case UserRole.INSTRUCTOR: return "/instructor-dashboard";
+      case UserRole.SUPER_ADMIN: return "/admin-dashboard";
+      case UserRole.COMPANY_ADMIN: return "/company-dashboard";
+      default: return "/student-dashboard";
+    }
+  };
+  const dashboardLink = getDashboardLink();
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-white selection:bg-primary selection:text-white pb-20">

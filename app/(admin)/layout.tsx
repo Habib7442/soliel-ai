@@ -8,8 +8,8 @@ export default function AdminLayout({
 }) {
   return (
     <>
-      <UnifiedNavbar userRole={UserRole.SUPER_ADMIN} />
-      <main className="w-full pt-16">
+      <UnifiedNavbar userRole={UserRole.SUPER_ADMIN} isDashboard={true} />
+      <main className="w-full pt-28">
         {children}
       </main>
     </>

@@ -26,12 +26,12 @@ const enterpriseFeatures = [
 
 export function EnterpriseSection() {
   return (
-    <section className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-white">
+    <section className="relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-white">
       {/* Background Blobs for context */}
       <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[140px] -z-10" />
 
       <div className="max-w-7xl mx-auto">
-        <div className="relative rounded-[2rem] sm:rounded-[3rem] md:rounded-[4rem] overflow-hidden bg-gray-900 px-6 py-12 sm:px-10 sm:py-16 md:px-16 md:py-20 lg:px-20 lg:py-28 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)]">
+        <div className="relative rounded-[2rem] sm:rounded-[3rem] md:rounded-[4rem] overflow-hidden bg-gray-900 px-6 py-10 sm:px-10 sm:py-12 md:px-16 md:py-16 lg:px-20 lg:py-20 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)]">
           {/* Animated Background Gradients inside the dark card */}
           <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,0,0,0.25),transparent_60%)]" />
           <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,rgba(255,0,0,0.1),transparent_50%)]" />
