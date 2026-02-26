@@ -124,12 +124,12 @@ export function FeaturesSection() {
                 {feature.title}
               </h3>
               
-              <p className="text-[10px] text-muted-foreground font-medium leading-relaxed mb-4">
+              <p className="text-xs text-muted-foreground font-medium leading-relaxed mb-4">
                 {feature.description}
               </p>
 
               <div className="mt-auto pt-3 border-t border-gray-50 w-full">
-                <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                   {feature.tech}
                 </span>
               </div>

@@ -129,7 +129,7 @@ export function TestimonialsSection() {
           {/* Navigation Arrows */}
           <button 
             onClick={() => scroll('left')}
-            className="absolute -left-4 top-1/2 -translate-y-full z-20 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/swiper:opacity-100 hidden md:flex"
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/swiper:opacity-100 hidden md:flex"
             aria-label="Previous testimonial"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -137,7 +137,7 @@ export function TestimonialsSection() {
           
           <button 
             onClick={() => scroll('right')}
-            className="absolute -right-4 top-1/2 -translate-y-full z-20 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/swiper:opacity-100 hidden md:flex"
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary hover:scale-110 active:scale-95 transition-all opacity-0 group-hover/swiper:opacity-100 hidden md:flex"
             aria-label="Next testimonial"
           >
             <ChevronRight className="w-6 h-6" />

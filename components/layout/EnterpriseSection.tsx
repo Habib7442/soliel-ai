@@ -44,7 +44,7 @@ export function EnterpriseSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary-foreground text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-6 sm:mb-8">
+              <div className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary-foreground text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] mb-6 sm:mb-8">
                 Enterprise Solutions
               </div>
               
@@ -84,7 +84,7 @@ export function EnterpriseSection() {
                 
                 <div className="text-center mb-8 sm:mb-10 md:mb-12">
                   <h3 className="text-2xl sm:text-3xl font-black text-white mb-2 sm:mb-3 tracking-tight">Ready to scale?</h3>
-                  <p className="text-gray-400 font-medium tracking-wide uppercase text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em]">Unlock corporate excellence today.</p>
+                  <p className="text-gray-400 font-medium tracking-wide uppercase text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em]">Unlock corporate excellence today.</p>
                 </div>
                 
                 <div className="space-y-3 sm:space-y-4">
@@ -106,7 +106,7 @@ export function EnterpriseSection() {
                       </div>
                     ))}
                   </div>
-                  <p className="text-[9px] sm:text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] sm:tracking-[0.3em] text-center">Trusted by 500+ Global Teams</p>
+                  <p className="text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-[0.2em] sm:tracking-[0.3em] text-center">Trusted by 500+ Global Teams</p>
                 </div>
               </div>
             </motion.div>

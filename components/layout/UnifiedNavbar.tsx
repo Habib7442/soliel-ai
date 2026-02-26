@@ -44,6 +44,7 @@ export function UnifiedNavbar({
 
   // Fetch user role from DB when no prop is provided
   useEffect(() => {
+    let cancelled = false;
     const fetchUserRole = async () => {
       if (userRoleProp) return; // Prop was provided, no need to fetch
       if (!user) {
@@ -59,14 +60,18 @@ export function UnifiedNavbar({
           .eq('id', user.id)
           .single();
 
-        if (profile) {
-          setFetchedRole(profile.role as UserRole);
+        if (profile && !cancelled) {
+          const role = Object.values(UserRole).includes(profile.role as UserRole)
+            ? (profile.role as UserRole)
+            : null;
+          setFetchedRole(role);
         }
       } catch {
         // silently fail — public nav will be shown
       }
     };
     fetchUserRole();
+    return () => { cancelled = true; };
   }, [user, userRoleProp]);
 
   const getNavItems = () => {

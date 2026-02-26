@@ -58,7 +58,7 @@ export function HowItWorksSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 relative">
           {/* Connector Line (hidden on mobile) */}
-          <div className="hidden lg:block absolute top-[40%] left-0 w-full h-0.5 bg-gray-100 -z-10" />
+          <div className="hidden md:block absolute top-[40%] left-0 w-full h-0.5 bg-gray-100 -z-10" />
 
           {steps.map((step, index) => (
             <motion.div
@@ -79,11 +79,11 @@ export function HowItWorksSection() {
                   {step.icon}
                 </div>
                 
-                <h3 className="text-sm font-bold mb-2 text-gray-900 leading-tight">
+                <h3 className="text-base font-bold mb-2 text-gray-900 leading-tight">
                   {step.title}
                 </h3>
                 
-                <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
+                <p className="text-xs text-muted-foreground font-medium leading-relaxed">
                   {step.description}
                 </p>
               </div>

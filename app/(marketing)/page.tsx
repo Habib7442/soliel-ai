@@ -66,7 +66,7 @@ export default async function Home() {
                   <div className="p-3 flex flex-col flex-1">
                     <div className="flex flex-wrap gap-2 mb-2">
                       {blog.blog_category_relations?.slice(0, 1).map((rel) => (
-                        <span key={rel.blog_categories.id} className="text-[8px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2 py-0.5 rounded-full">
+                        <span key={rel.blog_categories.id} className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2 py-0.5 rounded-full">
                           {rel.blog_categories.name}
                         </span>
                       ))}
@@ -82,14 +82,14 @@ export default async function Home() {
                           {blog.profiles?.avatar_url ? (
                             <Image src={blog.profiles.avatar_url} alt={blog.profiles.full_name || ""} width={20} height={20} />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[6px] font-bold text-gray-400">
+                            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-gray-400">
                               {blog.profiles?.full_name?.charAt(0) || "U"}
                             </div>
                           )}
                         </div>
-                        <span className="text-[10px] font-bold text-gray-500">{blog.profiles?.full_name?.split(' ')[0] || "Author"}</span>
+                        <span className="text-xs font-bold text-gray-500">{blog.profiles?.full_name?.split(' ')[0] || "Author"}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                         <span>
                           {blog.published_at
                             ? new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })

@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
   const companyAdmins = users?.filter(user => user.role === UserRole.COMPANY_ADMIN).length || 0;
   
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950">
+    <div className="min-h-screen bg-[#fffcfc] dark:bg-gray-950">
        {/* Hero Section */}
        <div className="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
         <div className="container mx-auto px-4 py-8 lg:py-12 max-w-7xl">
@@ -46,18 +46,20 @@ export default async function AdminDashboardPage() {
                <div className="h-16 w-16 rounded-full bg-primary/5 dark:bg-primary/10 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden shrink-0">
                   {profile?.avatar_url ? (
                     <Image 
-                      src={profile.avatar_url} 
-                      alt={profile.full_name || 'Admin'} 
+                      src={profile?.avatar_url} 
+                      alt={profile?.full_name || 'Admin'} 
                       width={64} 
                       height={64} 
                       className="object-cover h-full w-full"
                     />
                   ) : (
-                    <ShieldCheck className="h-8 w-8 text-primary" />
+                    <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary font-bold text-xl">
+                      {profile?.full_name?.charAt(0) || 'A'}
+                    </div>
                   )}
                </div>
                <div>
-                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                 <h1 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                    Admin Dashboard
                  </h1>
                  <p className="text-muted-foreground mt-1">
@@ -80,51 +82,31 @@ export default async function AdminDashboardPage() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
-             <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                 <Users className="h-6 w-6" />
-               </div>
-               <div>
-                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Users</p>
-                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{totalUsers}</h3>
-               </div>
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
+             <CardContent className="p-6">
+               <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Total Users</p>
+               <h3 className="text-3xl font-black text-gray-900 dark:text-white">{totalUsers}</h3>
              </CardContent>
            </Card>
            
-           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
-             <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                 <GraduationCap className="h-6 w-6" />
-               </div>
-               <div>
-                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Instructors</p>
-                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{instructors}</h3>
-               </div>
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
+             <CardContent className="p-6">
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Instructors</p>
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white">{instructors}</h3>
              </CardContent>
            </Card>
            
-           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
-             <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                 <BookOpen className="h-6 w-6" />
-               </div>
-               <div>
-                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Students</p>
-                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{students}</h3>
-               </div>
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
+             <CardContent className="p-6">
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Students</p>
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white">{students}</h3>
              </CardContent>
            </Card>
            
-           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
-             <CardContent className="p-6 flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
-                 <Building2 className="h-6 w-6" />
-               </div>
-               <div>
-                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Companies</p>
-                 <h3 className="text-2xl font-black text-gray-900 dark:text-white">{companyAdmins}</h3>
-               </div>
+           <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
+             <CardContent className="p-6">
+                <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mb-1">Companies</p>
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white">{companyAdmins}</h3>
              </CardContent>
            </Card>
         </div>
@@ -132,104 +114,69 @@ export default async function AdminDashboardPage() {
         {/* Quick Management Section */}
         <div className="mb-10">
            <h2 className="font-bold text-lg mb-4">Quick Management</h2>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
               <Link href="/admin-users" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                          <Users className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Users</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Roles & permissions</p>
-                       </div>
+                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                    <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                       <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">Users</h3>
+                       <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Manage</p>
                     </CardContent>
                  </Card>
               </Link>
 
                <Link href="/admin-courses" className="block group">
-                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                     <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/5 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                           <BookOpen className="h-5 w-5" />
-                        </div>
-                        <div>
-                           <h3 className="font-semibold text-gray-900 dark:text-gray-100">Courses</h3>
-                           <p className="text-xs text-muted-foreground mt-0.5">Content & reviews</p>
-                        </div>
+                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                     <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">Courses</h3>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Content</p>
                      </CardContent>
                   </Card>
                </Link>
               
               <Link href="/admin-bundles" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center shrink-0 group-hover:bg-purple-100 transition-colors">
-                          <Package className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Bundles</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Offers & discounts</p>
-                       </div>
+                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                    <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                       <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">Bundles</h3>
+                       <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Offers</p>
                     </CardContent>
                  </Card>
               </Link>
               
               <Link href="/admin-companies" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
-                          <Building2 className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Companies</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">B2B accounts</p>
-                       </div>
+                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                    <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                       <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">Companies</h3>
+                       <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">B2B</p>
                     </CardContent>
                  </Card>
               </Link>
               
               <Link href="/admin-faq" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center shrink-0 group-hover:bg-amber-100 transition-colors">
-                          <MessageSquare className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">FAQs</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Support content</p>
-                       </div>
+                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                    <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                       <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">FAQs</h3>
+                       <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Support</p>
                     </CardContent>
                  </Card>
               </Link>
 
               <Link href="/admin-reports" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 flex items-center justify-center shrink-0 group-hover:bg-cyan-100 transition-colors">
-                          <BarChart3 className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Reports</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Analytics & insights</p>
-                       </div>
-                    </CardContent>
-                 </Card>
-              </Link>
+                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                     <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">Reports</h3>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Analytics</p>
+                     </CardContent>
+                  </Card>
+               </Link>
 
-              <Link href="/admin-payments" className="block group">
-                 <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
-                          <CreditCard className="h-5 w-5" />
-                       </div>
-                       <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Payments</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Transactions & refunds</p>
-                       </div>
-                    </CardContent>
-                 </Card>
-              </Link>
+               <Link href="/admin-payments" className="block group">
+                  <Card className="border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/20 h-full bg-white dark:bg-gray-800">
+                     <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">Payments</h3>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">Transactions</p>
+                     </CardContent>
+                  </Card>
+               </Link>
            </div>
         </div>
 

@@ -15,6 +15,7 @@ export function HeroSection() {
   const [roleLoading, setRoleLoading] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchUserRole = async () => {
       if (user) {
         setRoleLoading(true);
@@ -25,16 +26,22 @@ export function HeroSection() {
           .eq('id', user.id)
           .single();
         
-        if (profile) {
-          setUserRole(profile.role as UserRole);
+        if (profile && !cancelled) {
+          const role = Object.values(UserRole).includes(profile.role as UserRole)
+            ? (profile.role as UserRole)
+            : null;
+          setUserRole(role);
         }
-        setRoleLoading(false);
+        if (!cancelled) setRoleLoading(false);
       } else {
-        setUserRole(null);
-        setRoleLoading(false);
+        if (!cancelled) {
+          setUserRole(null);
+          setRoleLoading(false);
+        }
       }
     };
     fetchUserRole();
+    return () => { cancelled = true; };
   }, [user]);
 
   const getDashboardLink = () => {
@@ -47,8 +54,16 @@ export function HeroSection() {
   };
 
   // Only resolve the link once the role is known
-  const ctaLink = !user ? "/sign-up" : (roleLoading || !userRole) ? "#" : getDashboardLink();
-  const ctaText = !user ? "Get Started Now" : (roleLoading ? "Loading..." : "Go to Dashboard");
+  const ctaLink = !user 
+    ? "/sign-up" 
+    : roleLoading 
+      ? "#" 
+      : getDashboardLink();
+  const ctaText = !user 
+    ? "Get Started Now" 
+    : roleLoading 
+      ? "Loading..." 
+      : "Go to Dashboard";
 
   return (
     <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-32 px-4 sm:px-6 lg:px-8 selection:bg-primary selection:text-white">

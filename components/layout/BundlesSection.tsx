@@ -35,7 +35,7 @@ export async function BundlesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {bundles.map((bundle) => {
             const courses = bundle.bundle_courses || [];
             const courseCount = courses.length;
@@ -66,12 +66,14 @@ export async function BundlesSection() {
                   )}
                   
                   {/* Floating Discount Badge */}
-                  <div className="absolute top-2 right-2 backdrop-blur-md bg-primary/90 text-white font-black text-[8px] px-2 py-1 rounded-full shadow-lg">
-                    -{bundle.discount_percent}%
-                  </div>
+                  {bundle.discount_percent > 0 && (
+                    <div className="absolute top-2 right-2 backdrop-blur-md bg-primary/90 text-white font-black text-[10px] px-2 py-1 rounded-full shadow-lg">
+                      -{bundle.discount_percent}%
+                    </div>
+                  )}
 
                   <div className="absolute bottom-2 left-2 flex gap-1">
-                    <div className="backdrop-blur-md bg-black/30 border border-white/10 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider">
+                    <div className="backdrop-blur-md bg-black/30 border border-white/10 text-white px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
                       {courseCount} Courses
                     </div>
                   </div>
@@ -79,7 +81,7 @@ export async function BundlesSection() {
 
                 <div className="p-3 flex flex-col flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
                       <Package className="w-2.5 h-2.5" />
                       Bundle
                     </span>
@@ -92,7 +94,7 @@ export async function BundlesSection() {
                   <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between gap-2">
                     <div className="flex flex-col">
                       {originalPrice > bundle.price_cents && (
-                        <span className="text-[10px] text-gray-400 line-through leading-none">
+                        <span className="text-xs text-gray-400 line-through leading-none">
                           ${(originalPrice / 100).toFixed(0)}
                         </span>
                       )}
@@ -101,7 +103,7 @@ export async function BundlesSection() {
                       </span>
                     </div>
                     
-                    <Button asChild size="sm" className="h-8 px-3 rounded-lg text-[10px] font-bold border-0 bg-gray-900 hover:bg-primary text-white transition-all">
+                    <Button asChild size="sm" className="h-8 px-3 rounded-lg text-xs font-bold border-0 bg-gray-900 hover:bg-primary text-white transition-all">
                       <Link href={`/bundles/${bundle.id}`} className="flex items-center justify-center gap-1">
                         Enroll
                         <ArrowRight className="w-3 h-3" />
