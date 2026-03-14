@@ -1,6 +1,6 @@
 "use server";
 
-import { createServerClient } from "@/lib/supabase-server";
+import { createServerClient, createAdminClient } from "@/lib/supabase-server";
 import { UserRole } from "@/types/enums";
 import { revalidatePath } from "next/cache";
 import * as Sentry from "@sentry/nextjs";
@@ -117,7 +117,24 @@ export const updateUserRole = async ({ userId, role }: UpdateUserRoleParams) => 
         span?.setAttribute("userId", userId);
         span?.setAttribute("role", role);
 
-        const { data, error } = await supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          return { success: false, error: 'Unauthorized to update role' };
+        }
+
+        const { data: currentUserProfile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (currentUserProfile?.role !== UserRole.SUPER_ADMIN) {
+          return { success: false, error: 'Insufficient permissions to update role' };
+        }
+
+        const adminSupabase = await createAdminClient();
+
+        const { data, error } = await adminSupabase
           .from('profiles')
           .update({ role })
           .eq('id', userId)
